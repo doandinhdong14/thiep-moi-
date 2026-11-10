@@ -44,7 +44,7 @@ export default async function ShopsDirectoryPage({ searchParams }: ShopsPageProp
             Gửi Trao Yêu Thương Cùng Quà Tặng & Thiệp QR
           </h1>
           <p className="text-neutral-600 text-sm md:text-base leading-relaxed">
-            Kết hợp thiệp mời điện tử MomentLink cùng những bó hoa tươi thắm, gấu bông hoặc hộp quà cao cấp từ các đối tác uy tín.
+            Kết hợp thiệp mời điện tử Ding Dong Gift cùng những bó hoa tươi thắm, gấu bông hoặc hộp quà cao cấp từ các đối tác uy tín.
           </p>
         </div>
 
@@ -153,7 +153,7 @@ export default async function ShopsDirectoryPage({ searchParams }: ShopsPageProp
               Bạn là chủ tiệm hoa hoặc cửa hàng quà tặng?
             </h2>
             <p className="text-neutral-300 text-sm max-w-xl">
-              Hợp tác cùng MomentLink để tiếp cận hàng ngàn khách hàng tổ chức sự kiện, đám cưới, sinh nhật và lễ tốt nghiệp mỗi ngày.
+              Hợp tác cùng Ding Dong Gift để tiếp cận hàng ngàn khách hàng tổ chức sự kiện, đám cưới, sinh nhật và lễ tốt nghiệp mỗi ngày.
             </p>
           </div>
           <Link

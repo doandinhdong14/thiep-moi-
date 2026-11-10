@@ -103,7 +103,7 @@ export default function FooterCtaBlock({
         </Link>
         <Link href="/" className="hover:underline text-slate-500 flex items-center gap-1">
           <Sparkles className="w-3 h-3 text-rose-500" />
-          <span>Tạo thiệp tương tác miễn phí với MomentLink</span>
+          <span>Tạo thiệp tương tác miễn phí với Ding Dong Gift</span>
         </Link>
       </div>
     </div>

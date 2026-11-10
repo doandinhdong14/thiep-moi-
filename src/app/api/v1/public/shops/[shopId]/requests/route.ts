@@ -52,7 +52,7 @@ export async function POST(
       buyerId = currentUser.id;
     } else {
       // Find or create guest user
-      const guestEmail = `guest_${contactPhone.replace(/\D/g, "")}@momentlink.guest`;
+      const guestEmail = `guest_${contactPhone.replace(/\D/g, "")}@dingdonggift.guest`;
       const guest = await prisma.user.upsert({
         where: { email: guestEmail },
         update: { name: contactName },

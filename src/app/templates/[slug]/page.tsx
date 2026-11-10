@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, useSearchParams } from "next/navigation";
 import { TEMPLATES_REGISTRY, getTemplateDemoContent } from "@/lib/templates/registry";
 import TemplateRenderer from "@/components/template-renderer/TemplateRenderer";
 import { Smartphone, Monitor, ArrowLeft, ArrowRight, Sparkles } from "lucide-react";
@@ -12,7 +12,18 @@ export default function TemplateDemoPage({
 }: {
   params: { slug: string };
 }) {
+  const searchParams = useSearchParams();
   const [deviceView, setDeviceView] = useState<"mobile" | "desktop">("mobile");
+  const [isIframe, setIsIframe] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      if (window.self !== window.top || window.location.search.includes("embed=true")) {
+        setIsIframe(true);
+      }
+    }
+  }, []);
+
   const template = TEMPLATES_REGISTRY[params.slug];
 
   if (!template) {
@@ -20,6 +31,20 @@ export default function TemplateDemoPage({
   }
 
   const demoContent = getTemplateDemoContent(params.slug);
+  const isEmbed = isIframe || searchParams.get("embed") === "true";
+
+  if (isEmbed) {
+    return (
+      <div className="w-full min-h-screen bg-transparent overflow-x-hidden">
+        <TemplateRenderer
+          content={demoContent}
+          theme={template.theme}
+          slug={template.slug}
+          isPreview={true}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 flex flex-col bg-slate-900 min-h-screen">

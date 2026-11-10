@@ -72,7 +72,7 @@ export default function AbuseReportPage({
             <CheckCircle className="w-12 h-12 mx-auto text-emerald-500" />
             <h3 className="text-base font-bold text-slate-800">Báo cáo đã được tiếp nhận</h3>
             <p className="text-xs text-slate-600 max-w-sm mx-auto leading-relaxed">
-              Đội ngũ kiểm duyệt MomentLink sẽ xem xét nội dung và có biện pháp xử lý kịp thời theo chính sách nền tảng.
+              Đội ngũ kiểm duyệt Ding Dong Gift sẽ xem xét nội dung và có biện pháp xử lý kịp thời theo chính sách nền tảng.
             </p>
           </div>
         ) : (

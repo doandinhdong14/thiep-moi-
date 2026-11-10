@@ -39,7 +39,7 @@ export default function TermsOfServicePage() {
           <section className="space-y-2">
             <h2 className="text-lg font-serif font-bold text-slate-900">3. Giới hạn trách nhiệm</h2>
             <p>
-              MomentLink cung cấp công cụ tạo thiệp mời và kết nối thông tin đối tác. Nền tảng không chịu trách nhiệm đối với các tranh chấp phát sinh giữa người mua và các shop hoa/quà vật lý về chất lượng hoa, thời gian giao vận ngoài phạm vi công nghệ số.
+              Ding Dong Gift cung cấp công cụ tạo thiệp mời và kết nối thông tin đối tác. Nền tảng không chịu trách nhiệm đối với các tranh chấp phát sinh giữa người mua và các shop hoa/quà vật lý về chất lượng hoa, thời gian giao vận ngoài phạm vi công nghệ số.
             </p>
           </section>
         </div>

@@ -13,7 +13,7 @@ export default async function PricingPage() {
   const faqs = [
     {
       q: "Gói dịch vụ thanh toán một lần hay định kỳ?",
-      a: "Tất cả các gói dịch vụ tại MomentLink đều là thanh toán một lần duy nhất cho mỗi thiệp mời, không tự động gia hạn và không phát sinh chi phí ẩn.",
+      a: "Tất cả các gói dịch vụ tại Ding Dong Gift đều là thanh toán một lần duy nhất cho mỗi thiệp mời, không tự động gia hạn và không phát sinh chi phí ẩn.",
     },
     {
       q: "Khách của tôi có cần tạo tài khoản để xem thiệp hay gửi RSVP không?",
@@ -21,7 +21,7 @@ export default async function PricingPage() {
     },
     {
       q: "Tôi có thể chỉnh sửa nội dung thiệp sau khi đã in mã QR không?",
-      a: "Có! Mã QR của MomentLink là mã QR động liên kết với đường link ổn định. Bất cứ khi nào bạn cập nhật thông tin trên website, khách quét mã cũ vẫn sẽ thấy bản cập nhật mới nhất.",
+      a: "Có! Mã QR của Ding Dong Gift là mã QR động liên kết với đường link ổn định. Bất cứ khi nào bạn cập nhật thông tin trên website, khách quét mã cũ vẫn sẽ thấy bản cập nhật mới nhất.",
     },
     {
       q: "Chính sách hoa hồng 10% của Cộng tác viên hoạt động thế nào?",
@@ -86,7 +86,7 @@ export default async function PricingPage() {
                     </li>
                     <li className="flex items-center gap-2">
                       <Check className="w-4 h-4 text-emerald-500 flex-shrink-0" />
-                      <span>{p.basePriceVnd === 0 ? "Watermark MomentLink" : "Bỏ hình mờ (No watermark)"}</span>
+                      <span>{p.basePriceVnd === 0 ? "Watermark Ding Dong Gift" : "Bỏ hình mờ (No watermark)"}</span>
                     </li>
                     <li className="flex items-center gap-2">
                       <Check className="w-4 h-4 text-emerald-500 flex-shrink-0" />

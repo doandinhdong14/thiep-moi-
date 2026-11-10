@@ -18,15 +18,15 @@ export async function generateMetadata({
   });
 
   if (!inv || inv.status !== "PUBLISHED") {
-    return { title: "Thiệp mời — MomentLink" };
+    return { title: "Thiệp mời — Ding Dong Gift" };
   }
 
   // Respect privacy: noindex if unlisted or password protected
   const shouldIndex = inv.privacyMode === "PUBLIC" && inv.allowIndexing;
 
   return {
-    title: `${inv.title} — MomentLink`,
-    description: "Bạn nhận được một lời mời đặc biệt từ MomentLink.",
+    title: `${inv.title} — Ding Dong Gift`,
+    description: "Bạn nhận được một lời mời đặc biệt từ Ding Dong Gift.",
     robots: {
       index: shouldIndex,
       follow: shouldIndex,

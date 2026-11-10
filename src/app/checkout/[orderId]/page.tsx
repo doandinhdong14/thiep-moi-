@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -13,6 +13,9 @@ import {
   ArrowRight,
   ShieldCheck,
   Loader2,
+  QrCode,
+  ExternalLink,
+  Sparkles,
 } from "lucide-react";
 
 export default function CheckoutOrderPage() {
@@ -23,12 +26,16 @@ export default function CheckoutOrderPage() {
   const [order, setOrder] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [payosLoading, setPayosLoading] = useState(false);
+  const [payosData, setPayosData] = useState<{ checkoutUrl: string; qrCode?: string } | null>(null);
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const pollTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const loadOrder = async () => {
+  const loadOrder = async (silent = false) => {
     try {
+      if (!silent) setLoading(true);
       const res = await fetch(`/api/v1/orders/${orderId}`);
       if (!res.ok) {
         if (res.status === 401) {
@@ -40,9 +47,9 @@ export default function CheckoutOrderPage() {
       const data = await res.json();
       setOrder(data.data.order);
     } catch (err: any) {
-      setError(err.message || "Đã xảy ra lỗi.");
+      if (!silent) setError(err.message || "Đã xảy ra lỗi.");
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 
@@ -50,10 +57,48 @@ export default function CheckoutOrderPage() {
     if (orderId) loadOrder();
   }, [orderId]);
 
+  // Real-time polling when order is UNPAID or TRANSFER_SUBMITTED
+  useEffect(() => {
+    if (order && order.status !== "PAID") {
+      pollTimerRef.current = setInterval(() => {
+        loadOrder(true);
+      }, 3500);
+    }
+    return () => {
+      if (pollTimerRef.current) clearInterval(pollTimerRef.current);
+    };
+  }, [order?.status]);
+
   const handleCopy = (text: string, field: string) => {
     navigator.clipboard.writeText(text);
     setCopiedField(field);
     setTimeout(() => setCopiedField(null), 2000);
+  };
+
+  const handlePayOSCheckout = async () => {
+    setPayosLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/v1/orders/${orderId}/payos-link`, {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error?.message || "Không thể khởi tạo cổng PayOS.");
+      }
+      if (data.data?.checkoutUrl) {
+        setPayosData({
+          checkoutUrl: data.data.checkoutUrl,
+          qrCode: data.data.qrCode,
+        });
+        // Direct redirect to PayOS checkout page
+        window.location.href = data.data.checkoutUrl;
+      }
+    } catch (err: any) {
+      setError(err.message || "Đã xảy ra lỗi khi kết nối PayOS.");
+    } finally {
+      setPayosLoading(false);
+    }
   };
 
   const handleMarkSubmitted = async () => {
@@ -69,7 +114,7 @@ export default function CheckoutOrderPage() {
         throw new Error(data.error?.message || "Không thể gửi xác nhận.");
       }
       setMessage(data.data.message);
-      loadOrder();
+      loadOrder(true);
     } catch (err: any) {
       setError(err.message || "Đã xảy ra lỗi.");
     } finally {
@@ -117,21 +162,21 @@ export default function CheckoutOrderPage() {
             Thanh toán Đơn hàng #{order.orderNumber}
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Chuyển khoản ngân hàng chính xác theo thông tin bên dưới để kích hoạt gói dịch vụ.
+            Quét mã VietQR tự động qua PayOS hoặc chuyển khoản ngân hàng để kích hoạt ngay.
           </p>
 
           <div className="mt-4 inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold">
             {isPaid ? (
-              <span className="bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full flex items-center gap-1.5">
+              <span className="bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full flex items-center gap-1.5 animate-pulse">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600" /> Đã thanh toán thành công
               </span>
             ) : isSubmitted ? (
               <span className="bg-amber-100 text-amber-800 px-3 py-1 rounded-full flex items-center gap-1.5">
-                <Clock className="w-4 h-4 text-amber-600" /> Đang chờ Admin duyệt đối soát
+                <Clock className="w-4 h-4 text-amber-600" /> Đang chờ duyệt đối soát
               </span>
             ) : (
               <span className="bg-slate-100 text-slate-700 px-3 py-1 rounded-full">
-                Chờ chuyển khoản
+                Chờ thanh toán
               </span>
             )}
           </div>
@@ -165,12 +210,68 @@ export default function CheckoutOrderPage() {
           </div>
         </div>
 
-        {/* Bank Transfer Details */}
+        {/* PayOS Automated VietQR Checkout Card */}
+        {!isPaid && (
+          <div className="bg-gradient-to-br from-indigo-900 via-indigo-800 to-slate-900 text-white rounded-3xl p-6 sm:p-8 shadow-xl shadow-indigo-950/20 space-y-5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="p-2 rounded-xl bg-white/10 backdrop-blur-sm text-amber-300">
+                  <Sparkles className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-base text-white">Thanh toán tự động qua PayOS (VietQR)</h3>
+                  <p className="text-xs text-indigo-200">Kích hoạt tài khoản tức thì sau 3 giây</p>
+                </div>
+              </div>
+              <span className="px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-[11px] font-semibold border border-emerald-400/30">
+                Tự động 24/7
+              </span>
+            </div>
+
+            <p className="text-xs text-slate-300 leading-relaxed">
+              Hỗ trợ quét mã VietQR trên mọi ứng dụng ngân hàng (Vietcombank, MB, Techcombank, VPBank, TPBank, Momo,...). Không cần nhập số tiền hay nội dung chuyển khoản.
+            </p>
+
+            <button
+              onClick={handlePayOSCheckout}
+              disabled={payosLoading}
+              className="w-full py-4 px-6 rounded-2xl bg-rose-600 hover:bg-rose-500 disabled:bg-rose-800 text-white font-bold text-sm shadow-lg shadow-rose-900/50 transition-all flex items-center justify-center gap-2"
+            >
+              {payosLoading ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span>Đang kết nối cổng PayOS...</span>
+                </>
+              ) : (
+                <>
+                  <QrCode className="w-5 h-5" />
+                  <span>Mở Cổng Thanh Toán VietQR (PayOS)</span>
+                  <ExternalLink className="w-4 h-4 ml-1 opacity-75" />
+                </>
+              )}
+            </button>
+
+            {payosData?.checkoutUrl && (
+              <div className="text-center pt-2">
+                <a
+                  href={payosData.checkoutUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-xs text-indigo-300 hover:text-white underline inline-flex items-center gap-1"
+                >
+                  Nhấn vào đây nếu trang thanh toán không tự động mở
+                </a>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Fallback Bank Transfer Details */}
         {!isPaid && (
           <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-sm space-y-6">
             <div className="flex items-center gap-2 text-slate-800 font-semibold text-sm">
               <ShieldCheck className="w-5 h-5 text-indigo-600" />
-              <span>Thông tin chuyển khoản ngân hàng</span>
+              <span>Phương thức 2: Chuyển khoản ngân hàng thủ công</span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
@@ -220,13 +321,20 @@ export default function CheckoutOrderPage() {
               </div>
             )}
 
+            {error && (
+              <div className="p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-2xl text-xs flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-rose-600 flex-shrink-0" />
+                <span>{error}</span>
+              </div>
+            )}
+
             {/* Action button */}
             {!isSubmitted && (
               <button
                 onClick={handleMarkSubmitted}
                 disabled={submitting}
                 data-testid="mark-transfer-submitted-btn"
-                className="w-full py-3.5 px-6 rounded-2xl bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white font-bold text-sm shadow-lg shadow-indigo-100 transition flex items-center justify-center gap-2"
+                className="w-full py-3.5 px-6 rounded-2xl bg-slate-800 hover:bg-slate-900 disabled:bg-slate-400 text-white font-bold text-sm shadow-md transition flex items-center justify-center gap-2"
               >
                 {submitting ? (
                   <>
@@ -234,7 +342,7 @@ export default function CheckoutOrderPage() {
                   </>
                 ) : (
                   <>
-                    <CheckCircle2 className="w-4 h-4" /> Tôi đã chuyển khoản xong
+                    <CheckCircle2 className="w-4 h-4" /> Tôi đã chuyển khoản thủ công xong
                   </>
                 )}
               </button>
@@ -255,7 +363,7 @@ export default function CheckoutOrderPage() {
               Cảm ơn bạn! Đơn hàng đã được thanh toán thành công.
             </h3>
             <p className="text-xs text-emerald-700 max-w-md mx-auto">
-              Quyền lợi gói đã được kích hoạt trên tài khoản của bạn. Bạn có thể sử dụng tất cả tính năng cao cấp ngay bây giờ.
+              Quyền lợi gói đã được kích hoạt tự động trên tài khoản của bạn. Bạn có thể sử dụng tất cả tính năng cao cấp ngay bây giờ.
             </p>
             <div className="pt-2">
               <Link
@@ -272,4 +380,3 @@ export default function CheckoutOrderPage() {
     </div>
   );
 }
-

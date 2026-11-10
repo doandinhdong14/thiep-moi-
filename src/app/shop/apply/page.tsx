@@ -57,7 +57,7 @@ export default function ShopApplyPage() {
           </div>
           <h1 className="text-2xl font-bold text-neutral-900 mb-2">Đăng ký thành công!</h1>
           <p className="text-neutral-600 text-sm mb-6 leading-relaxed">
-            Hồ sơ đối tác cửa hàng của bạn đã được gửi tới đội ngũ MomentLink. Chúng tôi sẽ duyệt thông tin và cấp quyền Shop Owner trong vòng 24 giờ.
+            Hồ sơ đối tác cửa hàng của bạn đã được gửi tới đội ngũ Ding Dong Gift. Chúng tôi sẽ duyệt thông tin và cấp quyền Shop Owner trong vòng 24 giờ.
           </p>
           <Link
             href="/dashboard"
@@ -80,7 +80,7 @@ export default function ShopApplyPage() {
             </div>
             <div>
               <h1 className="text-xl font-bold text-neutral-900">Đăng ký Đối tác Cửa hàng</h1>
-              <p className="text-xs text-neutral-500">Tham gia mạng lưới Hoa & Quà tặng MomentLink</p>
+              <p className="text-xs text-neutral-500">Tham gia mạng lưới Hoa & Quà tặng Ding Dong Gift</p>
             </div>
           </div>
           <Link href="/" className="text-neutral-400 hover:text-neutral-600">

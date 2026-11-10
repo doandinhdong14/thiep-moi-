@@ -185,7 +185,7 @@ export default function AffiliateApplyPage() {
             </div>
 
             <p className="text-[11px] text-slate-400 text-center">
-              Bằng việc đăng ký, bạn đồng ý với Điều khoản đối tác và chính sách hoa hồng 10% của MomentLink.
+              Bằng việc đăng ký, bạn đồng ý với Điều khoản đối tác và chính sách hoa hồng 10% của Ding Dong Gift.
             </p>
           </form>
         )}

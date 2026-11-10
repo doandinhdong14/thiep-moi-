@@ -42,7 +42,7 @@ export async function GET(
         paymentInstructions: {
           bankName: "Techcombank (Ngân hàng TMCP Kỹ Thương Việt Nam)",
           accountNumber: "19036789123456",
-          accountHolder: "CONG TY CP MOMENTLINK VN",
+          accountHolder: "CONG TY CP DING DONG GIFT VN",
           transferSyntax: order.orderNumber,
           amountVnd: order.totalVnd,
         },

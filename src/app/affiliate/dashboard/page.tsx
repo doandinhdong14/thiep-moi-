@@ -105,7 +105,7 @@ export default function AffiliateDashboardPage() {
           Bạn chưa đăng ký làm Cộng tác viên
         </h2>
         <p className="text-xs sm:text-sm text-slate-500 max-w-md mb-6">
-          Tham gia mạng lưới đối tác MomentLink ngay hôm nay để nhận 10% hoa hồng trên mọi đơn hàng kỹ thuật số.
+          Tham gia mạng lưới đối tác Ding Dong Gift ngay hôm nay để nhận 10% hoa hồng trên mọi đơn hàng kỹ thuật số.
         </p>
         <Link
           href="/affiliate/apply"

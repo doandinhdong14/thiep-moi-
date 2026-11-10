@@ -24,7 +24,7 @@ export default function ShopPolicyPage() {
           <section className="space-y-2">
             <h2 className="text-lg font-serif font-bold text-slate-900">1. Bản chất dịch vụ trong giai đoạn P0</h2>
             <p>
-              MomentLink hoạt động như kênh kết nối và khám phá đối tác (Partner Discovery & Quote Request). Nền tảng không giữ tiền thanh toán hàng vật lý. Cửa hàng và người mua tự thỏa thuận xác nhận báo giá, phương thức giao nhận và thanh toán trực tiếp.
+              Ding Dong Gift hoạt động như kênh kết nối và khám phá đối tác (Partner Discovery & Quote Request). Nền tảng không giữ tiền thanh toán hàng vật lý. Cửa hàng và người mua tự thỏa thuận xác nhận báo giá, phương thức giao nhận và thanh toán trực tiếp.
             </p>
           </section>
 

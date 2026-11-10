@@ -3,7 +3,7 @@ import crypto from "crypto";
 import bcrypt from "bcryptjs";
 import prisma from "@/lib/prisma";
 
-export const SESSION_COOKIE_NAME = "momentlink_session";
+export const SESSION_COOKIE_NAME = "dingdong_session";
 const SESSION_DURATION_DAYS = 30;
 
 export async function hashPassword(password: string): Promise<string> {

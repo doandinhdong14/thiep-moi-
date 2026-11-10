@@ -112,7 +112,7 @@ export default async function GiftCardScanPage({ params }: GiftCardScanPageProps
             <Sparkles className="w-3.5 h-3.5" />
             Món quà sắp mở
           </div>
-          <h1 className="text-2xl font-bold text-neutral-900 mb-2">Thẻ QR vật lý MomentLink</h1>
+          <h1 className="text-2xl font-bold text-neutral-900 mb-2">Thẻ QR vật lý Ding Dong Gift</h1>
           <p className="text-neutral-600 text-sm mb-6 leading-relaxed">
             Thẻ quà tặng này hiện chưa được kích hoạt liên kết với thiệp mời kỹ thuật số. Nếu bạn là chủ sở hữu tấm thiệp, hãy cào mã bí mật ở mặt sau và kích hoạt ngay.
           </p>

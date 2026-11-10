@@ -1,31 +1,89 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
-import { Sparkles, Heart } from "lucide-react";
+import {
+  Heart,
+  Mail,
+  ShieldCheck,
+  Send,
+  Phone,
+  CheckCircle,
+} from "lucide-react";
 
 export default function Footer() {
+  const [subscribed, setSubscribed] = useState(false);
+  const [emailInput, setEmailInput] = useState("");
+
+  const handleSubscribe = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!emailInput || !emailInput.includes("@")) return;
+    setSubscribed(true);
+    setEmailInput("");
+  };
+
+  const handleOpenCookieSettings = () => {
+    window.dispatchEvent(new CustomEvent("open-cookie-settings"));
+  };
+
   return (
-    <footer className="mt-auto bg-slate-900 text-slate-300 border-t border-slate-800">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* Brand */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-rose-500 flex items-center justify-center text-white">
-                <Sparkles className="w-4 h-4" />
+    <footer id="contact" className="mt-auto bg-[#1d1e25] text-slate-300 pt-14 pb-8 border-t border-slate-800">
+      <div className="max-w-[1140px] mx-auto px-4 sm:px-6">
+        {/* 5-Column Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-6 mb-12">
+          {/* Column 1: Brand intro */}
+          <div className="lg:col-span-1 space-y-3.5">
+            <Link href="/" className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-[#ff6b61] to-[#fa416a] flex items-center justify-center text-white">
+                <Heart className="w-4 h-4 fill-white" />
               </div>
-              <span className="font-serif text-lg font-bold text-white">MomentLink</span>
-            </div>
-            <p className="text-sm text-slate-400 leading-relaxed">
-              Nền tảng tạo thiệp mời, mini website tương tác và thẻ QR vật lý tinh tế cho những khoảnh khắc đáng nhớ nhất.
+              <span className="text-lg font-bold text-white tracking-tight">Ding Dong Gift</span>
+            </Link>
+
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Nền tảng thiệp mời thông minh, mini website tương tác & thẻ QR in ấn tinh tế cho mọi khoảnh khắc đáng nhớ nhất.
             </p>
+
+            <div className="space-y-1.5 pt-1 text-xs text-slate-400">
+              <a
+                href="mailto:hotro@dingdonggift.vn"
+                className="flex items-center gap-2 hover:text-[#fa416a] transition-colors"
+              >
+                <Mail className="w-3.5 h-3.5 text-[#ff6b61] shrink-0" />
+                <span>hotro@dingdonggift.vn</span>
+              </a>
+
+              <div className="flex items-center gap-2 text-slate-400">
+                <Phone className="w-3.5 h-3.5 text-[#ff6b61] shrink-0" />
+                <span>Hotline: 1900 8888</span>
+              </div>
+
+              <div className="flex items-center gap-2 text-slate-400">
+                <ShieldCheck className="w-3.5 h-3.5 text-[#ff6b61] shrink-0" />
+                <span>Ding Dong Gift Ltd.</span>
+              </div>
+            </div>
           </div>
 
-          {/* Dịp phổ biến */}
+          {/* Column 2: Sản Phẩm */}
           <div>
-            <h4 className="text-sm font-semibold uppercase tracking-wider text-white mb-3">Dịp phổ biến</h4>
-            <ul className="space-y-2 text-sm text-slate-400">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-white mb-3.5">
+              Sản Phẩm
+            </h4>
+            <ul className="space-y-2 text-xs text-slate-400">
+              <li>
+                <Link href="/products" className="hover:text-rose-400 transition-colors">
+                  Tất cả mẫu thiệp
+                </Link>
+              </li>
               <li>
                 <Link href="/occasions/wedding-ceremony" className="hover:text-rose-400 transition-colors">
                   Thiệp cưới & Đính hôn
+                </Link>
+              </li>
+              <li>
+                <Link href="/occasions/personal-birthday" className="hover:text-rose-400 transition-colors">
+                  Thiệp sinh nhật & Thôi nôi
                 </Link>
               </li>
               <li>
@@ -34,62 +92,61 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/occasions/personal-birthday" className="hover:text-rose-400 transition-colors">
-                  Sinh nhật & Thôi nôi
+                <Link href="/partners" className="hover:text-rose-400 transition-colors">
+                  Trở thành đối tác CTV
                 </Link>
               </li>
+            </ul>
+          </div>
+
+          {/* Column 3: Chủ Đề */}
+          <div>
+            <h4 className="text-xs font-bold uppercase tracking-wider text-white mb-3.5">
+              Chủ Đề
+            </h4>
+            <ul className="space-y-2 text-xs text-slate-400">
               <li>
                 <Link href="/occasions/love-confession" className="hover:text-rose-400 transition-colors">
-                  Tỏ tình & Kỷ niệm ngày yêu
+                  QR tình yêu & Tỏ tình
+                </Link>
+              </li>
+              <li>
+                <Link href="/templates/wedding-classic" className="hover:text-rose-400 transition-colors">
+                  Thiệp cưới hoàng gia
+                </Link>
+              </li>
+              <li>
+                <Link href="/templates/love-galaxy" className="hover:text-rose-400 transition-colors">
+                  Trái tim QR 3D
+                </Link>
+              </li>
+              <li>
+                <Link href="/templates/birthday-fun" className="hover:text-rose-400 transition-colors">
+                  Pháo hoa sinh nhật
+                </Link>
+              </li>
+              <li>
+                <Link href="/templates/love-letter" className="hover:text-rose-400 transition-colors">
+                  Thư tay phong bì ảo
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Sản phẩm & Đối tác */}
+          {/* Column 4: Chính Sách */}
           <div>
-            <h4 className="text-sm font-semibold uppercase tracking-wider text-white mb-3">Hệ sinh thái</h4>
-            <ul className="space-y-2 text-sm text-slate-400">
-              <li>
-                <Link href="/templates" className="hover:text-rose-400 transition-colors">
-                  Bộ sưu tập mẫu thiệp
-                </Link>
-              </li>
-              <li>
-                <Link href="/shops" className="hover:text-rose-400 transition-colors">
-                  Đối tác hoa & quà tặng
-                </Link>
-              </li>
-              <li>
-                <Link href="/activate" className="hover:text-rose-400 transition-colors">
-                  Kích hoạt thẻ QR vật lý
-                </Link>
-              </li>
-              <li>
-                <Link href="/affiliate/dashboard" className="hover:text-rose-400 transition-colors">
-                  Cộng tác viên (10% hoa hồng)
-                </Link>
-              </li>
-              <li>
-                <Link href="/pricing" className="hover:text-rose-400 transition-colors">
-                  Gói dịch vụ & Bảng giá
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Pháp lý & Hỗ trợ */}
-          <div>
-            <h4 className="text-sm font-semibold uppercase tracking-wider text-white mb-3">Chính sách & Pháp lý</h4>
-            <ul className="space-y-2 text-sm text-slate-400">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-white mb-3.5">
+              Chính Sách
+            </h4>
+            <ul className="space-y-2 text-xs text-slate-400">
               <li>
                 <Link href="/legal/privacy" className="hover:text-rose-400 transition-colors">
-                  Bảo vệ dữ liệu cá nhân (Nghị định 91/2025)
+                  Chính sách bảo mật
                 </Link>
               </li>
               <li>
                 <Link href="/legal/terms" className="hover:text-rose-400 transition-colors">
-                  Điều khoản dịch vụ
+                  Điều khoản sử dụng
                 </Link>
               </li>
               <li>
@@ -102,18 +159,84 @@ export default function Footer() {
                   Báo cáo nội dung vi phạm
                 </Link>
               </li>
+              <li>
+                <button
+                  type="button"
+                  onClick={handleOpenCookieSettings}
+                  className="hover:text-rose-400 transition-colors text-left"
+                >
+                  Cài đặt cookie
+                </button>
+              </li>
             </ul>
+          </div>
+
+          {/* Column 5: Kết Nối */}
+          <div>
+            <h4 className="text-xs font-bold uppercase tracking-wider text-white mb-3.5">
+              Kết Nối
+            </h4>
+            <p className="text-xs text-slate-400 mb-3">
+              Đăng ký nhận tin tức ưu đãi và mẫu thiệp mới nhất từ chúng tôi:
+            </p>
+
+            <form onSubmit={handleSubscribe} className="space-y-2">
+              <div className="relative">
+                <input
+                  type="email"
+                  value={emailInput}
+                  onChange={(e) => setEmailInput(e.target.value)}
+                  placeholder="Nhập email của bạn..."
+                  className="w-full px-3 py-2 pr-9 bg-slate-800/80 border border-slate-700 rounded-lg text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#fa416a]"
+                  required
+                />
+                <button
+                  type="submit"
+                  aria-label="Đăng ký nhận tin"
+                  className="absolute right-1.5 top-1/2 -translate-y-1/2 p-1 text-[#ff6b61] hover:text-[#fa416a] transition-colors"
+                >
+                  <Send className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              {subscribed && (
+                <p className="text-[11px] text-emerald-400 flex items-center gap-1">
+                  <CheckCircle className="w-3 h-3" />
+                  <span>Đăng ký nhận tin thành công!</span>
+                </p>
+              )}
+            </form>
+
+            <div className="flex items-center gap-3 mt-4 pt-2">
+              <a
+                href="https://facebook.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-7 h-7 rounded-full bg-slate-800 hover:bg-[#fa416a] flex items-center justify-center text-slate-300 hover:text-white transition-colors text-xs font-bold"
+              >
+                f
+              </a>
+              <a
+                href="https://tiktok.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-7 h-7 rounded-full bg-slate-800 hover:bg-[#fa416a] flex items-center justify-center text-slate-300 hover:text-white transition-colors text-xs font-bold"
+              >
+                ♪
+              </a>
+            </div>
           </div>
         </div>
 
-        <div className="mt-8 pt-8 border-t border-slate-800 text-xs text-slate-500 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p>© 2026 MomentLink. Tất cả quyền được bảo lưu.</p>
-          <p className="flex items-center gap-1 text-slate-400">
-            Thiết kế vì những khoảnh khắc chân thành <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500" />
+        {/* Divider & Copyright */}
+        <div className="pt-6 border-t border-slate-800 text-center text-xs text-slate-500 space-y-2">
+          <p>© {new Date().getFullYear()} Ding Dong Gift. Tất cả quyền được bảo lưu.</p>
+          <p className="flex items-center justify-center gap-1 text-[11px] text-slate-500">
+            Được thiết kế vì những khoảnh khắc yêu thương chân thành
+            <Heart className="w-3 h-3 text-rose-500 fill-rose-500" />
           </p>
         </div>
       </div>
     </footer>
   );
 }
-

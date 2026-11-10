@@ -49,7 +49,7 @@ export async function GET(
       ext = "jpg";
     }
 
-    const filename = `momentlink-${job.invitation.slug}-${job.format.toLowerCase()}.${ext}`;
+    const filename = `dingdonggift-${job.invitation.slug}-${job.format.toLowerCase()}.${ext}`;
 
     return new NextResponse(new Uint8Array(fileBuffer), {
       status: 200,

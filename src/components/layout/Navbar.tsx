@@ -3,7 +3,24 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, useCallback } from "react";
-import { Sparkles, Heart, Menu, X, User as UserIcon, LogOut, PlusCircle, Shield } from "lucide-react";
+import {
+  Heart,
+  Home,
+  LayoutGrid,
+  Sparkles,
+  PackageCheck,
+  Handshake,
+  PhoneCall,
+  Gift,
+  LogIn,
+  Menu,
+  X,
+  User as UserIcon,
+  LogOut,
+  Shield,
+  PlusCircle,
+} from "lucide-react";
+import VoucherModal from "@/components/landing/VoucherModal";
 
 interface UserProfile {
   id: string;
@@ -16,6 +33,7 @@ export default function Navbar() {
   const pathname = usePathname();
   const [user, setUser] = useState<UserProfile | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [voucherModalOpen, setVoucherModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const fetchUser = useCallback(() => {
@@ -39,208 +57,225 @@ export default function Navbar() {
     return () => window.removeEventListener("auth-change", handleAuthChange);
   }, [pathname, fetchUser]);
 
+  // Handle ESC key for mobile menu
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setMobileMenuOpen(false);
+        setVoucherModalOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   const handleLogout = async () => {
     await fetch("/api/v1/auth/sign-out", { method: "POST" });
     setUser(null);
     window.location.href = "/";
   };
 
+  const navLinks = [
+    { label: "Trang chủ", href: "/", icon: Home, active: pathname === "/" },
+    { label: "Sản phẩm", href: "/products", icon: LayoutGrid, active: pathname === "/products" },
+    { label: "Bộ sưu tập", href: "/collections", icon: Sparkles, active: pathname.startsWith("/collections") || pathname.startsWith("/templates") },
+    { label: "Đơn hàng của tôi", href: "/dashboard", icon: PackageCheck, active: pathname.startsWith("/dashboard") },
+    { label: "Đối tác", href: "/partners", icon: Handshake, active: pathname.startsWith("/partners") || pathname.startsWith("/affiliate") },
+    { label: "Liên hệ", href: "/#contact", icon: PhoneCall, active: false },
+  ];
+
   return (
-    <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-rose-100">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-rose-500 to-amber-400 flex items-center justify-center text-white shadow-md shadow-rose-200 group-hover:scale-105 transition-transform">
-              <Sparkles className="w-5 h-5" />
+    <>
+      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-100 shadow-[0_1px_3px_rgba(0,0,0,0.03)] h-16">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 h-full">
+          <div className="flex items-center justify-between h-full">
+            {/* 1. Left Zone: Brand Logo */}
+            <Link href="/" className="flex items-center gap-2.5 group shrink-0">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#ff6b61] to-[#fa416a] flex items-center justify-center text-white shadow-md shadow-rose-200 group-hover:scale-105 transition-transform">
+                <Heart className="w-5 h-5 fill-white" />
+              </div>
+              <span className="text-xl font-bold bg-gradient-to-r from-[#ff6b61] to-[#fa416a] bg-clip-text text-transparent tracking-tight">
+                Ding Dong Gift
+              </span>
+            </Link>
+
+            {/* 2. Middle Zone: Navigation */}
+            <nav className="hidden lg:flex items-center gap-1 xl:gap-2 h-full text-[14px] font-medium text-slate-700">
+              {navLinks.map((item) => {
+                const IconComponent = item.icon;
+                return (
+                  <Link
+                    key={item.label}
+                    href={item.href}
+                    className={`relative flex items-center gap-1.5 px-3 py-2 h-full hover:text-[#fa416a] transition-colors ${item.active ? "text-[#fa416a] font-semibold" : "text-slate-600"
+                      }`}
+                  >
+                    <IconComponent className="w-4 h-4 stroke-[1.8]" />
+                    <span>{item.label}</span>
+                    {item.active && (
+                      <span className="absolute bottom-0 left-2 right-2 h-[2.5px] bg-[#fa416a] rounded-t-full" />
+                    )}
+                  </Link>
+                );
+              })}
+            </nav>
+
+            {/* 3. Right Zone: Actions */}
+            <div className="hidden sm:flex items-center gap-3 shrink-0">
+              {/* Voucher Button */}
+              <button
+                onClick={() => setVoucherModalOpen(true)}
+                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#fff0f3] hover:bg-rose-100 border border-rose-200 text-[#fa416a] text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+                title="Nhận mã voucher giảm giá"
+              >
+                <Gift className="w-3.5 h-3.5" />
+                <span>Nhận voucher</span>
+              </button>
+
+              {/* Authentication Actions */}
+              {user ? (
+                <div className="flex items-center gap-2">
+                  <Link
+                    href="/create"
+                    className="flex items-center gap-1.5 px-3.5 py-1.5 bg-gradient-to-r from-[#ff6b61] to-[#fa416a] hover:opacity-95 text-white text-xs font-semibold rounded-md shadow-sm shadow-rose-200 transition-all"
+                  >
+                    <PlusCircle className="w-3.5 h-3.5" />
+                    <span>Tạo thiệp mới</span>
+                  </Link>
+
+                  <Link
+                    href="/dashboard"
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-slate-700 hover:text-[#fa416a] text-xs font-medium rounded-md hover:bg-rose-50 transition-colors"
+                  >
+                    <UserIcon className="w-3.5 h-3.5 text-[#fa416a]" />
+                    <span className="max-w-[100px] truncate">{user.name}</span>
+                  </Link>
+
+                  {user.roles.includes("ADMIN") && (
+                    <Link
+                      href="/admin"
+                      className="flex items-center gap-1 px-2 py-1 text-[11px] font-semibold bg-amber-100 text-amber-800 rounded hover:bg-amber-200 transition-colors"
+                    >
+                      <Shield className="w-3 h-3" />
+                      <span>Admin</span>
+                    </Link>
+                  )}
+
+                  <button
+                    onClick={handleLogout}
+                    title="Đăng xuất"
+                    data-testid="logout-btn"
+                    className="p-1.5 text-slate-400 hover:text-[#fa416a] rounded hover:bg-rose-50 transition-colors"
+                  >
+                    <LogOut className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ) : (
+                <Link
+                  href="/login"
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 bg-gradient-to-r from-[#ff6b61] to-[#fa416a] hover:opacity-95 text-white text-xs font-semibold rounded-[6px] shadow-sm shadow-rose-200 transition-all h-[34px]"
+                >
+                  <LogIn className="w-3.5 h-3.5" />
+                  <span>Đăng nhập</span>
+                </Link>
+              )}
             </div>
-            <span className="font-serif text-xl font-bold bg-gradient-to-r from-rose-600 to-amber-600 bg-clip-text text-transparent">
-              MomentLink
-            </span>
-          </Link>
 
-          {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-slate-600">
-            <Link href="/occasions" className="hover:text-rose-600 transition-colors">
-              Chủ đề & Dịp
-            </Link>
-            <Link href="/templates" className="hover:text-rose-600 transition-colors">
-              Mẫu thiệp
-            </Link>
-            <Link href="/pricing" className="hover:text-rose-600 transition-colors">
-              Bảng giá
-            </Link>
-            <Link href="/shops" className="hover:text-rose-600 transition-colors">
-              Hoa & Quà
-            </Link>
-            <Link href="/affiliate/dashboard" className="hover:text-rose-600 transition-colors">
-              Cộng tác viên (10%)
-            </Link>
-          </nav>
+            {/* Mobile menu trigger */}
+            <div className="flex lg:hidden items-center gap-2">
+              <button
+                onClick={() => setVoucherModalOpen(true)}
+                className="p-2 text-[#fa416a] hover:bg-rose-50 rounded-lg sm:hidden"
+                aria-label="Nhận voucher"
+              >
+                <Gift className="w-5 h-5" />
+              </button>
 
-          {/* Right Actions */}
-          <div className="hidden md:flex items-center gap-3">
-            {!loading && user ? (
-              <>
-                <Link
-                  href="/create"
-                  className="flex items-center gap-1.5 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-sm font-medium rounded-full shadow-sm shadow-rose-200 transition-all hover:shadow-md"
-                >
-                  <PlusCircle className="w-4 h-4" />
-                  <span>Tạo thiệp mới</span>
-                </Link>
-
-                <Link
-                  href="/dashboard"
-                  className="flex items-center gap-1.5 px-3 py-2 text-slate-700 hover:text-rose-600 text-sm font-medium rounded-lg hover:bg-rose-50 transition-colors"
-                >
-                  <UserIcon className="w-4 h-4" />
-                  <span>{user.name}</span>
-                </Link>
-
-                {user.roles.includes("ADMIN") && (
-                  <Link
-                    href="/admin"
-                    className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold bg-amber-100 text-amber-800 rounded-lg hover:bg-amber-200 transition-colors"
-                  >
-                    <Shield className="w-3.5 h-3.5" />
-                    <span>Admin</span>
-                  </Link>
-                )}
-
-                <button
-                  onClick={handleLogout}
-                  title="Đăng xuất"
-                  data-testid="logout-btn"
-                  className="p-2 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition-colors"
-                >
-                  <LogOut className="w-4 h-4" />
-                </button>
-              </>
-            ) : !loading ? (
-              <>
-                <Link
-                  href="/auth/sign-in"
-                  className="px-3.5 py-2 text-sm font-medium text-slate-700 hover:text-rose-600 transition-colors"
-                >
-                  Đăng nhập
-                </Link>
-                <Link
-                  href="/create"
-                  className="px-4 py-2 bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white text-sm font-medium rounded-full shadow-sm shadow-rose-200 transition-all hover:shadow-md"
-                >
-                  Tạo thiệp miễn phí
-                </Link>
-              </>
-            ) : null}
-          </div>
-
-          {/* Mobile menu button */}
-          <div className="flex md:hidden items-center gap-2">
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 text-slate-600 hover:text-rose-600 rounded-lg focus:outline-none"
-              aria-label="Toggle menu"
-            >
-              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="p-2 text-slate-700 hover:text-[#fa416a] rounded-lg focus:outline-none"
+                aria-label="Mở danh mục điều hướng"
+                aria-expanded={mobileMenuOpen}
+              >
+                {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              </button>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Mobile Drawer */}
-      {mobileMenuOpen && (
-        <div className="md:hidden border-b border-rose-100 bg-white px-4 pt-2 pb-6 space-y-3">
-          <Link
-            href="/occasions"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block px-3 py-2 text-base font-medium text-slate-700 hover:text-rose-600 hover:bg-rose-50 rounded-lg"
-          >
-            Chủ đề & Dịp
-          </Link>
-          <Link
-            href="/templates"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block px-3 py-2 text-base font-medium text-slate-700 hover:text-rose-600 hover:bg-rose-50 rounded-lg"
-          >
-            Mẫu thiệp
-          </Link>
-          <Link
-            href="/pricing"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block px-3 py-2 text-base font-medium text-slate-700 hover:text-rose-600 hover:bg-rose-50 rounded-lg"
-          >
-            Bảng giá
-          </Link>
-          <Link
-            href="/shops"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block px-3 py-2 text-base font-medium text-slate-700 hover:text-rose-600 hover:bg-rose-50 rounded-lg"
-          >
-            Hoa & Quà
-          </Link>
-          <Link
-            href="/affiliate/dashboard"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block px-3 py-2 text-base font-medium text-slate-700 hover:text-rose-600 hover:bg-rose-50 rounded-lg"
-          >
-            Cộng tác viên (10%)
-          </Link>
-
-          <div className="pt-3 border-t border-rose-100 space-y-2">
-            {user ? (
-              <>
+        {/* Mobile Drawer */}
+        {mobileMenuOpen && (
+          <div className="lg:hidden border-b border-rose-100 bg-white px-4 pt-3 pb-6 space-y-2 shadow-lg animate-fadeIn">
+            {navLinks.map((item) => {
+              const IconComp = item.icon;
+              return (
                 <Link
-                  href="/dashboard"
+                  key={item.label}
+                  href={item.href}
                   onClick={() => setMobileMenuOpen(false)}
-                  className="block px-3 py-2 text-base font-medium text-slate-800 hover:bg-rose-50 rounded-lg"
+                  className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${item.active
+                      ? "bg-rose-50 text-[#fa416a] font-semibold"
+                      : "text-slate-700 hover:bg-slate-50 hover:text-[#fa416a]"
+                    }`}
                 >
-                  Dashboard: {user.name}
+                  <IconComp className="w-4 h-4 text-slate-500" />
+                  <span>{item.label}</span>
                 </Link>
-                {user.roles.includes("ADMIN") && (
+              );
+            })}
+
+            <div className="pt-3 border-t border-slate-100 space-y-2">
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  setVoucherModalOpen(true);
+                }}
+                className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-[#fff0f3] text-[#fa416a] text-sm font-semibold rounded-lg border border-rose-200"
+              >
+                <Gift className="w-4 h-4" />
+                <span>Nhận voucher ưu đãi</span>
+              </button>
+
+              {user ? (
+                <div className="space-y-1.5 pt-1">
                   <Link
-                    href="/admin"
+                    href="/dashboard"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="block px-3 py-2 text-base font-medium text-amber-700 hover:bg-amber-50 rounded-lg"
+                    className="block px-3 py-2 text-sm font-medium text-slate-800 hover:bg-rose-50 rounded-lg"
                   >
-                    Trang Quản Trị (Admin)
+                    Đơn hàng / Dashboard: <span className="font-semibold">{user.name}</span>
                   </Link>
-                )}
+                  <Link
+                    href="/create"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block w-full text-center px-4 py-2 bg-gradient-to-r from-[#ff6b61] to-[#fa416a] text-white font-medium text-sm rounded-lg"
+                  >
+                    Tạo thiệp mới
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="block w-full text-center px-3 py-2 text-xs text-slate-500 hover:text-[#fa416a]"
+                  >
+                    Đăng xuất
+                  </button>
+                </div>
+              ) : (
                 <Link
-                  href="/create"
+                  href="/login"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="block w-full text-center px-4 py-2.5 bg-rose-600 text-white font-medium rounded-full"
+                  className="flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-gradient-to-r from-[#ff6b61] to-[#fa416a] text-white text-sm font-semibold rounded-lg shadow-sm"
                 >
-                  Tạo thiệp mới
+                  <LogIn className="w-4 h-4" />
+                  <span>Đăng nhập</span>
                 </Link>
-                <button
-                  onClick={handleLogout}
-                  className="block w-full text-center px-3 py-2 text-sm text-slate-500 hover:text-rose-600"
-                >
-                  Đăng xuất
-                </button>
-              </>
-            ) : (
-              <>
-                <Link
-                  href="/auth/sign-in"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="block w-full text-center px-3 py-2 text-base font-medium text-slate-700 border border-slate-200 rounded-lg"
-                >
-                  Đăng nhập
-                </Link>
-                <Link
-                  href="/create"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="block w-full text-center px-4 py-2.5 bg-rose-600 text-white font-medium rounded-full shadow"
-                >
-                  Tạo thiệp miễn phí
-                </Link>
-              </>
-            )}
+              )}
+            </div>
           </div>
-        </div>
-      )}
-    </header>
+        )}
+      </header>
+
+      {/* Voucher Modal */}
+      <VoucherModal isOpen={voucherModalOpen} onClose={() => setVoucherModalOpen(false)} />
+    </>
   );
 }

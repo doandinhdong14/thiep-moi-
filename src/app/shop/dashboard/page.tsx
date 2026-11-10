@@ -417,7 +417,7 @@ export default function ShopDashboardPage() {
                     rows={3}
                     value={productDesc}
                     onChange={(e) => setProductDesc(e.target.value)}
-                    placeholder="Bao gồm hoa hướng dương tươi, giấy gói phong cách Hàn Quốc, tương thích đính kèm Thẻ QR MomentLink..."
+                    placeholder="Bao gồm hoa hướng dương tươi, giấy gói phong cách Hàn Quốc, tương thích đính kèm Thẻ QR Ding Dong Gift..."
                     className="w-full px-3 py-2 text-sm border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500"
                   />
                 </div>

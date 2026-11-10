@@ -52,7 +52,7 @@ export default function SignUpPage() {
           <div className="mx-auto w-12 h-12 rounded-xl bg-gradient-to-tr from-rose-500 to-amber-400 flex items-center justify-center text-white shadow-md shadow-rose-200">
             <Sparkles className="w-6 h-6" />
           </div>
-          <h2 className="mt-4 text-2xl font-serif font-bold text-slate-900">Tạo tài khoản MomentLink</h2>
+          <h2 className="mt-4 text-2xl font-serif font-bold text-slate-900">Tạo tài khoản Ding Dong Gift</h2>
           <p className="mt-2 text-sm text-slate-500">
             Bắt đầu tạo thiệp mời và lưu giữ khoảnh khắc trong 2 phút
           </p>

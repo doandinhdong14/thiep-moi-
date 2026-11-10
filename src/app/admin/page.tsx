@@ -49,7 +49,7 @@ export default async function AdminPortalPage() {
             <span>Admin Control Panel</span>
           </div>
           <h1 className="text-3xl font-serif font-bold text-slate-900">
-            Trung tâm Quản trị Nền tảng MomentLink
+            Trung tâm Quản trị Nền tảng Ding Dong Gift
           </h1>
           <p className="text-sm text-slate-500 mt-1">
             Quản lý tài khoản, đơn hàng, hoa hồng đối tác và hệ sinh thái dịch vụ.

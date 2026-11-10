@@ -36,7 +36,7 @@ export default function PrivacyPolicyPage() {
           <section className="space-y-2">
             <h2 className="text-lg font-serif font-bold text-slate-900">1. Mục đích thu thập dữ liệu</h2>
             <p>
-              MomentLink thu thập và xử lý các thông tin cần thiết phục vụ cho việc tạo, hiển thị mini website thiệp mời,
+              Ding Dong Gift thu thập và xử lý các thông tin cần thiết phục vụ cho việc tạo, hiển thị mini website thiệp mời,
               xử lý phản hồi tham dự (RSVP), sổ lưu bút, kết nối đơn hoa quà đối tác và đối soát hoa hồng tiếp thị liên kết.
             </p>
           </section>
@@ -54,7 +54,7 @@ export default function PrivacyPolicyPage() {
           <section className="space-y-2">
             <h2 className="text-lg font-serif font-bold text-slate-900">3. Quyền riêng tư theo mặc định</h2>
             <p>
-              Mọi thiệp mời tạo ra trên MomentLink được đặt ở chế độ <strong>UNLISTED</strong> theo mặc định. Thiệp không xuất hiện trên các công cụ tìm kiếm công cộng (Google) và chỉ những ai có liên kết hoặc mã QR mới có thể xem được. Chủ thiệp có quyền khóa thiệp bằng mật mã (PASSWORD) hoặc lưu trữ (ARCHIVED) bất kỳ lúc nào.
+              Mọi thiệp mời tạo ra trên Ding Dong Gift được đặt ở chế độ <strong>UNLISTED</strong> theo mặc định. Thiệp không xuất hiện trên các công cụ tìm kiếm công cộng (Google) và chỉ những ai có liên kết hoặc mã QR mới có thể xem được. Chủ thiệp có quyền khóa thiệp bằng mật mã (PASSWORD) hoặc lưu trữ (ARCHIVED) bất kỳ lúc nào.
             </p>
           </section>
 

@@ -55,7 +55,7 @@ export async function GET(
     const size = Math.min(Math.max(isNaN(sizeParam) ? 512 : sizeParam, 128), 2048);
     const download = url.searchParams.get("download") === "true";
 
-    const filename = `momentlink-${inv.slug}-qr.${format === "svg" ? "svg" : "png"}`;
+    const filename = `dingdonggift-${inv.slug}-qr.${format === "svg" ? "svg" : "png"}`;
     const disposition = download
       ? `attachment; filename="${filename}"`
       : `inline; filename="${filename}"`;
