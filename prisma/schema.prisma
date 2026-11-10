@@ -20,6 +20,8 @@ model User {
   image         String?
   status        String    @default("ACTIVE") // ACTIVE, SUSPENDED, DEACTIVATED
   locale        String    @default("vi-VN")
+  imageCredits  Int       @default(0)
+  audioCredits  Int       @default(0)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -138,6 +140,7 @@ model Invitation {
   expiresAt         DateTime?
   publishedAt       DateTime?
   currentRevisionId String?
+  qrDesignJson      String?
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
@@ -366,6 +369,7 @@ model Order {
   buyerId             String
   orderNumber         String    @unique
   status              String    @default("PENDING") // PENDING, TRANSFER_SUBMITTED, PAID, CANCELLED, REFUNDED
+  purpose             String    @default("DIGITAL_PLAN") // gift_unlock, image_credits, audio_credits, gift_renewal, gift_upgrade, tip
   currency            String    @default("VND")
   subtotalVnd         Int       @default(0)
   discountVnd         Int       @default(0)

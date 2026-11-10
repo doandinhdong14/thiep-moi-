@@ -3,6 +3,7 @@ import prisma from "@/lib/prisma";
 import { requireRole } from "@/lib/auth/session";
 import { apiSuccess, apiError, handleApiError } from "@/lib/api/response";
 import { logAudit } from "@/lib/audit";
+import { fulfillOrder } from "@/lib/payments/fulfillment";
 
 export async function POST(
   req: NextRequest,
@@ -73,6 +74,9 @@ export async function POST(
           },
         });
       }
+
+      // Fulfill based on order purpose (media credits, gift unlock, renewal, etc.)
+      await fulfillOrder(order.id, tx);
 
       // 3. Create Entitlements for digital plans
       let purchaseInvitationId: string | null = null;

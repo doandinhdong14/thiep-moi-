@@ -20,6 +20,9 @@ export interface TemplateMeta {
   isPremium: boolean;
   theme: TemplateTheme;
   blocks: string[];
+  interactiveUrl?: string;
+  badge?: string;
+  icon?: string;
 }
 
 export const TEMPLATES_REGISTRY: Record<string, TemplateMeta> = {
@@ -158,14 +161,14 @@ export const TEMPLATES_REGISTRY: Record<string, TemplateMeta> = {
   },
   "love-galaxy": {
     slug: "love-galaxy",
-    title: "Written in the Stars",
+    title: "Vũ trụ yêu thương - Mưa Lời Yêu Thương",
     occasionKey: "love",
     occasionTitle: "Kỷ niệm tình yêu",
-    description: "Bầu trời đêm ngàn vì sao lấp lánh, bản tình ca du dương và lời hẹn ước mãi mãi.",
-    isPremium: true,
+    description: "Bầu trời đêm ngàn vì sao lấp lánh, hiệu ứng mưa lời yêu thương và thông điệp tình cảm ngọt ngào.",
+    isPremium: false,
     theme: {
-      name: "Written in the Stars",
-      style: "Đêm sao kỳ ảo & Tím mộng mơ",
+      name: "Vũ trụ yêu thương",
+      style: "Đêm sao kỳ ảo & Mưa lời yêu thương",
       background: "#09090b",
       foreground: "#f4f4f5",
       accent: "#a855f7",
@@ -174,6 +177,226 @@ export const TEMPLATES_REGISTRY: Record<string, TemplateMeta> = {
       fontFamily: "serif",
     },
     blocks: ["cover", "intro_message", "gallery", "music_control", "response_question", "footer_cta"],
+  },
+  "thiep-3": {
+    slug: "thiep-3",
+    title: "Thiệp 03: Một Tấm Vé Hẹn Hò ♡",
+    occasionKey: "love",
+    occasionTitle: "Hẹn hò & Tình yêu",
+    description: "Phong cách vintage cổ điển ấm áp. Cho phép người thương tự tay chọn ngày giờ, địa điểm, món ngon và hoạt động yêu thích, xuất chiếc vé tình yêu độc bản với mã vạch và dấu mộc lưu niệm.",
+    isPremium: false,
+    interactiveUrl: "/templates/thiep-3.html",
+    badge: "Vé Hẹn Hò",
+    icon: "🎟️",
+    theme: {
+      name: "Vintage Ticket",
+      style: "Giấy Cũ Vintage & Vé Tình Yêu",
+      background: "#FAF4E2",
+      foreground: "#504735",
+      accent: "#AA713D",
+      muted: "#A18C70",
+      cardBg: "#F3ECE2",
+      fontFamily: "serif",
+    },
+    blocks: ["cover", "intro_message", "event_details", "response_question", "footer_cta"],
+  },
+  "thiep-4": {
+    slug: "thiep-4",
+    title: "Thiệp 04: Gửi Em Một Vũ Trụ ✨",
+    occasionKey: "love",
+    occasionTitle: "Kỷ niệm tình yêu & Tỏ tình",
+    description: "Hành trình không gian 7 cảnh ma mị: bắt đầu từ ngôi sao phát tín hiệu, câu hỏi với nút né tinh nghịch cực gắt, xuyên cổng sao warp, gom sao trái tim, mở bì thư sáp 3D và nhận tọa độ vũ trụ riêng.",
+    isPremium: false,
+    interactiveUrl: "/templates/thiep-4.html",
+    badge: "Vũ Trụ 7 Cảnh",
+    icon: "🪐",
+    theme: {
+      name: "Cosmic Journey",
+      style: "Vũ Trụ Huyền Ảo & Warp Cổng Sao",
+      background: "#080c16",
+      foreground: "#f0f4fc",
+      accent: "#9d7cf7",
+      muted: "#8892b0",
+      cardBg: "#121828",
+      fontFamily: "sans",
+    },
+    blocks: ["cover", "intro_message", "response_question", "footer_cta"],
+  },
+  "thiep-5": {
+    slug: "thiep-5",
+    title: "Thiệp 05: Khu Vườn Kỷ Niệm – Phong Thư Tình Yêu 🌸",
+    occasionKey: "love",
+    occasionTitle: "Kỷ niệm ngày yêu",
+    description: "Mở lá thư, ngắm hoa bay và những kỷ niệm ngọt ngào. Khóa trái tim mã PIN, rút thiệp 3D lật gáy sách sang trọng, đọc tâm thư gõ chữ và ngắm ảnh kỷ niệm bay vào vòng hoa trái tim.",
+    isPremium: false,
+    interactiveUrl: "/templates/thiep-5.html",
+    badge: "Khóa PIN & 3D",
+    icon: "🌸",
+    theme: {
+      name: "Memory Garden",
+      style: "Khu Vườn Hoa & Lật Gáy Sách 3D",
+      background: "#1a0f18",
+      foreground: "#fff0f5",
+      accent: "#bc1948",
+      muted: "#c9ac9d",
+      cardBg: "#2d1b28",
+      fontFamily: "serif",
+    },
+    blocks: ["envelope_reveal", "cover", "intro_message", "gallery", "footer_cta"],
+  },
+  "thiep-6": {
+    slug: "thiep-6",
+    title: "Thiệp 06: Mùa Thu Kỷ Niệm – Bức Thư Giữa Mùa Lá Rụng 🍁",
+    occasionKey: "love",
+    occasionTitle: "Kỷ niệm & Hoài niệm",
+    description: "Biến thể từ Thiệp 5 mang tone màu thu vàng ấm áp hoài niệm. Mưa lá phong đỏ và lá bạch quả chao nghiêng theo gió, sáp niêm phong lá phong, mở phong thư giấy Kraft và vòng lá phong kết tụ ảnh kỷ niệm.",
+    isPremium: false,
+    interactiveUrl: "/templates/thiep-6.html",
+    badge: "Mùa Thu Lá Phong",
+    icon: "🍁",
+    theme: {
+      name: "Autumn Leaves",
+      style: "Mùa Thu Lá Phong & Giấy Kraft",
+      background: "#1b120c",
+      foreground: "#fef5e7",
+      accent: "#e67e22",
+      muted: "#d35400",
+      cardBg: "#2c1b10",
+      fontFamily: "serif",
+    },
+    blocks: ["envelope_reveal", "cover", "intro_message", "gallery", "footer_cta"],
+  },
+  "thiep-7": {
+    slug: "thiep-7",
+    title: "Thiệp 07: Đại Dương Tình Yêu & Ánh Sáng Biển Sâu 🌊",
+    occasionKey: "love",
+    occasionTitle: "Lời ngỏ & Tình yêu",
+    description: "Biến thể từ Thiệp 4 đưa người thương lặn sâu vào đại dương xanh thẳm: viên ngọc phát quang sinh học, nút bơi né cá heo tinh nghịch, gom 5 viên ngọc trái tim, mở thư trong chai và xuất hải đồ kỷ niệm.",
+    isPremium: false,
+    interactiveUrl: "/templates/thiep-7.html",
+    badge: "Thư Trong Chai",
+    icon: "🌊",
+    theme: {
+      name: "Deep Ocean",
+      style: "Đại Dương Xanh & Dạ Quang Biển Sâu",
+      background: "#031021",
+      foreground: "#e0f7fa",
+      accent: "#00f2fe",
+      muted: "#4facfe",
+      cardBg: "#051833",
+      fontFamily: "sans",
+    },
+    blocks: ["cover", "intro_message", "response_question", "footer_cta"],
+  },
+  "thiep-8": {
+    slug: "thiep-8",
+    title: "Thiệp 08: Vũ Trụ Trái Tim & Bì Thư 3D 💖",
+    occasionKey: "love",
+    occasionTitle: "Kỷ niệm tình yêu",
+    description: "Vũ trụ sao hạt lung linh, trái tim particle 3D có độ sâu, vòng chữ và ảnh quay quỹ đạo. Xuyên tim flash hồng đón phong thư mở nắp, rút thiệp lật gáy 3D lộ ảnh kỷ niệm và tâm thư gõ chữ mượt mà.",
+    isPremium: false,
+    interactiveUrl: "/templates/thiep-8.html",
+    badge: "Tim Particle 3D",
+    icon: "💖",
+    theme: {
+      name: "Cosmic Heart 3D",
+      style: "Particle Trái Tim 3D & Bì Thư Mở Nắp",
+      background: "#090514",
+      foreground: "#ffe6f0",
+      accent: "#d50065",
+      muted: "#ff82ab",
+      cardBg: "#1a0c24",
+      fontFamily: "sans",
+    },
+    blocks: ["cover", "intro_message", "gallery", "footer_cta"],
+  },
+  "thiep-9": {
+    slug: "thiep-9",
+    title: "Thiệp 09: Vũ Điệu Cực Quang & Trái Tim Pha Lê 3D 🌌",
+    occasionKey: "love",
+    occasionTitle: "Tình yêu mùa đông",
+    description: "Biến thể từ Thiệp 8 đưa bạn vào bầu trời đêm Bắc Cực ngập tràn ánh sáng Aurora Borealis đa sắc. Trái tim 3D kết tinh từ ngàn hạt pha lê băng tuyết lấp lánh và bức thư ấm áp xua tan giá lạnh.",
+    isPremium: false,
+    interactiveUrl: "/templates/thiep-9.html",
+    badge: "Cực Quang & Pha Lê",
+    icon: "🌌",
+    theme: {
+      name: "Aurora Crystal",
+      style: "Cực Quang Bắc Cực & Pha Lê Băng Tuyết",
+      background: "#051329",
+      foreground: "#e8fdf8",
+      accent: "#64ffda",
+      muted: "#00b894",
+      cardBg: "#0b2246",
+      fontFamily: "sans",
+    },
+    blocks: ["cover", "intro_message", "gallery", "footer_cta"],
+  },
+  "thiep-10": {
+    slug: "thiep-10",
+    title: "Thiệp 10: Boarding Pass – Chuyến Bay Hạnh Phúc ✈️",
+    occasionKey: "love",
+    occasionTitle: "Hẹn hò & Trải nghiệm",
+    description: "Biến thể từ Thiệp 3 theo phong cách thẻ lên máy bay hạng nhất (First Class Boarding Pass). Chọn lịch trình bay, điểm đến lãng mạn, nút né tránh va chạm radar và xuất thẻ Boarding Pass PNG cao cấp.",
+    isPremium: false,
+    interactiveUrl: "/templates/thiep-10.html",
+    badge: "Boarding Pass",
+    icon: "✈️",
+    theme: {
+      name: "Boarding Pass",
+      style: "Vé Máy Bay First Class & Radar Tình Yêu",
+      background: "#0a1128",
+      foreground: "#fff8e7",
+      accent: "#d4af37",
+      muted: "#1e90ff",
+      cardBg: "#121d40",
+      fontFamily: "sans",
+    },
+    blocks: ["cover", "intro_message", "event_details", "response_question", "footer_cta"],
+  },
+  "thiep-giang-sinh": {
+    slug: "thiep-giang-sinh",
+    title: "Thiệp Giáng Sinh – Đêm Noel Diệu Kỳ 🎄",
+    occasionKey: "love",
+    occasionTitle: "Giáng sinh & Năm mới",
+    description: "Không gian đêm Giáng Sinh tuyết rơi đa tầng ấm áp với dây đèn Fairy Lights lung linh tương tác đổi nhịp sáng. Hộp quà 3D thắt nơ vàng kim lắc lư mời gọi chạm để mở nơ, bung nắp hộp quà bắn pháo tuyết, hé lộ bức thiệp Noel, chọn điều ước đêm đông và xuất bưu thiếp Bắc Cực độc bản.",
+    isPremium: false,
+    interactiveUrl: "/templates/thiep-giang-sinh.html",
+    badge: "Đêm Noel 3D",
+    icon: "🎄",
+    theme: {
+      name: "Christmas Magic",
+      style: "Đêm Noel Tuyết Rơi 3D & Hộp Quà Mở Nơ",
+      background: "#0c1829",
+      foreground: "#fff9f0",
+      accent: "#e74c3c",
+      muted: "#f1c40f",
+      cardBg: "#192d47",
+      fontFamily: "serif",
+    },
+    blocks: ["cover", "intro_message", "response_question", "footer_cta"],
+  },
+  "thiep-xmas": {
+    slug: "thiep-xmas",
+    title: "Christmas Special – Hộp Quà Giáng Sinh Lung Linh 🎅",
+    occasionKey: "love",
+    occasionTitle: "Giáng sinh & Năm mới",
+    description: "Phiên bản hộp quà Giáng Sinh 3D lộng lẫy, tương tác mở nơ bung nắp quà, hiệu ứng tuyết rơi rơi và âm nhạc rộn rã mang lại cảm xúc mùa lễ hội ấm áp tuyệt vời.",
+    isPremium: false,
+    interactiveUrl: "/templates/thiep-xmas.html",
+    badge: "Christmas Special",
+    icon: "🎅",
+    theme: {
+      name: "Christmas Special",
+      style: "Hộp Quà 3D & Bưu Thiếp Bắc Cực",
+      background: "#14070a",
+      foreground: "#fff5f5",
+      accent: "#c0392b",
+      muted: "#27ae60",
+      cardBg: "#2d0f14",
+      fontFamily: "serif",
+    },
+    blocks: ["cover", "intro_message", "response_question", "footer_cta"],
   },
 };
 
@@ -389,6 +612,12 @@ export function getTemplateDemoContent(slug: string): InvitationContent {
           { role: "partner2", displayName: "Ngọc Hà" },
         ],
         message: "Một năm trôi qua với biết bao tiếng cười và cả những lúc giận hờn. Cảm ơn vì em luôn ở đó, cùng anh viết nên câu chuyện đẹp nhất đời mình.",
+        loveMessages: [
+          "Em là điều tuyệt vời nhất",
+          "Nụ cười của em là nắng",
+          "Anh nhớ em",
+          "Thương em hơn hôm qua",
+        ],
         coverImageUrl: "https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?auto=format&fit=crop&w=1200&q=80",
         galleryUrls: [
           "https://images.unsplash.com/photo-1518895949257-7621c3c786d7?auto=format&fit=crop&w=800&q=80",
@@ -398,6 +627,220 @@ export function getTemplateDemoContent(slug: string): InvitationContent {
         responseQuestion: {
           question: "Năm sau vẫn nắm tay anh đi khắp thế gian chứ?",
           options: ["Mãi mãi bên anh! 💖", "Tất nhiên rồi chàng trai ngốc!"],
+        },
+        blocks: meta.blocks.map((type, i) => ({ id: `blk_${i}`, type: type as any, enabled: true })),
+      };
+
+    case "thiep-3":
+      return {
+        schemaVersion: 1,
+        occasionKey: "love",
+        locale: "vi-VN",
+        title: "Một Tấm Vé Hẹn Hò ♡",
+        subtitle: "Một chiếc hẹn dành riêng cho em",
+        people: [
+          { role: "sender", displayName: "Anh" },
+          { role: "recipient", displayName: "Em" },
+        ],
+        message: "Vì nụ cười của em luôn làm cả ngày của anh bừng sáng, và anh mong chúng mình sẽ cùng có thêm thật nhiều kỷ niệm ngọt ngào bên nhau 🥰 📷",
+        coverImageUrl: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=1200&q=80",
+        galleryUrls: [],
+        privacy: { mode: "UNLISTED", allowIndexing: false },
+        features: { rsvp: false, guestbook: false },
+        responseQuestion: {
+          question: "Em đi hẹn hò với anh nhé?",
+          options: ["Dạ đồng ý nè! ♡", "Để em suy nghĩ xíu..."],
+        },
+        blocks: meta.blocks.map((type, i) => ({ id: `blk_${i}`, type: type as any, enabled: true })),
+      };
+
+    case "thiep-4":
+      return {
+        schemaVersion: 1,
+        occasionKey: "love",
+        locale: "vi-VN",
+        title: "Gửi Em Một Vũ Trụ ✨",
+        subtitle: "Giữa hàng triệu vì sao, anh có điều muốn gửi em",
+        people: [
+          { role: "sender", displayName: "Anh" },
+          { role: "recipient", displayName: "Em" },
+        ],
+        message: "Anh muốn cùng em đi qua những ngày rực rỡ, và cả những ngày bình dị chẳng có gì đặc biệt. Cùng thưởng thức món ngon, kể nhau nghe những chuyện vụn vặt, rồi thấy một ngày trôi qua thật dịu dàng.",
+        coverImageUrl: "https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?auto=format&fit=crop&w=1200&q=80",
+        galleryUrls: [],
+        privacy: { mode: "UNLISTED", allowIndexing: false },
+        features: { rsvp: false, guestbook: false },
+        responseQuestion: {
+          question: "Cho anh được ở trong vũ trụ của em nhé?",
+          options: ["Đồng ý, cho anh một chỗ ❤️", "Hổng cho đâu 😜"],
+        },
+        blocks: meta.blocks.map((type, i) => ({ id: `blk_${i}`, type: type as any, enabled: true })),
+      };
+
+    case "thiep-5":
+      return {
+        schemaVersion: 1,
+        occasionKey: "love",
+        locale: "vi-VN",
+        title: "Khu Vườn Kỷ Niệm – Phong Thư Tình Yêu",
+        subtitle: "Mỗi bông hoa trong khu vườn nhỏ này đều nở rộ vì em",
+        people: [
+          { role: "sender", displayName: "Anh iu" },
+          { role: "recipient", displayName: "Bé ngốc" },
+        ],
+        message: "Mỗi bông hoa trong khu vườn nhỏ này đều nở rộ vì em — vì sự dịu dàng, vì ánh mắt nụ cười, và vì từng khoảnh khắc bình yên tuyệt vời nhất mà mình đã cùng nhau đi qua.",
+        coverImageUrl: "https://images.unsplash.com/photo-1518895949257-7621c3c786d7?auto=format&fit=crop&w=1200&q=80",
+        galleryUrls: [],
+        privacy: { mode: "UNLISTED", allowIndexing: false },
+        features: { rsvp: false, guestbook: false },
+        blocks: meta.blocks.map((type, i) => ({ id: `blk_${i}`, type: type as any, enabled: true })),
+      };
+
+    case "thiep-6":
+      return {
+        schemaVersion: 1,
+        occasionKey: "love",
+        locale: "vi-VN",
+        title: "Mùa Thu Kỷ Niệm – Bức Thư Giữa Mùa Lá Rụng",
+        subtitle: "Lá phong đỏ vàng, sáp niêm phong & Hoài niệm ấm áp",
+        people: [
+          { role: "sender", displayName: "Anh" },
+          { role: "recipient", displayName: "Em" },
+        ],
+        message: "Gió heo may thổi về mang theo hương thu dịu mát, và hình bóng của em luôn ngập tràn trong tâm trí anh. Cảm ơn em vì đã đến bên anh trong mùa thu này.",
+        coverImageUrl: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80",
+        galleryUrls: [],
+        privacy: { mode: "UNLISTED", allowIndexing: false },
+        features: { rsvp: false, guestbook: false },
+        blocks: meta.blocks.map((type, i) => ({ id: `blk_${i}`, type: type as any, enabled: true })),
+      };
+
+    case "thiep-7":
+      return {
+        schemaVersion: 1,
+        occasionKey: "love",
+        locale: "vi-VN",
+        title: "Đại Dương Tình Yêu & Ánh Sáng Biển Sâu",
+        subtitle: "Lặn sâu vào đại dương xanh thẳm cùng bức thư trong chai",
+        people: [
+          { role: "sender", displayName: "Anh" },
+          { role: "recipient", displayName: "Em" },
+        ],
+        message: "Đại dương ngoài kia mênh mông sâu thẳm, nhưng nơi bình yên nhất luôn là bên cạnh em. Gom đủ 5 viên ngọc trái tim để mở ra hải trình tình yêu vĩnh cửu.",
+        coverImageUrl: "https://images.unsplash.com/photo-1518837695005-2083093ee35b?auto=format&fit=crop&w=1200&q=80",
+        galleryUrls: [],
+        privacy: { mode: "UNLISTED", allowIndexing: false },
+        features: { rsvp: false, guestbook: false },
+        responseQuestion: {
+          question: "Cùng anh đi tới tận cùng đại dương nhé?",
+          options: ["Em đồng ý! 🌊", "Bơi né dolphin 🐬"],
+        },
+        blocks: meta.blocks.map((type, i) => ({ id: `blk_${i}`, type: type as any, enabled: true })),
+      };
+
+    case "thiep-8":
+      return {
+        schemaVersion: 1,
+        occasionKey: "love",
+        locale: "vi-VN",
+        title: "Vũ Trụ Trái Tim & Bì Thư 3D",
+        subtitle: "Trái tim particle 3D có chiều sâu & Phong thư mở nắp",
+        people: [
+          { role: "sender", displayName: "Anh" },
+          { role: "recipient", displayName: "Em" },
+        ],
+        message: "Vũ trụ sao hạt lung linh, trái tim particle 3D có độ sâu, vòng chữ và ảnh quay quỹ đạo. Xuyên tim flash hồng đón phong thư mở nắp, hé lộ bức tâm thư dành riêng cho em.",
+        coverImageUrl: "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1200&q=80",
+        galleryUrls: [],
+        privacy: { mode: "UNLISTED", allowIndexing: false },
+        features: { rsvp: false, guestbook: false },
+        blocks: meta.blocks.map((type, i) => ({ id: `blk_${i}`, type: type as any, enabled: true })),
+      };
+
+    case "thiep-9":
+      return {
+        schemaVersion: 1,
+        occasionKey: "love",
+        locale: "vi-VN",
+        title: "Vũ Điệu Cực Quang & Trái Tim Pha Lê 3D",
+        subtitle: "Bầu trời đêm Bắc Cực ngập tràn ánh sáng Aurora Borealis",
+        people: [
+          { role: "sender", displayName: "Anh" },
+          { role: "recipient", displayName: "Em" },
+        ],
+        message: "Người ta thường bảo ai may mắn nhìn thấy dải cực quang sẽ có được hạnh phúc trọn đời. Nhưng với anh, khoảnh khắc kỳ diệu nhất là khi được gặp em và cùng em nắm tay đi qua những ngày tháng bình yên.",
+        coverImageUrl: "https://images.unsplash.com/photo-1531366936337-7c912a4589a7?auto=format&fit=crop&w=1200&q=80",
+        galleryUrls: [],
+        privacy: { mode: "UNLISTED", allowIndexing: false },
+        features: { rsvp: false, guestbook: false },
+        blocks: meta.blocks.map((type, i) => ({ id: `blk_${i}`, type: type as any, enabled: true })),
+      };
+
+    case "thiep-10":
+      return {
+        schemaVersion: 1,
+        occasionKey: "love",
+        locale: "vi-VN",
+        title: "Boarding Pass: Chuyến Bay Hạnh Phúc",
+        subtitle: "First Class Boarding Pass LV-520 đến trái tim em",
+        people: [
+          { role: "sender", displayName: "Anh" },
+          { role: "recipient", displayName: "Em" },
+        ],
+        message: "Vậy là đã chốt lịch trình bay rồi nha! Anh sẽ đón em đúng giờ, em chỉ cần chuẩn bị một nụ cười thật xinh là được ❤️",
+        coverImageUrl: "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&w=1200&q=80",
+        galleryUrls: [],
+        privacy: { mode: "UNLISTED", allowIndexing: false },
+        features: { rsvp: false, guestbook: false },
+        responseQuestion: {
+          question: "Sẵn sàng lên chuyến bay hạnh phúc cùng anh chưa?",
+          options: ["Em sẵn sàng rồi! ✈️", "Để em suy nghĩ xíu..."],
+        },
+        blocks: meta.blocks.map((type, i) => ({ id: `blk_${i}`, type: type as any, enabled: true })),
+      };
+
+    case "thiep-giang-sinh":
+      return {
+        schemaVersion: 1,
+        occasionKey: "love",
+        locale: "vi-VN",
+        title: "Thiệp Giáng Sinh – Đêm Noel Diệu Kỳ",
+        subtitle: "Tuyết rơi 3D, dây đèn lung linh & Hộp quà nơ vàng",
+        people: [
+          { role: "sender", displayName: "Anh" },
+          { role: "recipient", displayName: "Em" },
+        ],
+        message: "Giáng Sinh này thật trọn vẹn và diệu kỳ vì có em bên cạnh. Chúc cho cô gái của anh luôn nở nụ cười thật tươi, luôn bình yên và rạng rỡ. Dù ngoài trời có lạnh giá, anh hứa sẽ luôn là chiếc khăn len ấm áp bên em.",
+        coverImageUrl: "https://images.unsplash.com/photo-1543258103-a62bdc069871?auto=format&fit=crop&w=1200&q=80",
+        galleryUrls: [],
+        privacy: { mode: "UNLISTED", allowIndexing: false },
+        features: { rsvp: false, guestbook: false },
+        responseQuestion: {
+          question: "Giáng sinh này cùng anh đi dạo phố nhé?",
+          options: ["Chắc chắn rồi anh yêu! 🎄", "Chờ em chọn đồ xinh nha!"],
+        },
+        blocks: meta.blocks.map((type, i) => ({ id: `blk_${i}`, type: type as any, enabled: true })),
+      };
+
+    case "thiep-xmas":
+      return {
+        schemaVersion: 1,
+        occasionKey: "love",
+        locale: "vi-VN",
+        title: "Christmas Special – Hộp Quà Giáng Sinh Lung Linh",
+        subtitle: "Món quà Giáng Sinh 3D ngọt ngào dành riêng cho người thương",
+        people: [
+          { role: "sender", displayName: "Anh" },
+          { role: "recipient", displayName: "Em" },
+        ],
+        message: "Phiên bản hộp quà Giáng Sinh 3D lộng lẫy, mở nơ quà bung nắp bất ngờ với pháo tuyết rực rỡ và bưu thiếp Bắc Cực độc bản trao gửi yêu thương.",
+        coverImageUrl: "https://images.unsplash.com/photo-1512389142860-9c449e58a543?auto=format&fit=crop&w=1200&q=80",
+        galleryUrls: [],
+        privacy: { mode: "UNLISTED", allowIndexing: false },
+        features: { rsvp: false, guestbook: false },
+        responseQuestion: {
+          question: "Mở nơ hộp quà bí mật đêm Noel chưa nè?",
+          options: ["Mở ngay thôi! 🎁", "Hồi hộp quá đi à!"],
         },
         blocks: meta.blocks.map((type, i) => ({ id: `blk_${i}`, type: type as any, enabled: true })),
       };

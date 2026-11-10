@@ -108,7 +108,7 @@ export default function TemplateDemoPage({
       {/* Main Preview Container */}
       <div className="flex-1 flex items-center justify-center py-8 px-4 overflow-x-auto">
         {deviceView === "mobile" ? (
-          <div className="w-[375px] min-h-[700px] max-h-[880px] bg-white rounded-[40px] shadow-2xl border-[10px] border-slate-800 overflow-y-auto relative scrollbar-thin">
+          <div className="w-[375px] h-[780px] max-h-[880px] bg-white rounded-[40px] shadow-2xl border-[10px] border-slate-800 overflow-hidden relative">
             <TemplateRenderer
               content={demoContent}
               theme={template.theme}
@@ -117,7 +117,7 @@ export default function TemplateDemoPage({
             />
           </div>
         ) : (
-          <div className="w-full max-w-4xl bg-white rounded-3xl shadow-2xl overflow-hidden min-h-[700px]">
+          <div className="w-full max-w-4xl bg-white rounded-3xl shadow-2xl overflow-hidden h-[820px] min-h-[700px]">
             <TemplateRenderer
               content={demoContent}
               theme={template.theme}

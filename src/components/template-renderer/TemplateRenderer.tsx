@@ -13,6 +13,7 @@ import GuestbookBlock from "./blocks/GuestbookBlock";
 import ResponseQuestionBlock from "./blocks/ResponseQuestionBlock";
 import MusicControlBlock from "./blocks/MusicControlBlock";
 import FooterCtaBlock from "./blocks/FooterCtaBlock";
+import GalaxyRainMotion from "./blocks/GalaxyRainMotion";
 
 interface TemplateRendererProps {
   content: InvitationContent;
@@ -21,17 +22,48 @@ interface TemplateRendererProps {
   isPreview?: boolean;
 }
 
+const INTERACTIVE_TEMPLATES: Record<string, string> = {
+  "thiep-3": "/templates/thiep-3.html",
+  "thiep-4": "/templates/thiep-4.html",
+  "thiep-5": "/templates/thiep-5.html",
+  "thiep-6": "/templates/thiep-6.html",
+  "thiep-7": "/templates/thiep-7.html",
+  "thiep-8": "/templates/thiep-8.html",
+  "thiep-9": "/templates/thiep-9.html",
+  "thiep-10": "/templates/thiep-10.html",
+  "thiep-giang-sinh": "/templates/thiep-giang-sinh.html",
+  "thiep-xmas": "/templates/thiep-xmas.html",
+};
+
 export default function TemplateRenderer({
   content,
   theme,
   slug,
   isPreview = false,
 }: TemplateRendererProps) {
+  const interactiveUrl =
+    (slug && INTERACTIVE_TEMPLATES[slug]) ||
+    (content as any)?.interactiveUrl;
+
+  if (interactiveUrl) {
+    return (
+      <div className="w-full h-full min-h-[720px] md:min-h-screen bg-black flex flex-col relative overflow-hidden">
+        <iframe
+          src={interactiveUrl}
+          title={content.title || "Thiệp tương tác"}
+          className="w-full h-full min-h-[720px] md:min-h-screen border-0 flex-1"
+          allow="autoplay; accelerometer; gyroscope; clipboard-write; encrypted-media; fullscreen"
+        />
+      </div>
+    );
+  }
+
   const blocks = content.blocks || [];
+  const isGalaxyTheme = slug === "love-galaxy" || (content.loveMessages && content.loveMessages.length > 0);
 
   return (
     <div
-      className={`min-h-screen w-full transition-colors duration-300 ${
+      className={`min-h-screen w-full relative overflow-x-hidden transition-colors duration-300 ${
         theme.fontFamily === "serif" ? "font-serif" : "font-sans"
       }`}
       style={{
@@ -39,7 +71,14 @@ export default function TemplateRenderer({
         color: theme.foreground,
       }}
     >
-      <div className="max-w-2xl mx-auto px-4 py-8 relative">
+      {isGalaxyTheme && (
+        <GalaxyRainMotion
+          loveMessages={content.loveMessages}
+          galleryUrls={content.galleryUrls}
+          coverImageUrl={content.coverImageUrl}
+        />
+      )}
+      <div className="max-w-2xl mx-auto px-4 py-8 relative z-10">
         {blocks.map((b) => {
           if (!b.enabled) return null;
 

@@ -31,6 +31,7 @@ export default function CheckoutOrderPage() {
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [simulating, setSimulating] = useState(false);
   const pollTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const loadOrder = async (silent = false) => {
@@ -119,6 +120,25 @@ export default function CheckoutOrderPage() {
       setError(err.message || "Đã xảy ra lỗi.");
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleSimulatePayment = async () => {
+    setSimulating(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/v1/orders/${orderId}/simulate-payment`, {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error?.message || "Không thể thực hiện thanh toán thử nghiệm.");
+      }
+      loadOrder(true);
+    } catch (err: any) {
+      setError(err.message || "Đã xảy ra lỗi.");
+    } finally {
+      setSimulating(false);
     }
   };
 
@@ -328,54 +348,123 @@ export default function CheckoutOrderPage() {
               </div>
             )}
 
-            {/* Action button */}
+            {/* Action buttons */}
             {!isSubmitted && (
-              <button
-                onClick={handleMarkSubmitted}
-                disabled={submitting}
-                data-testid="mark-transfer-submitted-btn"
-                className="w-full py-3.5 px-6 rounded-2xl bg-slate-800 hover:bg-slate-900 disabled:bg-slate-400 text-white font-bold text-sm shadow-md transition flex items-center justify-center gap-2"
-              >
-                {submitting ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" /> Đang gửi xác nhận...
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle2 className="w-4 h-4" /> Tôi đã chuyển khoản thủ công xong
-                  </>
-                )}
-              </button>
+              <div className="space-y-2">
+                <button
+                  onClick={handleMarkSubmitted}
+                  disabled={submitting}
+                  data-testid="mark-transfer-submitted-btn"
+                  className="w-full py-3.5 px-6 rounded-2xl bg-slate-800 hover:bg-slate-900 disabled:bg-slate-400 text-white font-bold text-sm shadow-md transition flex items-center justify-center gap-2"
+                >
+                  {submitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" /> Đang gửi xác nhận...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="w-4 h-4" /> Tôi đã chuyển khoản — kiểm tra trạng thái
+                    </>
+                  )}
+                </button>
+
+                {/* Sandbox test button */}
+                <button
+                  onClick={handleSimulatePayment}
+                  disabled={simulating}
+                  data-testid="simulate-payment-btn"
+                  className="w-full py-2.5 px-4 rounded-xl border border-dashed border-indigo-300 bg-indigo-50/50 hover:bg-indigo-100/70 text-indigo-700 font-semibold text-xs transition flex items-center justify-center gap-1.5"
+                >
+                  {simulating ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
+                  )}
+                  <span>Mô phỏng thanh toán thành công (Sandbox Test)</span>
+                </button>
+              </div>
             )}
 
             {isSubmitted && (
-              <div className="p-4 bg-slate-100 rounded-2xl text-center text-xs text-slate-600">
-                Bạn đã gửi thông báo chuyển khoản. Quản trị viên sẽ đối soát giao dịch và kích hoạt gói cho bạn trong vài phút.
+              <div className="space-y-3">
+                <div className="p-4 bg-slate-100 rounded-2xl text-center text-xs text-slate-600">
+                  Bạn đã gửi thông báo chuyển khoản. Quản trị viên sẽ đối soát giao dịch và kích hoạt cho bạn.
+                </div>
+                <button
+                  onClick={handleSimulatePayment}
+                  disabled={simulating}
+                  className="w-full py-2.5 px-4 rounded-xl border border-dashed border-indigo-300 bg-indigo-50/50 hover:bg-indigo-100/70 text-indigo-700 font-semibold text-xs transition flex items-center justify-center gap-1.5"
+                >
+                  {simulating ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
+                  )}
+                  <span>Mô phỏng thanh toán thành công (Sandbox Test)</span>
+                </button>
               </div>
             )}
           </div>
         )}
 
-        {isPaid && (
-          <div className="bg-emerald-50 rounded-3xl p-6 sm:p-8 border border-emerald-200 text-center space-y-4">
-            <CheckCircle2 className="w-12 h-12 text-emerald-600 mx-auto" />
-            <h3 className="text-lg font-bold text-emerald-950">
-              Cảm ơn bạn! Đơn hàng đã được thanh toán thành công.
-            </h3>
-            <p className="text-xs text-emerald-700 max-w-md mx-auto">
-              Quyền lợi gói đã được kích hoạt tự động trên tài khoản của bạn. Bạn có thể sử dụng tất cả tính năng cao cấp ngay bây giờ.
-            </p>
-            <div className="pt-2">
-              <Link
-                href="/dashboard"
-                className="inline-flex items-center gap-2 px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs rounded-full shadow-md transition"
-              >
-                <span>Về Bảng điều khiển (Dashboard)</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
+        {isPaid && (() => {
+          const context = order.purchaseContext || {};
+          const giftId = context.giftId || order.lines?.[0]?.referenceId;
+          const purpose = order.purpose || context.purpose;
+
+          let targetUrl = "/dashboard";
+          let ctaText = "Về Bảng điều khiển (Dashboard)";
+          let successMsg = "Đơn hàng đã được thanh toán thành công!";
+
+          if (purpose === "image_credits") {
+            targetUrl = giftId ? `/editor/${giftId}?step=images&paid=image_credits` : "/editor";
+            ctaText = "Tiếp tục thêm ảnh";
+            successMsg = "Đã cộng thêm lượt tải ảnh vào tài khoản của bạn!";
+          } else if (purpose === "audio_credits") {
+            targetUrl = giftId ? `/editor/${giftId}?step=audio&paid=audio_credits` : "/editor";
+            ctaText = "Tiếp tục thêm nhạc";
+            successMsg = "Đã cộng thêm lượt tải nhạc vào tài khoản của bạn!";
+          } else if (purpose === "gift_unlock") {
+            targetUrl = giftId ? `/editor/${giftId}?step=finish&paid=gift_unlock` : "/dashboard";
+            ctaText = "Lấy link & tải mã QR";
+            successMsg = "Món quà đã sẵn sàng! Mở khóa thiệp thành công.";
+          } else if (purpose === "gift_renewal") {
+            targetUrl = giftId ? `/editor/${giftId}?step=finish&paid=gift_renewal` : "/dashboard";
+            ctaText = "Xem món quà đã gia hạn";
+            successMsg = "Đã gia hạn thời hạn món quà thành công!";
+          } else if (purpose === "tip") {
+            targetUrl = giftId ? `/editor/${giftId}?step=finish&paid=tip` : "/";
+            ctaText = "Quay lại món quà";
+            successMsg = "Cảm ơn bạn đã ủng hộ Ding Dong Gift! Chúc bạn và người thương luôn hạnh phúc.";
+          }
+
+          return (
+            <div className="bg-emerald-50 rounded-3xl p-6 sm:p-8 border border-emerald-200 text-center space-y-4">
+              <CheckCircle2 className="w-12 h-12 text-emerald-600 mx-auto" />
+              <h3 className="text-lg font-bold text-emerald-950">
+                {successMsg}
+              </h3>
+              <p className="text-xs text-emerald-700 max-w-md mx-auto">
+                Quyền lợi của bạn đã được kích hoạt tự động trên hệ thống.
+              </p>
+              <div className="pt-2 flex flex-col sm:flex-row gap-3 justify-center">
+                <Link
+                  href={targetUrl}
+                  className="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs rounded-full shadow-md transition"
+                >
+                  <span>{ctaText}</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+                <Link
+                  href="/dashboard"
+                  className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-white border border-slate-200 text-slate-700 font-semibold text-xs rounded-full hover:bg-slate-50 transition"
+                >
+                  <span>Về Dashboard</span>
+                </Link>
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
       </div>
     </div>
   );

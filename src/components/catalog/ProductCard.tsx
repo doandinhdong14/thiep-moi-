@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ShoppingCart, Eye, BookOpen, PlayCircle, ImageOff } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ShoppingCart, Eye, BookOpen, PlayCircle, ImageOff, Loader2 } from "lucide-react";
 import { CatalogProduct } from "@/data/catalogData";
 
 interface ProductCardProps {
@@ -11,7 +12,31 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product, onOpenDemo }: ProductCardProps) {
+  const router = useRouter();
   const [imageError, setImageError] = useState(false);
+  const [loadingDraft, setLoadingDraft] = useState(false);
+
+  const handleCustomize = async () => {
+    if (loadingDraft) return;
+    setLoadingDraft(true);
+    try {
+      const res = await fetch("/api/v1/invitations/draft", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ templateSlug: product.slug }),
+      });
+      const data = await res.json();
+      if (res.ok && data.data?.editorUrl) {
+        router.push(data.data.editorUrl);
+        return;
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingDraft(false);
+    }
+    router.push(`/create?template=${product.slug}`);
+  };
 
   const hasDiscount =
     product.compareAtPrice && product.compareAtPrice > product.price;
@@ -78,13 +103,19 @@ export default function ProductCard({ product, onOpenDemo }: ProductCardProps) {
 
         {/* 3. Action Buttons: Mua ngay & Xem demo */}
         <div className="grid grid-cols-2 gap-2 mb-3 mt-auto">
-          <Link
-            href={`/create?template=${product.slug}`}
-            className="flex items-center justify-center gap-1.5 h-[34px] px-2.5 rounded-[8px] bg-gradient-to-r from-[#ff6b61] to-[#fa416a] hover:opacity-95 text-white text-xs font-semibold shadow-xs transition-opacity"
+          <button
+            type="button"
+            onClick={handleCustomize}
+            disabled={loadingDraft}
+            className="flex items-center justify-center gap-1.5 h-[34px] px-2.5 rounded-[8px] bg-gradient-to-r from-[#ff6b61] to-[#fa416a] hover:opacity-95 text-white text-xs font-semibold shadow-xs transition-opacity disabled:opacity-60"
           >
-            <ShoppingCart className="w-3.5 h-3.5" />
-            <span>Mua ngay</span>
-          </Link>
+            {loadingDraft ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <ShoppingCart className="w-3.5 h-3.5" />
+            )}
+            <span>Tùy chỉnh ngay</span>
+          </button>
 
           <button
             type="button"

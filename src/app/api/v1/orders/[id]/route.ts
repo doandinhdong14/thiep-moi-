@@ -32,6 +32,7 @@ export async function GET(
         id: order.id,
         orderNumber: order.orderNumber,
         status: order.status,
+        purpose: order.purpose,
         paymentStatus: order.paymentStatus,
         subtotalVnd: order.subtotalVnd,
         discountVnd: order.discountVnd,
@@ -39,6 +40,7 @@ export async function GET(
         currency: order.currency,
         paidAt: order.paidAt,
         lines: order.lines,
+        purchaseContext: order.purchaseContext ? JSON.parse(order.purchaseContext) : null,
         paymentInstructions: {
           bankName: "Techcombank (Ngân hàng TMCP Kỹ Thương Việt Nam)",
           accountNumber: "19036789123456",

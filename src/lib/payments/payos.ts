@@ -2,6 +2,7 @@ import { PayOS } from "@payos/node";
 import { env } from "@/lib/config/env";
 import prisma from "@/lib/prisma";
 import crypto from "crypto";
+import { fulfillOrder } from "./fulfillment";
 
 let payosInstance: PayOS | null = null;
 
@@ -222,6 +223,9 @@ export async function processPayOSWebhookPayload(webhookBody: any) {
         rawSafeMetadata: JSON.stringify(verifiedData),
       },
     });
+
+    // Fulfill based on order purpose (media credits, gift unlock, renewal, etc.)
+    await fulfillOrder(order.id, tx);
 
     // Create Entitlements
     let purchaseInvitationId: string | null = null;

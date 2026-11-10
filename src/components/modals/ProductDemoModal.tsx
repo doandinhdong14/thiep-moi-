@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { X, Eye, Pencil, Loader2 } from "lucide-react";
 import ModalShell from "./ModalShell";
 import { CatalogProduct } from "@/data/catalogData";
@@ -18,8 +19,35 @@ export default function ProductDemoModal({
   isOpen,
   onClose,
 }: ProductDemoModalProps) {
+  const router = useRouter();
   const [qrCodeUrl, setQrCodeUrl] = useState<string>("");
   const [iframeLoading, setIframeLoading] = useState(true);
+  const [customizing, setCustomizing] = useState(false);
+
+  const handleCustomize = async () => {
+    if (customizing || !product) return;
+    setCustomizing(true);
+    try {
+      const res = await fetch("/api/v1/invitations/draft", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ templateSlug: product.slug }),
+      });
+      const data = await res.json();
+      if (res.ok && data.data?.editorUrl) {
+        onClose();
+        router.push(data.data.editorUrl);
+        return;
+      }
+    } catch (err) {
+      console.error("Customize draft error:", err);
+    } finally {
+      setCustomizing(false);
+    }
+    // Fallback
+    onClose();
+    router.push(`/create?template=${product.slug}`);
+  };
 
   const formatVnd = (amount: number) => {
     return new Intl.NumberFormat("vi-VN").format(amount) + "đ";
@@ -200,14 +228,19 @@ export default function ProductDemoModal({
                 <span className="truncate">Xem trực tiếp</span>
               </a>
 
-              <Link
-                href={`/create?template=${product.slug}`}
-                onClick={onClose}
-                className="flex-1 h-11 md:h-[36px] px-3 rounded-[9px] bg-gradient-to-r from-[#ff4d68] to-[#e93459] hover:opacity-95 text-white text-xs font-semibold flex items-center justify-center gap-1.5 shadow-md shadow-rose-200 transition-all"
+              <button
+                type="button"
+                onClick={handleCustomize}
+                disabled={customizing}
+                className="flex-1 h-11 md:h-[36px] px-3 rounded-[9px] bg-gradient-to-r from-[#ff4d68] to-[#e93459] hover:opacity-95 text-white text-xs font-semibold flex items-center justify-center gap-1.5 shadow-md shadow-rose-200 transition-all disabled:opacity-60"
               >
-                <Pencil className="w-3.5 h-3.5 md:w-4 md:h-4" />
-                <span className="truncate">Tùy chỉnh ngay</span>
-              </Link>
+                {customizing ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <Pencil className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                )}
+                <span className="truncate">{customizing ? "Đang chuẩn bị..." : "Tùy chỉnh ngay"}</span>
+              </button>
             </div>
 
             {/* QR Section: Centered vertical container */}

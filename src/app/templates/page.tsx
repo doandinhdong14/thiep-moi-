@@ -14,7 +14,7 @@ export default function TemplatesPage() {
     : allTemplates.filter((t) => t.occasionKey === filter);
 
   const tabs = [
-    { key: "all", label: "Tất cả 8 mẫu" },
+    { key: "all", label: `Tất cả (${allTemplates.length} mẫu)` },
     { key: "wedding", label: "Cưới & Đính hôn" },
     { key: "graduation", label: "Tốt nghiệp" },
     { key: "birthday", label: "Sinh nhật" },
@@ -30,7 +30,7 @@ export default function TemplatesPage() {
             <span>Bộ Sưu Tập Thiết Kế Hoàn Chỉnh</span>
           </div>
           <h1 className="text-3xl sm:text-4xl font-serif font-bold text-slate-900">
-            Khám phá 8 mẫu thiệp & mini website độc đáo
+            Khám phá {allTemplates.length} mẫu thiệp & mini website độc đáo
           </h1>
           <p className="text-slate-600 text-sm sm:text-base">
             Mỗi mẫu đều mang phong cách thị giác, bảng màu và bố cục tương tác riêng biệt. Tương thích hoàn hảo trên điện thoại.

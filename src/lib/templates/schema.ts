@@ -43,6 +43,7 @@ export const InvitationContentSchema = z.object({
   people: z.array(PersonSchema).default([]),
   event: EventDetailsSchema.optional(),
   message: z.string().optional(),
+  loveMessages: z.array(z.string()).optional(),
   coverImageUrl: z.string().optional(),
   galleryUrls: z.array(z.string()).default([]),
   privacy: z
