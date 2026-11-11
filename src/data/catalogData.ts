@@ -698,7 +698,7 @@ const RAW_CATALOG_PRODUCTS: CatalogProduct[] = [
   },
 ];
 
-export const TEST_PRODUCT_PRICE_VND = 1000;
+export const TEST_PRODUCT_PRICE_VND = 2000;
 export const TEST_MEDIA_CREDIT_PRICE_VND = TEST_PRODUCT_PRICE_VND;
 
 export const CATALOG_PRODUCTS: CatalogProduct[] = RAW_CATALOG_PRODUCTS.map((item) => {

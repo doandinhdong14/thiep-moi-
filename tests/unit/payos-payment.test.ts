@@ -50,9 +50,9 @@ describe("PayOS Payment Integration Unit Tests", () => {
     }
   });
 
-  it("should enforce 1.000đ price for products and both media upload credits", () => {
-    expect(TEST_PRODUCT_PRICE_VND).toBe(1000);
-    expect(TEST_MEDIA_CREDIT_PRICE_VND).toBe(1000);
+  it("should enforce 2.000đ price for products and both media upload credits", () => {
+    expect(TEST_PRODUCT_PRICE_VND).toBe(2000);
+    expect(TEST_MEDIA_CREDIT_PRICE_VND).toBe(2000);
   });
 
   it("should generate valid in-app NAPAS VietQR EMVCo payload without external URLs", () => {
@@ -65,13 +65,13 @@ describe("PayOS Payment Integration Unit Tests", () => {
     const payload = buildVietQrPayload({
       bankBin: tcb.bin,
       accountNumber: "19036789123456",
-      amount: 1000,
+      amount: 2000,
       description: "DDG TEST 001",
     });
 
     expect(payload.startsWith("000201010212")).toBe(true);
     expect(payload).toContain("A000000727");
-    expect(payload).toContain("54041000");
+    expect(payload).toContain("54042000");
     expect(payload).toMatch(/6304[0-9A-F]{4}$/);
   });
 
@@ -79,13 +79,13 @@ describe("PayOS Payment Integration Unit Tests", () => {
     const sampleQr = buildVietQrPayload({
       bankBin: "970422",
       accountNumber: "0123456789",
-      amount: 1000,
+      amount: 2000,
       description: "DDG ORDER1",
     });
 
     const parsed = await parseStoredPayOSQrAttempt({
       status: "PENDING",
-      amountVnd: 1000,
+      amountVnd: 2000,
       providerRef: "1762900000123",
       rawSafeMetadata: JSON.stringify({
         orderCode: 1762900000123,
@@ -94,7 +94,7 @@ describe("PayOS Payment Integration Unit Tests", () => {
         bin: "970422",
         accountNumber: "0123456789",
         accountName: "CONG TY CP DING DONG GIFT VN",
-        amount: 1000,
+        amount: 2000,
         description: "DDG ORDER1",
       }),
     });
@@ -157,7 +157,7 @@ describe("PayOS Payment Integration Unit Tests", () => {
         data: {
           buyerId: user.id,
           orderNumber: `ORD_UNL_${suffix}`,
-          totalVnd: 1000,
+          totalVnd: 2000,
           currency: "VND",
           status: "PAID",
           purpose: "gift_unlock",
@@ -294,7 +294,7 @@ describe("PayOS Payment Integration Unit Tests", () => {
         data: {
           buyerId: user.id,
           orderNumber: `ORD_WH_${suffix}`,
-          totalVnd: 1000,
+          totalVnd: 2000,
           currency: "VND",
           status: "PENDING_PAYMENT",
           purpose: "image_credits",
@@ -303,7 +303,7 @@ describe("PayOS Payment Integration Unit Tests", () => {
             create: {
               provider: "payos",
               providerRef: String(orderCode),
-              amountVnd: 1000,
+              amountVnd: 2000,
               status: "PENDING",
             },
           },
@@ -313,7 +313,7 @@ describe("PayOS Payment Integration Unit Tests", () => {
       const payos = getPayOSClient()!;
       const webhookData = {
         orderCode,
-        amount: 1000,
+        amount: 2000,
         description: `DDG ${order.orderNumber}`,
         accountNumber: "0123456789",
         reference: webhookRef,
