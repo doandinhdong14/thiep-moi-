@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Gift, X, Copy, Check, CheckCircle2, Sparkles, ExternalLink } from "lucide-react";
+import { X, Copy, Check, CheckCircle2, Sparkles, ExternalLink } from "lucide-react";
+import { BrandMark } from "@/components/common/BrandLogo";
 import ModalShell from "./ModalShell";
 import { VOUCHER_CAMPAIGN } from "@/data/catalogData";
 
@@ -49,9 +50,7 @@ export default function VoucherModal({ isOpen, onClose }: VoucherModalProps) {
         {/* Header Panel */}
         <div className="sticky top-0 z-10 flex items-center justify-between px-6 py-4 bg-[#ffedf0] border-b border-rose-100 shrink-0">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#ff6b61] to-[#fa416a] flex items-center justify-center text-white shadow-xs">
-              <Gift className="w-5 h-5 fill-white" />
-            </div>
+            <BrandMark size="sm" surface="white-card" />
             <div>
               <h2
                 id="voucher-modal-title"

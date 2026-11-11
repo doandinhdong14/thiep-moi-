@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Heart, Gift, AlertTriangle, Sparkles, Check } from "lucide-react";
+import { Heart, Gift, AlertTriangle, Check } from "lucide-react";
+import { BrandMark } from "@/components/common/BrandLogo";
 import { TemplateTheme } from "@/lib/templates/registry";
 
 interface FooterCtaBlockProps {
@@ -101,8 +102,8 @@ export default function FooterCtaBlock({
           <AlertTriangle className="w-3 h-3" />
           <span>Báo cáo nội dung lạm dụng / vi phạm</span>
         </Link>
-        <Link href="/" className="hover:underline text-slate-500 flex items-center gap-1">
-          <Sparkles className="w-3 h-3 text-rose-500" />
+        <Link href="/" className="hover:underline text-slate-500 flex items-center gap-1.5">
+          <BrandMark size="xs" alt="" className="w-4 h-4" />
           <span>Tạo thiệp tương tác miễn phí với Ding Dong Gift</span>
         </Link>
       </div>

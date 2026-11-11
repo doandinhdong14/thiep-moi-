@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  Shield,
   Users,
   CreditCard,
   Store,
@@ -13,6 +12,7 @@ import {
   ArrowLeft,
   Activity,
 } from "lucide-react";
+import { BrandMark } from "@/components/common/BrandLogo";
 
 export default function AdminHeader() {
   const pathname = usePathname();
@@ -41,9 +41,7 @@ export default function AdminHeader() {
             </Link>
             <div className="h-4 w-px bg-slate-200 hidden sm:block" />
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-amber-500 to-rose-600 text-white flex items-center justify-center shadow-xs">
-                <Shield className="w-4 h-4" />
-              </div>
+              <BrandMark size="sm" surface="white-card" className="w-7 h-7 p-1 rounded-lg" />
               <span className="font-serif font-bold text-slate-800 text-sm hidden md:inline">
                 Admin Portal
               </span>

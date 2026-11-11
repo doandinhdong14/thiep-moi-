@@ -1,6 +1,7 @@
 "use client";
 
-import { X, Heart, ExternalLink, Sparkles } from "lucide-react";
+import { X, ExternalLink, Sparkles } from "lucide-react";
+import { BrandMark } from "@/components/common/BrandLogo";
 
 interface FollowPromptModalProps {
   isOpen: boolean;
@@ -18,15 +19,12 @@ export default function FollowPromptModal({
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in">
       <div className="bg-white rounded-3xl max-w-sm w-full p-6 text-center space-y-4 shadow-2xl border border-slate-100">
-        {/* Cute Avatar Badge */}
+        {/* Brand Avatar Badge */}
         <div className="relative w-20 h-20 mx-auto">
           <div className="w-full h-full rounded-3xl bg-gradient-to-tr from-rose-500 to-amber-400 p-1 shadow-lg shadow-rose-200">
-            <div className="w-full h-full rounded-[22px] bg-white flex items-center justify-center text-3xl">
-              🐱
+            <div className="w-full h-full rounded-[22px] bg-white flex items-center justify-center p-3">
+              <BrandMark size="lg" alt="Ding Dong Gift" />
             </div>
-          </div>
-          <div className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-rose-600 text-white flex items-center justify-center text-xs shadow-md">
-            ❤️
           </div>
         </div>
 

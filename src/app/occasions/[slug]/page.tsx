@@ -2,7 +2,10 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import prisma from "@/lib/prisma";
 import { TEMPLATES_REGISTRY } from "@/lib/templates/registry";
-import { Sparkles, ArrowRight, CheckCircle2 } from "lucide-react";
+import { templateMetaToProductItem } from "@/data/landingData";
+import ProductShowcaseCard from "@/components/landing/ProductShowcaseCard";
+import styles from "@/components/landing/ProductShowcase.module.css";
+import { Sparkles } from "lucide-react";
 
 export default async function OccasionDetailPage({
   params,
@@ -25,7 +28,7 @@ export default async function OccasionDetailPage({
 
   return (
     <div className="flex-1 bg-slate-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-6xl mx-auto space-y-12">
+      <div className="max-w-[1320px] mx-auto space-y-12">
         <div className="text-center max-w-3xl mx-auto space-y-4">
           <Link
             href="/occasions"
@@ -50,61 +53,17 @@ export default async function OccasionDetailPage({
             Mẫu thiệp dành riêng cho {occasion.title} ({matchingTemplates.length} mẫu)
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {matchingTemplates.map((tpl) => (
-              <div
+          <div className={styles.showcaseGrid}>
+            {matchingTemplates.map((tpl, index) => (
+              <ProductShowcaseCard
                 key={tpl.slug}
-                className="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden flex flex-col hover:shadow-xl transition-all"
-              >
-                <div
-                  className="p-8 text-center relative"
-                  style={{
-                    backgroundColor: tpl.theme.background,
-                    color: tpl.theme.foreground,
-                  }}
-                >
-                  <span
-                    className="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-4 border"
-                    style={{
-                      backgroundColor: `${tpl.theme.accent}20`,
-                      borderColor: tpl.theme.accent,
-                      color: tpl.theme.accent,
-                    }}
-                  >
-                    {tpl.theme.style}
-                  </span>
-                  <h3 className="text-2xl font-serif font-bold mb-2">{tpl.title}</h3>
-                  <p className="text-xs max-w-md mx-auto opacity-75">{tpl.description}</p>
-                </div>
-
-                <div className="p-6 flex-1 flex flex-col justify-between space-y-6">
-                  <div className="space-y-2 text-xs text-slate-600">
-                    <p className="font-semibold text-slate-800">Các khối tính năng tích hợp:</p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {tpl.blocks.map((b) => (
-                        <span key={b} className="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700">
-                          {b}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-3 pt-4 border-t border-slate-100">
-                    <Link
-                      href={`/templates/${tpl.slug}`}
-                      className="flex-1 py-2.5 text-center text-xs font-semibold text-slate-700 border border-slate-200 rounded-full hover:bg-slate-50 transition-colors"
-                    >
-                      Xem bản Demo sống
-                    </Link>
-                    <Link
-                      href={`/create?template=${tpl.slug}`}
-                      className="flex-1 py-2.5 text-center text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-full shadow-sm transition-all hover:scale-105"
-                    >
-                      Dùng mẫu này
-                    </Link>
-                  </div>
-                </div>
-              </div>
+                product={templateMetaToProductItem(tpl)}
+                index={index}
+                primaryLabel="Dùng mẫu này"
+                showGuideLinks={false}
+                showPrice={false}
+                subtitleText={tpl.theme.style}
+              />
             ))}
           </div>
         </div>

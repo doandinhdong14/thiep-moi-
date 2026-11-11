@@ -4,7 +4,7 @@ import prisma from "@/lib/prisma";
 import { getCurrentUser, createSession } from "@/lib/auth/session";
 import { apiSuccess, apiError, handleApiError } from "@/lib/api/response";
 import { logAudit } from "@/lib/audit";
-import { CATALOG_PRODUCTS } from "@/data/catalogData";
+import { CATALOG_PRODUCTS, TEST_PRODUCT_PRICE_VND } from "@/data/catalogData";
 
 const CreateOrderSchema = z.object({
   purpose: z.enum([
@@ -87,16 +87,16 @@ export async function POST(req: NextRequest) {
           const catalogItem = CATALOG_PRODUCTS.find(
             (p) => p.slug === inv.templateVersion.template.slug
           );
-          unitPriceVnd = catalogItem?.price || 49000;
+          unitPriceVnd = catalogItem?.price ?? TEST_PRODUCT_PRICE_VND;
           titleSnapshot = `Mở khóa thiệp: ${inv.title}`;
           referenceId = inv.id;
         }
       }
-      totalVnd = unitPriceVnd || 49000;
+      totalVnd = unitPriceVnd || TEST_PRODUCT_PRICE_VND;
       productType = "GIFT_UNLOCK";
     } else {
-      unitPriceVnd = 49000;
-      totalVnd = 49000;
+      unitPriceVnd = TEST_PRODUCT_PRICE_VND;
+      totalVnd = TEST_PRODUCT_PRICE_VND;
     }
 
     const randomSuffix = Math.random().toString(36).substring(2, 6).toUpperCase();

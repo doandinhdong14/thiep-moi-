@@ -3,7 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Sparkles, Loader2, AlertCircle } from "lucide-react";
+import { Loader2, AlertCircle } from "lucide-react";
+import { BrandMark } from "@/components/common/BrandLogo";
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -56,9 +57,7 @@ export default function SignUpPage() {
     <div className="flex-1 flex items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
       <div className="w-full max-w-md space-y-8 bg-white p-8 rounded-2xl shadow-xl shadow-rose-100/50 border border-rose-100">
         <div className="text-center">
-          <div className="mx-auto w-12 h-12 rounded-xl bg-gradient-to-tr from-rose-500 to-amber-400 flex items-center justify-center text-white shadow-md shadow-rose-200">
-            <Sparkles className="w-6 h-6" />
-          </div>
+          <BrandMark size="lg" surface="white-card" className="mx-auto shadow-md shadow-rose-100" />
           <h2 className="mt-4 text-2xl font-serif font-bold text-slate-900">Tạo tài khoản Ding Dong Gift</h2>
           <p className="mt-2 text-sm text-slate-500">
             Bắt đầu tạo thiệp mời và lưu giữ khoảnh khắc trong 2 phút

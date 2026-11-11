@@ -1,3 +1,11 @@
+import {
+  CATALOG_PRODUCTS,
+  CatalogProduct,
+  resolveTemplatePreviewImage,
+  TEST_PRODUCT_PRICE_VND,
+} from "./catalogData";
+import type { TemplateMeta } from "@/lib/templates/registry";
+
 export interface SiteConfig {
   brandName: string;
   tagline: string;
@@ -27,6 +35,8 @@ export interface ProductItem {
   slug: string;
   title: string;
   coverUrl: string;
+  previewImage?: string;
+  previewVideo?: string;
   priceVnd: number;
   compareAtPriceVnd?: number;
   demoUrl?: string;
@@ -123,12 +133,45 @@ export const heroSlides: HeroSlide[] = [
   },
 ];
 
-export const productList: ProductItem[] = [
+export function catalogProductToProductItem(item: CatalogProduct): ProductItem {
+  return {
+    id: item.id,
+    slug: item.slug,
+    title: item.title,
+    coverUrl: item.coverImage,
+    previewImage: item.previewImage || resolveTemplatePreviewImage(item.slug, item.demoUrl),
+    previewVideo: item.previewVideo,
+    priceVnd: item.price,
+    compareAtPriceVnd: item.compareAtPrice,
+    demoUrl: item.demoUrl,
+    guideUrl: item.guideUrl,
+    videoGuideUrl: item.videoGuideUrl,
+    category: item.category,
+    badge: item.badge,
+  };
+}
+
+export function templateMetaToProductItem(tpl: TemplateMeta): ProductItem {
+  return {
+    id: `tpl-${tpl.slug}`,
+    slug: tpl.slug,
+    title: tpl.title,
+    coverUrl: "",
+    previewImage: resolveTemplatePreviewImage(tpl.slug),
+    priceVnd: TEST_PRODUCT_PRICE_VND,
+    demoUrl: `/templates/${tpl.slug}`,
+    category: tpl.occasionTitle,
+    badge: tpl.isPremium ? "PREMIUM" : tpl.badge,
+  };
+}
+
+const CORE_LANDING_PRODUCTS: ProductItem[] = [
   {
     id: "prod-1",
     slug: "wedding-classic",
     title: "Thiệp Cưới Hoàng Gia Ivory Gold",
     coverUrl: "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=600&q=80",
+    previewImage: "/previews/wedding-classic.webp",
     priceVnd: 49000,
     compareAtPriceVnd: 99000,
     demoUrl: "/templates/wedding-classic",
@@ -141,6 +184,7 @@ export const productList: ProductItem[] = [
     slug: "wedding-floral",
     title: "Bloom & Vows — Lãng Mạn Hoa Pastel",
     coverUrl: "https://images.unsplash.com/photo-1520854221256-17451cc331bf?auto=format&fit=crop&w=600&q=80",
+    previewImage: "/previews/wedding-floral.webp",
     priceVnd: 49000,
     compareAtPriceVnd: 89000,
     demoUrl: "/templates/wedding-floral",
@@ -153,6 +197,7 @@ export const productList: ProductItem[] = [
     slug: "love-letter",
     title: "Secret Letter — Thư Tay Phong Bì Ảo",
     coverUrl: "https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=600&q=80",
+    previewImage: "/previews/love-letter.webp",
     priceVnd: 39000,
     compareAtPriceVnd: 69000,
     demoUrl: "/templates/love-letter",
@@ -165,6 +210,7 @@ export const productList: ProductItem[] = [
     slug: "love-galaxy",
     title: "Vũ trụ yêu thương - Mưa Lời Yêu Thương",
     coverUrl: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80",
+    previewImage: "/previews/love-galaxy.webp",
     priceVnd: 0,
     compareAtPriceVnd: 49000,
     demoUrl: "/templates/love-galaxy",
@@ -177,6 +223,7 @@ export const productList: ProductItem[] = [
     slug: "birthday-fun",
     title: "Confetti Pop — Sinh Nhật Rộn Rã Niềm Vui",
     coverUrl: "https://images.unsplash.com/photo-1530103862676-de8c9debad1d?auto=format&fit=crop&w=600&q=80",
+    previewImage: "/previews/birthday-fun.webp",
     priceVnd: 39000,
     compareAtPriceVnd: 79000,
     demoUrl: "/templates/birthday-fun",
@@ -189,6 +236,7 @@ export const productList: ProductItem[] = [
     slug: "birthday-minimal",
     title: "Candlelight — Ấm Cúng & Tối Giản",
     coverUrl: "https://images.unsplash.com/photo-1513151233558-d860c5398176?auto=format&fit=crop&w=600&q=80",
+    previewImage: "/previews/birthday-minimal.webp",
     priceVnd: 49000,
     compareAtPriceVnd: 89000,
     demoUrl: "/templates/birthday-minimal",
@@ -201,6 +249,7 @@ export const productList: ProductItem[] = [
     slug: "graduation-classic",
     title: "The Next Chapter — Lễ Tốt Nghiệp Trang Trọng",
     coverUrl: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=600&q=80",
+    previewImage: "/previews/graduation-classic.webp",
     priceVnd: 39000,
     compareAtPriceVnd: 69000,
     demoUrl: "/templates/graduation-classic",
@@ -213,6 +262,7 @@ export const productList: ProductItem[] = [
     slug: "graduation-playful",
     title: "Grad Party! — Tươi Trẻ & Pháo Giấy Rực Rỡ",
     coverUrl: "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=600&q=80",
+    previewImage: "/previews/graduation-playful.webp",
     priceVnd: 39000,
     compareAtPriceVnd: 69000,
     demoUrl: "/templates/graduation-playful",
@@ -221,6 +271,23 @@ export const productList: ProductItem[] = [
     category: "Tốt nghiệp",
   },
 ];
+
+const CORE_PRODUCT_SLUGS = new Set(CORE_LANDING_PRODUCTS.map((p) => p.slug));
+
+// Include all interactive and occasion templates from CATALOG_PRODUCTS after the 8 core items
+// so each 12-card page forms full balanced rows across desktop (4 cols), tablet (3 cols), and mobile (2 cols).
+const EXTRA_LANDING_PRODUCTS: ProductItem[] = CATALOG_PRODUCTS.filter(
+  (item) => !CORE_PRODUCT_SLUGS.has(item.slug)
+)
+  .slice(0, 16)
+  .map(catalogProductToProductItem);
+
+export const productList: ProductItem[] = [...CORE_LANDING_PRODUCTS, ...EXTRA_LANDING_PRODUCTS].map(
+  (item) => ({
+    ...item,
+    priceVnd: TEST_PRODUCT_PRICE_VND,
+  })
+);
 
 export const topicChips: { label: string; href: string }[] = [
   { label: "QR tình yêu", href: "/occasions/love-confession" },

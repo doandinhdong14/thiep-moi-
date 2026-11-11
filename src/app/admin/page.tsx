@@ -2,7 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import prisma from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth/session";
-import { CreditCard, Users, Store, Shield, Gift, Share2, Activity, ArrowRight, UserCheck } from "lucide-react";
+import { CreditCard, Users, Store, Gift, Share2, Activity, ArrowRight, UserCheck } from "lucide-react";
+import { BrandMark } from "@/components/common/BrandLogo";
 
 export const dynamic = "force-dynamic";
 
@@ -69,8 +70,8 @@ export default async function AdminPortalPage() {
         <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-3xl p-8 text-white shadow-xl relative overflow-hidden">
           <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-radial from-rose-500/10 to-transparent pointer-events-none" />
           <div className="relative z-10 space-y-3">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-400/20 text-amber-300 text-xs font-semibold backdrop-blur-xs border border-amber-400/30">
-              <Shield className="w-3.5 h-3.5" />
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-400/20 text-amber-300 text-xs font-semibold backdrop-blur-xs border border-amber-400/30">
+              <BrandMark size="xs" surface="pill" alt="" />
               <span>Admin Control Center • Ding Dong Gift</span>
             </div>
             <h1 className="text-3xl sm:text-4xl font-serif font-bold tracking-tight">

@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import ProductCard from "./ProductCard";
 import { CatalogProduct } from "@/data/catalogData";
+import styles from "@/components/landing/ProductShowcase.module.css";
 
 interface ProductGridProps {
   products: CatalogProduct[];
@@ -14,34 +15,50 @@ interface ProductGridProps {
 export default function ProductGrid({
   products,
   onOpenDemo,
-  itemsPerPage = 9,
+  itemsPerPage = 12,
 }: ProductGridProps) {
+  const gridRef = useRef<HTMLDivElement>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const totalPages = Math.ceil(products.length / itemsPerPage);
+  const totalPages = Math.max(1, Math.ceil(products.length / itemsPerPage));
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [products]);
 
   const displayedProducts = products.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
+  const handlePageChange = (nextPage: number) => {
+    setCurrentPage(nextPage);
+    if (gridRef.current && typeof window !== "undefined") {
+      const targetTop = Math.max(
+        0,
+        window.scrollY + gridRef.current.getBoundingClientRect().top - 96
+      );
+      window.scrollTo({ top: targetTop, behavior: "smooth" });
+    }
+  };
+
   return (
     <div className="w-full flex flex-col items-center">
-      {/* 3-Column Desktop Grid Centered to ~960px */}
-      <div className="w-full max-w-[960px] mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-9 sm:gap-y-10">
-        {displayedProducts.map((product) => (
+      <div ref={gridRef} className={styles.showcaseGrid}>
+        {displayedProducts.map((product, index) => (
           <ProductCard
             key={product.id}
             product={product}
+            index={index}
             onOpenDemo={onOpenDemo}
           />
         ))}
       </div>
 
-      {/* Pagination (if more than 1 page) */}
       {totalPages > 1 && (
         <div className="flex items-center justify-center gap-3 mt-12">
           <button
-            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+            type="button"
+            onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
             disabled={currentPage === 1}
             aria-label="Trang trước"
             className={`w-9 h-9 rounded-full flex items-center justify-center border transition-all ${
@@ -58,7 +75,8 @@ export default function ProductGrid({
           </span>
 
           <button
-            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+            type="button"
+            onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
             disabled={currentPage === totalPages}
             aria-label="Trang tiếp theo"
             className={`w-9 h-9 rounded-full flex items-center justify-center border transition-all ${
@@ -74,4 +92,3 @@ export default function ProductGrid({
     </div>
   );
 }
-

@@ -34,10 +34,10 @@ export async function POST(
       return apiError("Bạn không có quyền mở khóa thiệp mời này.", "FORBIDDEN", 403);
     }
 
-    // Verify template price: if template is free (0đ) or user has active entitlement
+    // Verify template price: free only when catalog price is 0 (or fallback non-premium template)
     const templateSlug = inv.templateVersion.template.slug;
     const catalogItem = CATALOG_PRODUCTS.find((p) => p.slug === templateSlug);
-    const isFree = !catalogItem || catalogItem.price === 0 || !inv.templateVersion.template.isPremium;
+    const isFree = catalogItem ? catalogItem.price === 0 : !inv.templateVersion.template.isPremium;
 
     if (!isFree && inv.status !== "PUBLISHED") {
       // Must check if user paid or has entitlement

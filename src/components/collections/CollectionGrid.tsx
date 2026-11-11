@@ -2,6 +2,7 @@
 
 import CollectionCard from "./CollectionCard";
 import { CollectionItem } from "@/data/catalogData";
+import styles from "@/components/landing/ProductShowcase.module.css";
 
 interface CollectionGridProps {
   collections: CollectionItem[];
@@ -9,11 +10,10 @@ interface CollectionGridProps {
 
 export default function CollectionGrid({ collections }: CollectionGridProps) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
-      {collections.map((item) => (
-        <CollectionCard key={item.id} collection={item} />
+    <div className={styles.showcaseGrid}>
+      {collections.map((item, index) => (
+        <CollectionCard key={item.id} collection={item} index={index} />
       ))}
     </div>
   );
 }
-

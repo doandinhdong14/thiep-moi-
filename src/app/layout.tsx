@@ -9,6 +9,15 @@ export const metadata: Metadata = {
   title: "Ding Dong Gift — Nền tảng tạo thiệp / Mini Website / QR Card tinh tế",
   description:
     "Tạo mini website thiệp mời đám cưới, sinh nhật, tốt nghiệp, tỏ tình tương tác và kết hợp thẻ QR vật lý, hoa quà tặng trong vài phút.",
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/brand/icon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/brand/icon-192.png", sizes: "192x192", type: "image/png" },
+    ],
+    shortcut: "/favicon.ico",
+    apple: "/brand/apple-touch-icon.png",
+  },
 };
 
 export default function RootLayout({

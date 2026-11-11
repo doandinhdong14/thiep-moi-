@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, useCallback } from "react";
 import {
-  Heart,
   Home,
   LayoutGrid,
   Sparkles,
@@ -22,6 +21,7 @@ import {
   Store,
   Settings,
 } from "lucide-react";
+import { BrandLogo } from "@/components/common/BrandLogo";
 import VoucherModal from "@/components/landing/VoucherModal";
 
 interface UserProfile {
@@ -92,14 +92,7 @@ export default function Navbar() {
         <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 h-full">
           <div className="flex items-center justify-between h-full">
             {/* 1. Left Zone: Brand Logo */}
-            <Link href="/" className="flex items-center gap-2.5 group shrink-0">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#ff6b61] to-[#fa416a] flex items-center justify-center text-white shadow-md shadow-rose-200 group-hover:scale-105 transition-transform">
-                <Heart className="w-5 h-5 fill-white" />
-              </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-[#ff6b61] to-[#fa416a] bg-clip-text text-transparent tracking-tight">
-                Ding Dong Gift
-              </span>
-            </Link>
+            <BrandLogo size="md" theme="light" />
 
             {/* 2. Middle Zone: Navigation */}
             <nav className="hidden lg:flex items-center gap-1 xl:gap-2 h-full text-[14px] font-medium text-slate-700">
@@ -237,8 +230,8 @@ export default function Navbar() {
                   href={item.href}
                   onClick={() => setMobileMenuOpen(false)}
                   className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${item.active
-                      ? "bg-rose-50 text-[#fa416a] font-semibold"
-                      : "text-slate-700 hover:bg-slate-50 hover:text-[#fa416a]"
+                    ? "bg-rose-50 text-[#fa416a] font-semibold"
+                    : "text-slate-700 hover:bg-slate-50 hover:text-[#fa416a]"
                     }`}
                 >
                   <IconComp className="w-4 h-4 text-slate-500" />

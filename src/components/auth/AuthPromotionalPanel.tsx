@@ -1,6 +1,6 @@
 "use client";
 
-import { Heart } from "lucide-react";
+import { BrandMark } from "@/components/common/BrandLogo";
 
 export default function AuthPromotionalPanel() {
   return (
@@ -18,9 +18,7 @@ export default function AuthPromotionalPanel() {
       {/* Top Left: Ding Dong Gift Pill Badge with Logo */}
       <div className="relative z-10 self-start">
         <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/95 backdrop-blur-md text-slate-900 shadow-md">
-          <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-[#ff6b61] to-[#fa416a] flex items-center justify-center text-white shrink-0 shadow-xs">
-            <Heart className="w-3 h-3 fill-white" />
-          </div>
+          <BrandMark size="xs" alt="" />
           <span className="text-xs font-bold tracking-tight text-slate-900">
             Ding Dong Gift
           </span>

@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Mail, Lock, Eye, EyeOff, Loader2, AlertCircle, Info } from "lucide-react";
+import { BrandLogo } from "@/components/common/BrandLogo";
 
 export default function LoginForm() {
   const router = useRouter();
@@ -83,6 +84,10 @@ export default function LoginForm() {
 
   return (
     <div className="w-full md:w-1/2 p-6 sm:p-10 flex flex-col justify-center bg-white">
+      <div className="mb-4 md:hidden">
+        <BrandLogo size="sm" theme="light" />
+      </div>
+
       {/* Heading & Subtitle */}
       <div className="mb-6">
         <h1 className="text-2xl sm:text-[24px] font-bold text-slate-900 tracking-tight">

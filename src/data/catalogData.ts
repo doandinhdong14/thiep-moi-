@@ -3,6 +3,9 @@ export interface CatalogProduct {
   slug: string;
   title: string;
   coverImage: string;
+  previewImage?: string;
+  previewVideo?: string;
+  badge?: string;
   price: number;
   compareAtPrice?: number;
   category: string;
@@ -34,6 +37,7 @@ export interface CollectionItem {
   title: string;
   subtitle: string;
   image: string;
+  previewImage?: string;
   iconName: string;
   productCount: number;
   categorySlug: string;
@@ -73,7 +77,39 @@ export const CATALOG_CATEGORIES: CatalogCategory[] = [
   { id: "graduation", slug: "tot-nghiep", title: "Tốt nghiệp", iconName: "GraduationCap" },
 ];
 
-export const CATALOG_PRODUCTS: CatalogProduct[] = [
+export const TEMPLATE_PREVIEW_SLUGS = new Set([
+  "wedding-classic",
+  "wedding-floral",
+  "love-letter",
+  "love-galaxy",
+  "birthday-fun",
+  "birthday-minimal",
+  "graduation-classic",
+  "graduation-playful",
+  "thiep-3",
+  "thiep-4",
+  "thiep-5",
+  "thiep-6",
+  "thiep-7",
+  "thiep-8",
+  "thiep-9",
+  "thiep-10",
+  "thiep-giang-sinh",
+  "thiep-xmas",
+]);
+
+export function resolveTemplatePreviewImage(slug?: string, demoUrl?: string): string | undefined {
+  if (slug && TEMPLATE_PREVIEW_SLUGS.has(slug)) {
+    return `/previews/${slug}.webp`;
+  }
+  const demoSlug = demoUrl?.replace(/^\/templates\//, "").split("?")[0];
+  if (demoSlug && TEMPLATE_PREVIEW_SLUGS.has(demoSlug)) {
+    return `/previews/${demoSlug}.webp`;
+  }
+  return undefined;
+}
+
+const RAW_CATALOG_PRODUCTS: CatalogProduct[] = [
   // 10 Mẫu Thiệp Tương Tác Độc Bản
   {
     id: "prod-thiep-3",
@@ -662,6 +698,26 @@ export const CATALOG_PRODUCTS: CatalogProduct[] = [
   },
 ];
 
+export const TEST_PRODUCT_PRICE_VND = 1000;
+
+export const CATALOG_PRODUCTS: CatalogProduct[] = RAW_CATALOG_PRODUCTS.map((item) => {
+  const price = TEST_PRODUCT_PRICE_VND;
+  const compareAtPrice =
+    item.compareAtPrice && item.compareAtPrice > price
+      ? item.compareAtPrice
+      : item.price > price
+      ? item.price
+      : 49000;
+
+  return {
+    ...item,
+    price,
+    compareAtPrice,
+    previewImage: item.previewImage || resolveTemplatePreviewImage(item.slug, item.demoUrl),
+    badge: item.slug.startsWith("thiep-") ? "Tương tác 3D" : item.badge,
+  };
+});
+
 export const COLLECTIONS_LIST: CollectionItem[] = [
   {
     id: "col-1",
@@ -669,6 +725,7 @@ export const COLLECTIONS_LIST: CollectionItem[] = [
     title: "Sinh Nhật Rực Rỡ",
     subtitle: "Pháo hoa, nến sinh nhật và thiệp mời tương tác cho mọi lứa tuổi",
     image: "https://images.unsplash.com/photo-1530103862676-de8c9debad1d?auto=format&fit=crop&w=800&q=80",
+    previewImage: "/previews/birthday-fun.webp",
     iconName: "Cake",
     productCount: 3,
     categorySlug: "sinh-nhat",
@@ -679,6 +736,7 @@ export const COLLECTIONS_LIST: CollectionItem[] = [
     title: "Tết Trung Thu Đoàn Viên",
     subtitle: "Đèn lồng lung linh, trăng rằm ấm áp và lời chúc sum vầy",
     image: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=800&q=80",
+    previewImage: "/previews/love-galaxy.webp",
     iconName: "Moon",
     productCount: 2,
     categorySlug: "trung-thu",
@@ -689,6 +747,7 @@ export const COLLECTIONS_LIST: CollectionItem[] = [
     title: "Hẹn Hò & Lời Ngỏ Ý",
     subtitle: "Tạo dấu ấn khó phai cho buổi hẹn đầu và bữa tối lãng mạn",
     image: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=800&q=80",
+    previewImage: "/previews/thiep-3.webp",
     iconName: "HeartHandshake",
     productCount: 2,
     categorySlug: "hen-ho",
@@ -699,6 +758,7 @@ export const COLLECTIONS_LIST: CollectionItem[] = [
     title: "Kỷ Niệm Ngày Yêu",
     subtitle: "Dòng thời gian tình yêu, thư tay ảo và những cột mốc ngọt ngào",
     image: "https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=800&q=80",
+    previewImage: "/previews/thiep-5.webp",
     iconName: "Sparkles",
     productCount: 2,
     categorySlug: "ky-niem",
@@ -709,6 +769,7 @@ export const COLLECTIONS_LIST: CollectionItem[] = [
     title: "Valentine & Tình Yêu",
     subtitle: "Trái tim QR 3D, bầu trời sao và hộp quà tình cảm chân thành",
     image: "https://images.unsplash.com/photo-1518895949257-7621c3c786d7?auto=format&fit=crop&w=800&q=80",
+    previewImage: "/previews/thiep-8.webp",
     iconName: "Heart",
     productCount: 2,
     categorySlug: "valentine",
@@ -719,6 +780,7 @@ export const COLLECTIONS_LIST: CollectionItem[] = [
     title: "Quà Tặng 8/3",
     subtitle: "Thiệp hoa pastel tinh tế và thông điệp gửi trọn lòng trân quý",
     image: "https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=800&q=80",
+    previewImage: "/previews/wedding-floral.webp",
     iconName: "Gift",
     productCount: 1,
     categorySlug: "qua-8-3",
@@ -729,6 +791,7 @@ export const COLLECTIONS_LIST: CollectionItem[] = [
     title: "Tri Ân 20/10",
     subtitle: "Nét đẹp truyền thống và lòng biết ơn tới người phụ nữ Việt Nam",
     image: "https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&w=800&q=80",
+    previewImage: "/previews/love-letter.webp",
     iconName: "Flower2",
     productCount: 1,
     categorySlug: "qua-20-10",
@@ -739,6 +802,7 @@ export const COLLECTIONS_LIST: CollectionItem[] = [
     title: "Cưới & Đính Hôn",
     subtitle: "Thiệp cưới hoàng gia, đếm ngược ngày chung đôi và RSVP thông minh",
     image: "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80",
+    previewImage: "/previews/wedding-classic.webp",
     iconName: "Crown",
     productCount: 2,
     categorySlug: "cuoi-dinh-hon",
@@ -749,6 +813,7 @@ export const COLLECTIONS_LIST: CollectionItem[] = [
     title: "Lễ Tốt Nghiệp",
     subtitle: "Đánh dấu cột mốc thanh xuân, gửi lời mời trang trọng tới thầy cô & bạn bè",
     image: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=800&q=80",
+    previewImage: "/previews/graduation-classic.webp",
     iconName: "GraduationCap",
     productCount: 2,
     categorySlug: "tot-nghiep",

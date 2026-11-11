@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { X, Eye, Pencil, Loader2 } from "lucide-react";
+import { BrandMark } from "@/components/common/BrandLogo";
 import ModalShell from "./ModalShell";
 import { CatalogProduct } from "@/data/catalogData";
 import { generateQrDataUrl } from "@/lib/qr";
@@ -266,8 +267,8 @@ export default function ProductDemoModal({
                         className="w-full h-full object-contain filter drop-shadow-[0_0_8px_rgba(255,42,95,0.6)]"
                       />
                       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                        <div className="w-5 h-5 rounded-full bg-[#0a0a0f] flex items-center justify-center">
-                          <span className="text-[10px] filter drop-shadow-[0_0_3px_#ff2a5f]">❤️</span>
+                        <div className="w-5 h-5 rounded-full bg-white p-0.5 flex items-center justify-center shadow-xs">
+                          <BrandMark size="xs" alt="" className="w-3.5 h-3.5" />
                         </div>
                       </div>
                     </div>
@@ -278,7 +279,10 @@ export default function ProductDemoModal({
                   )}
                 </div>
 
-                <span className="text-[10px] text-slate-400 font-mono mb-0.5 select-none">Ding Dong Gift</span>
+                <div className="inline-flex items-center gap-1.5 mb-0.5 select-none">
+                  <BrandMark size="xs" surface="pill" alt="" className="w-4 h-4 p-0.5" />
+                  <span className="text-[10px] text-slate-400 font-mono">Ding Dong Gift</span>
+                </div>
               </div>
 
               <p className="text-[11px] text-slate-500 mt-2.5 font-medium text-center">

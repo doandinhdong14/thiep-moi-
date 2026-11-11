@@ -10,6 +10,7 @@ import {
   Phone,
   CheckCircle,
 } from "lucide-react";
+import { BrandLogo } from "@/components/common/BrandLogo";
 
 export default function Footer() {
   const [subscribed, setSubscribed] = useState(false);
@@ -33,12 +34,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-6 mb-12">
           {/* Column 1: Brand intro */}
           <div className="lg:col-span-1 space-y-3.5">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-[#ff6b61] to-[#fa416a] flex items-center justify-center text-white">
-                <Heart className="w-4 h-4 fill-white" />
-              </div>
-              <span className="text-lg font-bold text-white tracking-tight">Ding Dong Gift</span>
-            </Link>
+            <BrandLogo size="sm" theme="dark" />
 
             <p className="text-xs text-slate-400 leading-relaxed">
               Nền tảng thiệp mời thông minh, mini website tương tác & thẻ QR in ấn tinh tế cho mọi khoảnh khắc đáng nhớ nhất.

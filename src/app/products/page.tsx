@@ -69,7 +69,7 @@ function ProductsContent() {
       </div>
 
       {/* 3. Catalog Grid: ~70–80px below tab strip */}
-      <div className="max-w-[1180px] mx-auto px-4 mt-16 sm:mt-20">
+      <div className="max-w-[1320px] mx-auto px-4 sm:px-6 mt-14 sm:mt-16">
         {loading ? (
           <LoadingSkeleton count={6} />
         ) : filteredProducts.length > 0 ? (
