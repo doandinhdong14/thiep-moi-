@@ -14,6 +14,9 @@ describe("PayOS Payment Integration Unit Tests", () => {
   });
 
   it("should initialize PayOS client instance with environment credentials", () => {
+    process.env.PAYOS_CLIENT_ID = process.env.PAYOS_CLIENT_ID || "test-client-id";
+    process.env.PAYOS_API_KEY = process.env.PAYOS_API_KEY || "test-api-key";
+    process.env.PAYOS_CHECKSUM_KEY = process.env.PAYOS_CHECKSUM_KEY || "test-checksum-key";
     const client = getPayOSClient();
     expect(client).not.toBeNull();
     expect(client?.paymentRequests).toBeDefined();

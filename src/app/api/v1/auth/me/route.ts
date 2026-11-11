@@ -12,6 +12,12 @@ export async function GET() {
       id: user.id,
       name: user.name,
       email: user.email,
+      image: user.image,
+      status: user.status,
+      locale: user.locale,
+      imageCredits: user.imageCredits,
+      audioCredits: user.audioCredits,
+      createdAt: user.createdAt,
       roles: user.roles,
     },
   });

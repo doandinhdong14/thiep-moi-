@@ -3,7 +3,7 @@ import Link from "next/link";
 import prisma from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth/session";
 import LogoutButton from "@/components/auth/LogoutButton";
-import { PlusCircle, Sparkles, Eye, Users, QrCode, ExternalLink, Edit3, Heart } from "lucide-react";
+import { PlusCircle, Sparkles, Eye, Users, QrCode, ExternalLink, Edit3, Heart, Shield, Store, Coins, Settings } from "lucide-react";
 
 export default async function DashboardPage() {
   const user = await getCurrentUser();
@@ -39,21 +39,71 @@ export default async function DashboardPage() {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-serif font-bold text-slate-900">
-              Chào mừng trở lại, {user.name} 👋
-            </h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-2xl font-serif font-bold text-slate-900">
+                Chào mừng trở lại, {user.name} 👋
+              </h1>
+              {user.roles.includes("ADMIN") && (
+                <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-purple-100 text-purple-800 border border-purple-200">
+                  Admin
+                </span>
+              )}
+            </div>
             <p className="text-sm text-slate-500 mt-1">
               Quản lý các mini website thiệp mời, theo dõi phản hồi khách và liên kết thẻ quà tặng.
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2.5">
+            {/* AI Credits balance chip */}
+            <Link
+              href="/dashboard/account"
+              className="inline-flex items-center gap-1.5 px-3 py-2 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200/80 rounded-xl text-xs font-semibold transition-colors"
+              title="Xem số dư AI Credits"
+            >
+              <Coins className="w-3.5 h-3.5 text-amber-600" />
+              <span>{user.imageCredits} 🖼️ / {user.audioCredits} 🎵</span>
+            </Link>
+
+            {/* Account Settings button */}
+            <Link
+              href="/dashboard/account"
+              className="inline-flex items-center gap-1.5 px-3 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-xl text-xs font-medium shadow-xs transition-colors"
+              title="Quản lý hồ sơ và đổi mật khẩu"
+            >
+              <Settings className="w-3.5 h-3.5 text-slate-500" />
+              <span>Tài khoản</span>
+            </Link>
+
+            {/* Fast access for Admin */}
+            {user.roles.includes("ADMIN") && (
+              <Link
+                href="/admin"
+                className="inline-flex items-center gap-1.5 px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-semibold shadow-xs transition-colors"
+              >
+                <Shield className="w-3.5 h-3.5" />
+                <span>Admin Portal</span>
+              </Link>
+            )}
+
+            {/* Fast access for Shop Owner */}
+            {(user.roles.includes("SHOP_OWNER") || user.roles.includes("SHOP_STAFF")) && (
+              <Link
+                href="/shop/dashboard"
+                className="inline-flex items-center gap-1.5 px-3 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-semibold shadow-xs transition-colors"
+              >
+                <Store className="w-3.5 h-3.5" />
+                <span>Kênh Shop</span>
+              </Link>
+            )}
+
             <LogoutButton />
+
             <Link
               href="/create"
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-medium rounded-full shadow-md shadow-rose-200 transition-all hover:scale-[1.02]"
+              className="inline-flex items-center gap-2 px-5 py-2 bg-rose-600 hover:bg-rose-700 text-white font-medium text-xs rounded-xl shadow-md shadow-rose-200 transition-all hover:scale-[1.02]"
             >
-              <PlusCircle className="w-5 h-5" />
+              <PlusCircle className="w-4 h-4" />
               <span>Tạo thiệp mới</span>
             </Link>
           </div>

@@ -19,6 +19,8 @@ import {
   LogOut,
   Shield,
   PlusCircle,
+  Store,
+  Settings,
 } from "lucide-react";
 import VoucherModal from "@/components/landing/VoucherModal";
 
@@ -134,30 +136,51 @@ export default function Navbar() {
 
               {/* Authentication Actions */}
               {user ? (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5 sm:gap-2">
                   <Link
                     href="/create"
-                    className="flex items-center gap-1.5 px-3.5 py-1.5 bg-gradient-to-r from-[#ff6b61] to-[#fa416a] hover:opacity-95 text-white text-xs font-semibold rounded-md shadow-sm shadow-rose-200 transition-all"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-[#ff6b61] to-[#fa416a] hover:opacity-95 text-white text-xs font-semibold rounded-md shadow-sm shadow-rose-200 transition-all"
                   >
                     <PlusCircle className="w-3.5 h-3.5" />
-                    <span>Tạo thiệp mới</span>
+                    <span className="hidden md:inline">Tạo thiệp mới</span>
                   </Link>
 
                   <Link
                     href="/dashboard"
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-slate-700 hover:text-[#fa416a] text-xs font-medium rounded-md hover:bg-rose-50 transition-colors"
+                    className="flex items-center gap-1.5 px-2.5 py-1.5 text-slate-700 hover:text-[#fa416a] text-xs font-medium rounded-md hover:bg-rose-50 transition-colors"
+                    title="Bảng điều khiển thiệp mời"
                   >
                     <UserIcon className="w-3.5 h-3.5 text-[#fa416a]" />
-                    <span className="max-w-[100px] truncate">{user.name}</span>
+                    <span className="max-w-[90px] truncate">{user.name}</span>
+                  </Link>
+
+                  <Link
+                    href="/dashboard/account"
+                    className="p-1.5 text-slate-500 hover:text-rose-600 rounded-md hover:bg-rose-50 transition-colors"
+                    title="Hồ sơ & Tài khoản"
+                  >
+                    <Settings className="w-3.5 h-3.5" />
                   </Link>
 
                   {user.roles.includes("ADMIN") && (
                     <Link
                       href="/admin"
-                      className="flex items-center gap-1 px-2 py-1 text-[11px] font-semibold bg-amber-100 text-amber-800 rounded hover:bg-amber-200 transition-colors"
+                      className="flex items-center gap-1 px-2 py-1 text-[11px] font-semibold bg-amber-100 text-amber-800 rounded-md hover:bg-amber-200 transition-colors"
+                      title="Trung tâm Quản trị Nền tảng"
                     >
-                      <Shield className="w-3 h-3" />
+                      <Shield className="w-3 h-3 text-amber-700" />
                       <span>Admin</span>
+                    </Link>
+                  )}
+
+                  {(user.roles.includes("SHOP_OWNER") || user.roles.includes("SHOP_STAFF")) && (
+                    <Link
+                      href="/shop/dashboard"
+                      className="flex items-center gap-1 px-2 py-1 text-[11px] font-semibold bg-rose-100 text-rose-800 rounded-md hover:bg-rose-200 transition-colors"
+                      title="Kênh Quản lý Cửa Hàng Shop"
+                    >
+                      <Store className="w-3 h-3 text-rose-700" />
+                      <span>Shop</span>
                     </Link>
                   )}
 
@@ -165,7 +188,7 @@ export default function Navbar() {
                     onClick={handleLogout}
                     title="Đăng xuất"
                     data-testid="logout-btn"
-                    className="p-1.5 text-slate-400 hover:text-[#fa416a] rounded hover:bg-rose-50 transition-colors"
+                    className="p-1.5 text-slate-400 hover:text-[#fa416a] rounded-md hover:bg-rose-50 transition-colors"
                   >
                     <LogOut className="w-3.5 h-3.5" />
                   </button>
@@ -238,13 +261,51 @@ export default function Navbar() {
 
               {user ? (
                 <div className="space-y-1.5 pt-1">
+                  <div className="px-3 py-2 bg-slate-50 rounded-lg">
+                    <p className="text-xs text-slate-500 font-medium">Đã đăng nhập với</p>
+                    <p className="text-sm font-bold text-slate-800 truncate">{user.name}</p>
+                  </div>
                   <Link
                     href="/dashboard"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="block px-3 py-2 text-sm font-medium text-slate-800 hover:bg-rose-50 rounded-lg"
+                    className="block px-3 py-2 text-sm font-medium text-slate-700 hover:bg-rose-50 hover:text-rose-600 rounded-lg"
                   >
-                    Đơn hàng / Dashboard: <span className="font-semibold">{user.name}</span>
+                    Quản lý thiệp mời (Dashboard)
                   </Link>
+                  <Link
+                    href="/dashboard/account"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block px-3 py-2 text-sm font-medium text-slate-700 hover:bg-rose-50 hover:text-rose-600 rounded-lg"
+                  >
+                    Hồ sơ & Tài khoản cá nhân
+                  </Link>
+                  {user.roles.includes("ADMIN") && (
+                    <Link
+                      href="/admin"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="block px-3 py-2 text-sm font-bold text-amber-800 bg-amber-50 hover:bg-amber-100 rounded-lg"
+                    >
+                      🛡️ Trung tâm Quản trị Admin
+                    </Link>
+                  )}
+                  {(user.roles.includes("SHOP_OWNER") || user.roles.includes("SHOP_STAFF")) && (
+                    <Link
+                      href="/shop/dashboard"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="block px-3 py-2 text-sm font-bold text-rose-800 bg-rose-50 hover:bg-rose-100 rounded-lg"
+                    >
+                      🏪 Kênh Cửa Hàng Shop
+                    </Link>
+                  )}
+                  {user.roles.includes("AFFILIATE") && (
+                    <Link
+                      href="/affiliate"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="block px-3 py-2 text-sm font-bold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 rounded-lg"
+                    >
+                      🤝 Cổng Cộng Tác Viên
+                    </Link>
+                  )}
                   <Link
                     href="/create"
                     onClick={() => setMobileMenuOpen(false)}
