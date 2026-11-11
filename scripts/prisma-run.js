@@ -1,7 +1,9 @@
 const { spawnSync } = require("child_process");
+const path = require("path");
 
 try {
-  const prismaBin = require.resolve("prisma/build/index.js");
+  const prismaPkg = require.resolve("prisma/package.json");
+  const prismaBin = path.join(path.dirname(prismaPkg), "build", "index.js");
   const args = process.argv.slice(2);
 
   const res = spawnSync(process.execPath, [prismaBin, ...args], {
