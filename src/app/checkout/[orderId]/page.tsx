@@ -18,7 +18,10 @@ import {
   RefreshCw,
   ShieldCheck,
   Sparkles,
+  ExternalLink,
+  Link2,
 } from "lucide-react";
+import QrDesigner from "@/components/editor/QrDesigner";
 
 interface PayOSQrInfo {
   orderCode: number;
@@ -156,12 +159,19 @@ export default function CheckoutOrderPage() {
     }
   }, [order, payosQr, initializeInAppPayOSQr]);
 
-  // Auto-redirect back to editor/target right after live transition to PAID
+  // Only auto-redirect back for credit top-ups so gift_unlock / gift_renewal stays here showing link + decorated QR
   useEffect(() => {
-    if (order?.status === "PAID" && sawUnpaidRef.current && redirectCountdown === null) {
+    const isCreditTopUp =
+      order?.purpose === "image_credits" || order?.purpose === "audio_credits";
+    if (
+      order?.status === "PAID" &&
+      isCreditTopUp &&
+      sawUnpaidRef.current &&
+      redirectCountdown === null
+    ) {
       setRedirectCountdown(3);
     }
-  }, [order?.status, redirectCountdown]);
+  }, [order?.status, order?.purpose, redirectCountdown]);
 
   useEffect(() => {
     if (redirectCountdown === null || !order || order.status !== "PAID") return;
@@ -630,7 +640,17 @@ export default function CheckoutOrderPage() {
         {isPaid && (() => {
           const context = order.purchaseContext || {};
           const giftId = context.giftId || order.lines?.[0]?.referenceId;
+          const giftInfo = order.giftInfo || null;
           const purpose = order.purpose || context.purpose;
+
+          const origin =
+            typeof window !== "undefined" ? window.location.origin : "";
+          const publicCardUrl = giftInfo?.slug
+            ? `${origin}/i/${giftInfo.slug}`
+            : "";
+          const shortCardUrl = giftInfo?.shortCode
+            ? `${origin}/q/${giftInfo.shortCode}`
+            : "";
 
           let targetUrl = "/dashboard";
           let ctaText = "Về Bảng điều khiển (Dashboard)";
@@ -646,54 +666,165 @@ export default function CheckoutOrderPage() {
             successMsg = "Đã cộng thêm lượt tải nhạc vào tài khoản của bạn!";
           } else if (purpose === "gift_unlock") {
             targetUrl = giftId ? `/editor/${giftId}?step=finish&paid=gift_unlock` : "/dashboard";
-            ctaText = "Lấy link & tải mã QR";
-            successMsg = "Món quà đã sẵn sàng! Mở khóa thiệp thành công.";
+            ctaText = "Vào trình chỉnh sửa thiệp";
+            successMsg = "Thanh toán thành công! Thiệp & mã QR của bạn đã sẵn sàng.";
           } else if (purpose === "gift_renewal") {
             targetUrl = giftId ? `/editor/${giftId}?step=finish&paid=gift_renewal` : "/dashboard";
-            ctaText = "Xem món quà đã gia hạn";
+            ctaText = "Quay lại trình chỉnh sửa";
             successMsg = "Đã gia hạn thời hạn món quà thành công!";
           } else if (purpose === "tip") {
             targetUrl = giftId ? `/editor/${giftId}?step=finish&paid=tip` : "/";
             ctaText = "Quay lại món quà";
-            successMsg = "Cảm ơn bạn đã ủng hộ Ding Dong Gift! Chúc bạn và người thương luôn hạnh phúc.";
+            successMsg = "Cảm ơn bạn đã ủng hộ! Chúc bạn và người thương luôn hạnh phúc.";
           }
 
           return (
-            <div className="bg-emerald-50 rounded-3xl p-6 sm:p-8 border border-emerald-200 text-center space-y-4">
-              <CheckCircle2 className="w-12 h-12 text-emerald-600 mx-auto" />
-              <h3 className="text-lg font-bold text-emerald-950">{successMsg}</h3>
-              <p className="text-xs text-emerald-700 max-w-md mx-auto">
-                Quyền lợi của bạn đã được kích hoạt tự động trên hệ thống Ding Dong Gift.
-              </p>
-              {redirectCountdown !== null && redirectCountdown > 0 && (
-                <p className="text-xs font-semibold text-emerald-800">
-                  Tự động quay lại sau {redirectCountdown}s...
+            <div className="space-y-6">
+              <div className="bg-emerald-50 rounded-3xl p-6 sm:p-8 border border-emerald-200 text-center space-y-4">
+                <CheckCircle2 className="w-12 h-12 text-emerald-600 mx-auto" />
+                <h3 className="text-lg font-bold text-emerald-950">{successMsg}</h3>
+                <p className="text-xs text-emerald-700 max-w-md mx-auto">
+                  Quyền lợi đã được kích hoạt tự động. Bạn có thể sao chép link, mở xem thiệp hoặc tải mã QR trang trí ngay bên dưới.
                 </p>
-              )}
-              <div className="pt-2 flex flex-col sm:flex-row gap-3 justify-center">
-                <Link
-                  href={targetUrl}
-                  className="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs rounded-full shadow-md transition"
-                >
-                  <span>{ctaText}</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </Link>
-                {redirectCountdown !== null && (
-                  <button
-                    type="button"
-                    onClick={() => setRedirectCountdown(null)}
-                    className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-white border border-emerald-200 text-emerald-800 font-semibold text-xs rounded-full hover:bg-emerald-100/60 transition"
-                  >
-                    <span>Ở lại trang này</span>
-                  </button>
+                {redirectCountdown !== null && redirectCountdown > 0 && (
+                  <p className="text-xs font-semibold text-emerald-800">
+                    Tự động quay lại sau {redirectCountdown}s...
+                  </p>
                 )}
-                <Link
-                  href="/dashboard"
-                  className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-white border border-slate-200 text-slate-700 font-semibold text-xs rounded-full hover:bg-slate-50 transition"
-                >
-                  <span>Về Dashboard</span>
-                </Link>
+                <div className="pt-2 flex flex-col sm:flex-row gap-3 justify-center">
+                  {giftInfo?.slug && (
+                    <Link
+                      href={`/i/${giftInfo.slug}`}
+                      target="_blank"
+                      className="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-semibold text-xs rounded-full shadow-md transition"
+                    >
+                      <span>Mở xem thiệp hoàn chỉnh</span>
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </Link>
+                  )}
+                  <Link
+                    href={targetUrl}
+                    className="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs rounded-full shadow-md transition"
+                  >
+                    <span>{ctaText}</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
+                  {redirectCountdown !== null && (
+                    <button
+                      type="button"
+                      onClick={() => setRedirectCountdown(null)}
+                      className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-white border border-emerald-200 text-emerald-800 font-semibold text-xs rounded-full hover:bg-emerald-100/60 transition"
+                    >
+                      <span>Ở lại trang này</span>
+                    </button>
+                  )}
+                  <Link
+                    href="/dashboard"
+                    className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-white border border-slate-200 text-slate-700 font-semibold text-xs rounded-full hover:bg-slate-50 transition"
+                  >
+                    <span>Về Dashboard</span>
+                  </Link>
+                </div>
               </div>
+
+              {giftInfo?.id && giftInfo?.slug && (
+                <div
+                  data-testid="post-payment-delivery-panel"
+                  className="space-y-5"
+                >
+                  {/* Copyable Public Card Link Panel */}
+                  <div className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/80 shadow-sm space-y-4">
+                    <div className="flex items-start gap-3">
+                      <div className="p-2.5 rounded-2xl bg-rose-50 text-rose-600 shrink-0">
+                        <Link2 className="w-5 h-5" />
+                      </div>
+                      <div className="space-y-1">
+                        <h4 className="font-bold text-base text-slate-900">
+                          Link mở thiệp của bạn
+                        </h4>
+                        <p className="text-xs text-slate-500">
+                          Sao chép đường dẫn này để gửi cho người nhận qua Zalo, Messenger hoặc mạng xã hội.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 p-2 bg-slate-50 rounded-2xl border border-slate-200">
+                      <input
+                        type="text"
+                        readOnly
+                        data-testid="post-payment-card-link"
+                        value={publicCardUrl}
+                        className="flex-1 px-3 py-1.5 text-xs font-mono text-slate-800 bg-transparent focus:outline-none select-all"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleCopy(publicCardUrl, "card_url")}
+                        data-testid="copy-card-link-btn"
+                        className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs flex items-center gap-1.5 transition shrink-0"
+                      >
+                        {copiedField === "card_url" ? (
+                          <>
+                            <Check className="w-3.5 h-3.5 text-emerald-400" />
+                            <span>Đã sao chép</span>
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="w-3.5 h-3.5" />
+                            <span>Sao chép link</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+
+                    {shortCardUrl && (
+                      <div className="flex items-center justify-between gap-2 px-3 py-2 rounded-xl bg-slate-50/70 border border-slate-100 text-xs">
+                        <span className="text-slate-500 truncate font-mono">
+                          Link rút gọn: <strong className="text-slate-800">{shortCardUrl}</strong>
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => handleCopy(shortCardUrl, "short_url")}
+                          className="text-rose-600 hover:text-rose-700 font-semibold shrink-0 flex items-center gap-1"
+                        >
+                          {copiedField === "short_url" ? (
+                            <>
+                              <Check className="w-3.5 h-3.5" /> Đã chép
+                            </>
+                          ) : (
+                            <>
+                              <Copy className="w-3.5 h-3.5" /> Chép
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Decorated Scannable QR Designer Panel */}
+                  <div className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/80 shadow-sm space-y-4">
+                    <div className="flex items-center justify-between gap-2">
+                      <div>
+                        <h4 className="font-bold text-base text-slate-900">
+                          QR Quét mở thiệp (16 mẫu khung trang trí)
+                        </h4>
+                        <p className="text-xs text-slate-500 mt-0.5">
+                          Chọn khung yêu thích, thêm lời chúc hoặc tải xuống ảnh PNG sắc nét để gửi tặng.
+                        </p>
+                      </div>
+                      <span className="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-bold shrink-0">
+                        Sẵn sàng quét
+                      </span>
+                    </div>
+
+                    <QrDesigner
+                      giftId={giftInfo.id}
+                      publicUrl={publicCardUrl}
+                      slug={giftInfo.slug}
+                      cardTitle={giftInfo.title}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           );
         })()}

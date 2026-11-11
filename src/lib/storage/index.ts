@@ -11,12 +11,24 @@ export interface StorageResult {
 
 const ALLOWED_MIME_TYPES = new Set([
   "image/jpeg",
+  "image/jpg",
   "image/png",
   "image/webp",
   "image/gif",
   "application/pdf",
   "audio/mpeg",
   "audio/mp3",
+  "audio/wav",
+  "audio/x-wav",
+  "audio/wave",
+  "audio/ogg",
+  "audio/mp4",
+  "audio/m4a",
+  "audio/x-m4a",
+  "audio/aac",
+  "audio/webm",
+  "audio/flac",
+  "video/mp4",
 ]);
 
 export interface StorageAdapter {

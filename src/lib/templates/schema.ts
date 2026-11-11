@@ -57,6 +57,8 @@ export const InvitationContentSchema = z.object({
       rsvp: z.boolean().default(true),
       guestbook: z.boolean().default(false),
       backgroundMusicUrl: z.string().optional().nullable(),
+      cardPin: z.string().optional(),
+      showPinHint: z.boolean().optional(),
       giftTransferInfo: z
         .object({
           enabled: z.boolean().default(false),

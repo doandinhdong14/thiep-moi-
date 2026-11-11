@@ -1,7 +1,12 @@
 "use client";
 
+import { useState, useEffect, useMemo } from "react";
 import { InvitationContent } from "@/lib/templates/schema";
 import { TemplateTheme } from "@/lib/templates/registry";
+import {
+  INTERACTIVE_TEMPLATE_URLS,
+  hydrateInteractiveHtml,
+} from "@/lib/templates/hydrateInteractiveHtml";
 import CoverBlock from "./blocks/CoverBlock";
 import EnvelopeRevealBlock from "./blocks/EnvelopeRevealBlock";
 import IntroMessageBlock from "./blocks/IntroMessageBlock";
@@ -19,41 +24,93 @@ interface TemplateRendererProps {
   content: InvitationContent;
   theme: TemplateTheme;
   slug?: string;
+  templateSlug?: string;
+  interactiveHtml?: string;
   isPreview?: boolean;
 }
-
-const INTERACTIVE_TEMPLATES: Record<string, string> = {
-  "thiep-3": "/templates/thiep-3.html",
-  "thiep-4": "/templates/thiep-4.html",
-  "thiep-5": "/templates/thiep-5.html",
-  "thiep-6": "/templates/thiep-6.html",
-  "thiep-7": "/templates/thiep-7.html",
-  "thiep-8": "/templates/thiep-8.html",
-  "thiep-9": "/templates/thiep-9.html",
-  "thiep-10": "/templates/thiep-10.html",
-  "thiep-giang-sinh": "/templates/thiep-giang-sinh.html",
-  "thiep-xmas": "/templates/thiep-xmas.html",
-};
 
 export default function TemplateRenderer({
   content,
   theme,
   slug,
+  templateSlug,
+  interactiveHtml,
   isPreview = false,
 }: TemplateRendererProps) {
+  const effectiveTemplateSlug =
+    (templateSlug && INTERACTIVE_TEMPLATE_URLS[templateSlug] ? templateSlug : undefined) ||
+    (slug && INTERACTIVE_TEMPLATE_URLS[slug] ? slug : undefined);
+
   const interactiveUrl =
-    (slug && INTERACTIVE_TEMPLATES[slug]) ||
+    (effectiveTemplateSlug && INTERACTIVE_TEMPLATE_URLS[effectiveTemplateSlug]) ||
     (content as any)?.interactiveUrl;
+
+  const resolvedInteractiveSlug =
+    effectiveTemplateSlug ||
+    (typeof interactiveUrl === "string"
+      ? interactiveUrl.match(/\/templates\/([^/.?#]+)\.html/)?.[1]
+      : undefined);
+
+  const [rawTemplateHtml, setRawTemplateHtml] = useState<string | null>(null);
+  const [debouncedContent, setDebouncedContent] = useState<InvitationContent>(content);
+
+  useEffect(() => {
+    if (!isPreview) {
+      setDebouncedContent(content);
+      return;
+    }
+    const timer = setTimeout(() => {
+      setDebouncedContent(content);
+    }, 350);
+    return () => clearTimeout(timer);
+  }, [content, isPreview]);
+
+  useEffect(() => {
+    if (interactiveHtml || !interactiveUrl) return;
+    let cancelled = false;
+    fetch(interactiveUrl)
+      .then((res) => (res.ok ? res.text() : Promise.reject(new Error("Failed to load template"))))
+      .then((html) => {
+        if (!cancelled) setRawTemplateHtml(html);
+      })
+      .catch(() => { });
+    return () => {
+      cancelled = true;
+    };
+  }, [interactiveHtml, interactiveUrl]);
+
+  const hydratedPreviewHtml = useMemo(() => {
+    if (interactiveHtml) return interactiveHtml;
+    if (!rawTemplateHtml || !resolvedInteractiveSlug) return null;
+    return hydrateInteractiveHtml(rawTemplateHtml, resolvedInteractiveSlug, debouncedContent, {
+      invitationSlug: slug,
+      isPreview,
+    });
+  }, [interactiveHtml, rawTemplateHtml, resolvedInteractiveSlug, debouncedContent, slug, isPreview]);
 
   if (interactiveUrl) {
     return (
-      <div className="w-full h-full min-h-[720px] md:min-h-screen bg-black flex flex-col relative overflow-hidden">
-        <iframe
-          src={interactiveUrl}
-          title={content.title || "Thiệp tương tác"}
-          className="w-full h-full min-h-[720px] md:min-h-screen border-0 flex-1"
-          allow="autoplay; accelerometer; gyroscope; clipboard-write; encrypted-media; fullscreen"
-        />
+      <div
+        className={`w-full bg-black flex flex-col relative overflow-hidden ${
+          isPreview ? "h-full min-h-[720px]" : "min-h-[100dvh] h-[100dvh]"
+        }`}
+      >
+        {hydratedPreviewHtml ? (
+          <iframe
+            key={(resolvedInteractiveSlug || slug || "card") + (isPreview ? "-preview" : "-live")}
+            srcDoc={hydratedPreviewHtml}
+            title={content.title || "Thiệp kỷ niệm"}
+            className="w-full h-full min-h-[720px] md:min-h-screen border-0 flex-1"
+            allow="autoplay; accelerometer; gyroscope; clipboard-write; encrypted-media; fullscreen"
+          />
+        ) : (
+          <iframe
+            src={interactiveUrl}
+            title={content.title || "Thiệp kỷ niệm"}
+            className="w-full h-full min-h-[720px] md:min-h-screen border-0 flex-1"
+            allow="autoplay; accelerometer; gyroscope; clipboard-write; encrypted-media; fullscreen"
+          />
+        )}
       </div>
     );
   }
@@ -63,9 +120,8 @@ export default function TemplateRenderer({
 
   return (
     <div
-      className={`min-h-screen w-full relative overflow-x-hidden transition-colors duration-300 ${
-        theme.fontFamily === "serif" ? "font-serif" : "font-sans"
-      }`}
+      className={`min-h-screen w-full relative overflow-x-hidden transition-colors duration-300 ${theme.fontFamily === "serif" ? "font-serif" : "font-sans"
+        }`}
       style={{
         backgroundColor: theme.background,
         color: theme.foreground,

@@ -59,7 +59,7 @@ function createPosterSvg(params: {
   } = params;
 
   const safeTitle = escapeXml(title || "THIỆP MỜI TRỌNG THỂ");
-  const safeOccasion = escapeXml(occasionName || "DING DONG GIFT INVITATION");
+  const safeOccasion = escapeXml(occasionName || "THIỆP MỜI KỶ NIỆM");
   const safeCelebrants = escapeXml(celebrantNames || "");
   const safeDate = escapeXml(dateStr || "");
   const safeVenue = escapeXml(venueStr || "");
@@ -143,7 +143,7 @@ function createPosterSvg(params: {
 
     <!-- Footer Tagline -->
     <text x="${width / 2}" y="${height - 70}" font-family="'Segoe UI', Roboto, sans-serif" font-size="15" fill="#94A3B8" letter-spacing="1" text-anchor="middle">
-      ĐƯỢC TẠO VỚI DING DONG GIFT • KHOẢNH KHẮC TRỌN VẸN
+      KHOẢNH KHẮC TRỌN VẸN • DÀNH RIÊNG CHO BẠN
     </text>
   </svg>`;
 }

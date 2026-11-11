@@ -63,9 +63,10 @@ interface QrDesignerProps {
   giftId: string;
   publicUrl: string;
   slug: string;
+  cardTitle?: string;
 }
 
-export default function QrDesigner({ giftId, publicUrl, slug }: QrDesignerProps) {
+export default function QrDesigner({ giftId, publicUrl, slug, cardTitle }: QrDesignerProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   const [activeTab, setActiveTab] = useState<"text" | "icon" | "style">("text");
@@ -74,6 +75,7 @@ export default function QrDesigner({ giftId, publicUrl, slug }: QrDesignerProps)
   const [exporting, setExporting] = useState(false);
   const [showFollowModal, setShowFollowModal] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [saveState, setSaveState] = useState<"idle" | "saving" | "saved">("idle");
   const [isDragging, setIsDragging] = useState(false);
   const [draggedItemId, setDraggedItemId] = useState<string | null>(null);
   const [dragType, setDragType] = useState<"text" | "icon" | null>(null);
@@ -81,34 +83,10 @@ export default function QrDesigner({ giftId, publicUrl, slug }: QrDesignerProps)
   // QR Design State
   const [design, setDesign] = useState<QrDesign>({
     giftId,
-    presetId: "gift-for-you",
-    moduleColor: "#ff2a5f",
-    texts: [
-      {
-        id: "txt_1",
-        text: "Anh yêu em ❤️",
-        x: 500,
-        y: 840,
-        rotation: 0,
-        fontFamily: "serif",
-        fontSize: 42,
-        color: "#ffffff",
-        hasBackground: false,
-        align: "center",
-        zIndex: 2,
-      },
-    ],
-    icons: [
-      {
-        id: "ic_1",
-        emoji: "❤️",
-        x: 500,
-        y: 250,
-        size: 48,
-        rotation: 0,
-        zIndex: 1,
-      },
-    ],
+    presetId: QR_PRESETS[0].id,
+    moduleColor: QR_PRESETS[0].defaultModuleColor,
+    texts: [],
+    icons: [],
     revision: 1,
   });
 
@@ -134,13 +112,22 @@ export default function QrDesigner({ giftId, publicUrl, slug }: QrDesignerProps)
   const saveDesignToServer = useCallback(
     (newDesign: QrDesign) => {
       if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+      setSaveState("saving");
       saveTimeoutRef.current = setTimeout(() => {
         fetch(`/api/v1/invitations/${giftId}/qr-design`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(newDesign),
-        }).catch((err) => console.error("Failed to autosave QR design:", err));
-      }, 1000);
+        })
+          .then((res) => {
+            if (res.ok) setSaveState("saved");
+            else setSaveState("idle");
+          })
+          .catch((err) => {
+            console.error("Failed to autosave QR design:", err);
+            setSaveState("idle");
+          });
+      }, 650);
     },
     [giftId]
   );
@@ -153,7 +140,7 @@ export default function QrDesigner({ giftId, publicUrl, slug }: QrDesignerProps)
     });
   };
 
-  // Re-draw canvas preview whenever design or preset changes
+  // Re-draw canvas preview whenever design, preset, or card title changes
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -162,8 +149,9 @@ export default function QrDesigner({ giftId, publicUrl, slug }: QrDesignerProps)
       exportScale: 0.6, // 600px preview
       showHandles: true,
       selectedItemId: selectedTextId || selectedIconId,
+      cardTitle,
     });
-  }, [design, publicUrl, selectedTextId, selectedIconId]);
+  }, [design, publicUrl, selectedTextId, selectedIconId, cardTitle]);
 
   // Selected Text & Icon references
   const selectedText = design.texts.find((t) => t.id === selectedTextId) || design.texts[0];
@@ -366,6 +354,7 @@ export default function QrDesigner({ giftId, publicUrl, slug }: QrDesignerProps)
       const result = await renderQrArtworkToCanvas(offscreen, design, publicUrl, {
         exportScale: 1.2,
         showHandles: false,
+        cardTitle,
       });
 
       if (!result.success) {
@@ -384,7 +373,7 @@ export default function QrDesigner({ giftId, publicUrl, slug }: QrDesignerProps)
         const downloadUrl = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = downloadUrl;
-        a.download = `qr-mon-qua-${slug || "dingdonggift"}.png`;
+        a.download = `qr-thiep-moi-${slug || "card"}.png`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -409,9 +398,19 @@ export default function QrDesigner({ giftId, publicUrl, slug }: QrDesignerProps)
       {/* 1. Header & Preset Selector */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
-            Mẫu khung QR ({QR_PRESETS.length})
-          </label>
+          <div className="flex items-center gap-2">
+            <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
+              Mẫu khung QR ({QR_PRESETS.length})
+            </label>
+            {saveState === "saving" && (
+              <span className="text-[11px] font-medium text-amber-600">Đang lưu...</span>
+            )}
+            {saveState === "saved" && (
+              <span className="text-[11px] font-medium text-emerald-600 inline-flex items-center gap-0.5">
+                <Check className="w-3 h-3" /> Đã lưu mẫu QR
+              </span>
+            )}
+          </div>
           <span className="text-[11px] text-slate-400">Cuộn ngang để xem thêm</span>
         </div>
 

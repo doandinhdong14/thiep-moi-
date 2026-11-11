@@ -65,38 +65,14 @@ export async function GET(
     }
 
     if (!design) {
-      // Default to "gift-for-you" preset with initial text
+      // Default to first preset cleanly with no obstructing overlays
       const preset = QR_PRESETS[0];
       design = {
         giftId: inv.id,
         presetId: preset.id,
         moduleColor: preset.defaultModuleColor,
-        texts: [
-          {
-            id: "txt_1",
-            text: "Anh yêu em ❤️",
-            x: 500,
-            y: 840,
-            rotation: 0,
-            fontFamily: "serif",
-            fontSize: 42,
-            color: "#ffffff",
-            hasBackground: false,
-            align: "center",
-            zIndex: 2,
-          },
-        ],
-        icons: [
-          {
-            id: "ic_1",
-            emoji: "❤️",
-            x: 500,
-            y: 250,
-            size: 48,
-            rotation: 0,
-            zIndex: 1,
-          },
-        ],
+        texts: [],
+        icons: [],
         revision: 1,
       };
     }

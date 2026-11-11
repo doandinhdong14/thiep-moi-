@@ -1,9 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
-import CookieConsent from "@/components/landing/CookieConsent";
-import FloatingWidgets from "@/components/landing/FloatingWidgets";
+import SiteChrome from "@/components/layout/SiteChrome";
 
 export const metadata: Metadata = {
   title: "Ding Dong Gift — Nền tảng tạo thiệp / Mini Website / QR Card tinh tế",
@@ -40,11 +37,7 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased min-h-screen flex flex-col bg-white text-[#19191f]">
-        <Navbar />
-        <main className="flex-1 flex flex-col">{children}</main>
-        <Footer />
-        <CookieConsent />
-        <FloatingWidgets />
+        <SiteChrome>{children}</SiteChrome>
       </body>
     </html>
   );

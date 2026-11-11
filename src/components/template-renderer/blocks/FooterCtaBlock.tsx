@@ -1,9 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
-import { Heart, Gift, AlertTriangle, Check } from "lucide-react";
-import { BrandMark } from "@/components/common/BrandLogo";
+import { Heart, Gift, Check } from "lucide-react";
 import { TemplateTheme } from "@/lib/templates/registry";
 
 interface FooterCtaBlockProps {
@@ -91,21 +89,6 @@ export default function FooterCtaBlock({
           Chân thành cảm ơn bạn đã là một phần đặc biệt trong ngày vui của chúng mình!
         </p>
         <Heart className="w-4 h-4 mx-auto text-rose-400 fill-current opacity-70" />
-      </div>
-
-      {/* Report & Platform Branding */}
-      <div className="pt-6 border-t border-slate-200/50 flex flex-col items-center gap-2 text-[11px] opacity-60">
-        <Link
-          href={`/report/${slug || "unknown"}`}
-          className="hover:underline flex items-center gap-1 text-slate-500 hover:text-slate-800"
-        >
-          <AlertTriangle className="w-3 h-3" />
-          <span>Báo cáo nội dung lạm dụng / vi phạm</span>
-        </Link>
-        <Link href="/" className="hover:underline text-slate-500 flex items-center gap-1.5">
-          <BrandMark size="xs" alt="" className="w-4 h-4" />
-          <span>Tạo thiệp tương tác miễn phí với Ding Dong Gift</span>
-        </Link>
       </div>
     </div>
   );

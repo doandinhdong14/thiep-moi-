@@ -88,6 +88,41 @@ export async function GET(
       margin: 2,
     });
 
+    const parsedContext = order.purchaseContext
+      ? (() => {
+          try {
+            return JSON.parse(order.purchaseContext);
+          } catch {
+            return null;
+          }
+        })()
+      : null;
+
+    const targetGiftId: string | null =
+      parsedContext?.giftId ||
+      parsedContext?.invitationId ||
+      order.lines?.[0]?.referenceId ||
+      null;
+
+    const giftRecord =
+      targetGiftId && order.status === "PAID"
+        ? await prisma.invitation.findUnique({
+            where: { id: targetGiftId },
+            select: {
+              id: true,
+              slug: true,
+              title: true,
+              status: true,
+              shareLinks: {
+                where: { status: "ACTIVE" },
+                orderBy: { createdAt: "desc" },
+                take: 1,
+                select: { shortCode: true },
+              },
+            },
+          })
+        : null;
+
     const allowSandboxSimulation =
       process.env.NODE_ENV !== "production" ||
       (process.env.PAYMENT_MODE || env.PAYMENT_MODE) === "sandbox";
@@ -105,7 +140,16 @@ export async function GET(
         currency: order.currency,
         paidAt: order.paidAt,
         lines: order.lines,
-        purchaseContext: order.purchaseContext ? JSON.parse(order.purchaseContext) : null,
+        purchaseContext: parsedContext,
+        giftInfo: giftRecord
+          ? {
+              id: giftRecord.id,
+              slug: giftRecord.slug,
+              title: giftRecord.title,
+              status: giftRecord.status,
+              shortCode: giftRecord.shareLinks[0]?.shortCode ?? null,
+            }
+          : null,
         payosConfigured: Boolean(getPayOSClient()),
         payosQr,
         allowSandboxSimulation,

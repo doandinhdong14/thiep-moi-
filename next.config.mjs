@@ -23,6 +23,16 @@ const nextConfig = {
       },
     ],
   },
+  async rewrites() {
+    return {
+      beforeFiles: [
+        {
+          source: '/uploads/:filename',
+          destination: '/api/v1/assets/file/:filename',
+        },
+      ],
+    };
+  },
   async headers() {
     return [
       {

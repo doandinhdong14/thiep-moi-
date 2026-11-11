@@ -198,8 +198,13 @@ function EditorContent({ invitationId }: { invitationId: string }) {
     }
   }, [searchParams, loadCredits, loadInvitation]);
 
-  // Sync step changes with URL query
+  // Sync step changes with URL query and flush pending autosave
   const handleStepChange = (step: StepKey) => {
+    if (autosaveTimerRef.current) {
+      clearTimeout(autosaveTimerRef.current);
+      autosaveTimerRef.current = null;
+      saveDraft(content || undefined);
+    }
     setCurrentStep(step);
     const url = new URL(window.location.href);
     url.searchParams.set("step", step);
@@ -214,6 +219,10 @@ function EditorContent({ invitationId }: { invitationId: string }) {
     const toSave = contentToSave || content;
     if (!toSave) return;
 
+    const resolvedTitle =
+      (newTitle !== undefined ? newTitle : toSave.title || invitationMeta.title).trim() ||
+      invitationMeta.title;
+
     setSaving(true);
     setSaveStatus("SAVING");
     setErrorMessage(null);
@@ -224,7 +233,7 @@ function EditorContent({ invitationId }: { invitationId: string }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           expectedRevision: invitationMeta.revision,
-          title: newTitle !== undefined ? newTitle : invitationMeta.title,
+          title: resolvedTitle,
           privacyMode: invitationMeta.privacyMode,
           content: toSave,
         }),
@@ -239,11 +248,14 @@ function EditorContent({ invitationId }: { invitationId: string }) {
         prev
           ? {
               ...prev,
-              title: newTitle !== undefined ? newTitle : prev.title,
+              title: resolvedTitle,
               revision: data.data.revision,
             }
           : null
       );
+      if (resolvedTitle !== tempTitle) {
+        setTempTitle(resolvedTitle);
+      }
       lastSavedSnapshotRef.current = JSON.parse(JSON.stringify(toSave));
       setSaveStatus("SAVED");
     } catch (err: any) {
@@ -290,8 +302,8 @@ function EditorContent({ invitationId }: { invitationId: string }) {
     const file = e.target.files?.[0];
     if (!file || !content) return;
 
-    // Quota check: if user uploads beyond sample cover without credits
-    if (!isCover && creditBalance.imageUploads <= 0 && content.galleryUrls.length >= 2) {
+    // Quota check: allow cover + up to 8 gallery images seamlessly
+    if (!isCover && creditBalance.imageUploads <= 0 && content.galleryUrls.length >= 8) {
       setBuyCreditsModal({ open: true, type: "image_credits" });
       return;
     }
@@ -690,13 +702,227 @@ function EditorContent({ invitationId }: { invitationId: string }) {
                     Lời chúc tâm tình đầy đủ
                   </label>
                   <textarea
-                    rows={3}
+                    rows={4}
                     value={content.message || ""}
                     onChange={(e) => triggerDirty({ ...content, message: e.target.value })}
                     placeholder="Viết những dòng cảm xúc sâu lắng nhất..."
                     className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-200"
                   />
                 </div>
+
+                {/* Personalization: People (Sender / Recipient or Bride / Groom) */}
+                {(() => {
+                  const tSlug = invitationMeta.templateSlug;
+                  const isWedding = tSlug.startsWith("wedding-");
+                  const isBirthday = tSlug.startsWith("birthday-");
+                  const isGrad = tSlug.startsWith("graduation-");
+                  const firstLabel = isWedding
+                    ? "Tên Chú rể"
+                    : isBirthday
+                    ? "Tên chủ nhân bữa tiệc"
+                    : isGrad
+                    ? "Tên tân cử nhân"
+                    : "Tên người gửi (Bạn)";
+                  const secondLabel = isWedding
+                    ? "Tên Cô dâu"
+                    : isBirthday || isGrad
+                    ? "Lời chúc từ"
+                    : "Tên người nhận";
+                  const p0 = content.people?.[0] || {
+                    role: isWedding ? "groom" : isBirthday ? "celebrant" : isGrad ? "graduate" : "sender",
+                    displayName: "",
+                  };
+                  const p1 = content.people?.[1] || {
+                    role: isWedding ? "bride" : "recipient",
+                    displayName: "",
+                  };
+                  const updatePeople = (idx: 0 | 1, val: string) => {
+                    const nextPeople = [...(content.people || [])];
+                    nextPeople[0] = idx === 0 ? { ...p0, displayName: val } : p0;
+                    nextPeople[1] = idx === 1 ? { ...p1, displayName: val } : p1;
+                    triggerDirty({ ...content, people: nextPeople });
+                  };
+
+                  return (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-700 mb-1">
+                          {firstLabel}
+                        </label>
+                        <input
+                          type="text"
+                          value={p0.displayName}
+                          onChange={(e) => updatePeople(0, e.target.value)}
+                          placeholder="Ví dụ: Minh Anh"
+                          className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-200"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-700 mb-1">
+                          {secondLabel}
+                        </label>
+                        <input
+                          type="text"
+                          value={p1.displayName}
+                          onChange={(e) => updatePeople(1, e.target.value)}
+                          placeholder="Ví dụ: Ngọc Linh"
+                          className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-200"
+                        />
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* Lock PIN for PIN-protected interactive cards */}
+                {(invitationMeta.templateSlug === "thiep-5" ||
+                  invitationMeta.templateSlug === "thiep-6") && (
+                  <div className="p-3.5 rounded-2xl bg-rose-50/70 border border-rose-200/80 space-y-2">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                      <div className="flex-1">
+                        <label className="block text-xs font-semibold text-slate-800 mb-1">
+                          Mã PIN mở khóa thiệp (4 chữ số)
+                        </label>
+                        <input
+                          type="text"
+                          maxLength={4}
+                          value={content.features?.cardPin || ""}
+                          onChange={(e) =>
+                            triggerDirty({
+                              ...content,
+                              features: {
+                                ...content.features,
+                                cardPin: e.target.value.replace(/\D/g, "").slice(0, 4),
+                              },
+                            })
+                          }
+                          placeholder="Mặc định: 0000"
+                          className="w-full px-3.5 py-2 text-xs font-mono rounded-xl border border-rose-300 bg-white focus:outline-none focus:ring-2 focus:ring-rose-200"
+                        />
+                      </div>
+                      <label className="flex items-center gap-2 text-xs text-slate-700 cursor-pointer pt-3 sm:pt-5">
+                        <input
+                          type="checkbox"
+                          checked={content.features?.showPinHint !== false}
+                          onChange={(e) =>
+                            triggerDirty({
+                              ...content,
+                              features: {
+                                ...content.features,
+                                showPinHint: e.target.checked,
+                              },
+                            })
+                          }
+                          className="rounded border-rose-300 text-rose-600 focus:ring-rose-200"
+                        />
+                        <span>Hiện gợi ý mã PIN</span>
+                      </label>
+                    </div>
+                  </div>
+                )}
+
+                {/* Event / Flight / Date details for event cards */}
+                {(invitationMeta.templateSlug.startsWith("wedding-") ||
+                  invitationMeta.templateSlug.startsWith("birthday-") ||
+                  invitationMeta.templateSlug.startsWith("graduation-") ||
+                  invitationMeta.templateSlug === "thiep-10") && (
+                  <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+                    <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                      {invitationMeta.templateSlug === "thiep-10"
+                        ? "Thông tin chuyến bay / Vé hẹn"
+                        : "Thời gian & Địa điểm sự kiện"}
+                    </p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                          {invitationMeta.templateSlug === "thiep-10"
+                            ? "Mã chuyến bay"
+                            : "Tên địa điểm"}
+                        </label>
+                        <input
+                          type="text"
+                          value={content.event?.venueName || ""}
+                          onChange={(e) =>
+                            triggerDirty({
+                              ...content,
+                              event: { ...content.event, venueName: e.target.value },
+                            })
+                          }
+                          placeholder={
+                            invitationMeta.templateSlug === "thiep-10"
+                              ? "VD: LV-520"
+                              : "VD: White Palace"
+                          }
+                          className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-rose-200"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                          Ngày giờ
+                        </label>
+                        <input
+                          type="text"
+                          value={content.event?.startsAt || ""}
+                          onChange={(e) =>
+                            triggerDirty({
+                              ...content,
+                              event: { ...content.event, startsAt: e.target.value },
+                            })
+                          }
+                          placeholder="VD: 2026-12-25 18:00"
+                          className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-rose-200"
+                        />
+                      </div>
+                    </div>
+                    {invitationMeta.templateSlug !== "thiep-10" && (
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                          Địa chỉ chi tiết
+                        </label>
+                        <input
+                          type="text"
+                          value={content.event?.address || ""}
+                          onChange={(e) =>
+                            triggerDirty({
+                              ...content,
+                              event: { ...content.event, address: e.target.value },
+                            })
+                          }
+                          placeholder="Số nhà, đường, quận/huyện..."
+                          className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-rose-200"
+                        />
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Interactive Response Question for proposal cards */}
+                {(invitationMeta.templateSlug === "love-letter" ||
+                  invitationMeta.templateSlug === "thiep-3" ||
+                  invitationMeta.templateSlug === "thiep-4" ||
+                  invitationMeta.templateSlug === "thiep-7") && (
+                  <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5">
+                    <label className="block text-xs font-semibold text-slate-700">
+                      Câu hỏi tương tác trên thiệp (tùy chọn)
+                    </label>
+                    <input
+                      type="text"
+                      value={content.responseQuestion?.question || ""}
+                      onChange={(e) =>
+                        triggerDirty({
+                          ...content,
+                          responseQuestion: {
+                            question: e.target.value,
+                            options: content.responseQuestion?.options?.length
+                              ? content.responseQuestion.options
+                              : ["Đồng ý ❤️", "Để suy nghĩ thêm"],
+                          },
+                        })
+                      }
+                      placeholder="Ví dụ: Đi hẹn hò với mình nhé?"
+                      className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-rose-200"
+                    />
+                  </div>
+                )}
               </div>
 
               {/* Box 2: Danh sách "Lời yêu thương" (Mưa chữ/Mưa lời chúc) */}
@@ -984,6 +1210,52 @@ function EditorContent({ invitationId }: { invitationId: string }) {
                   </button>
                 </div>
 
+                {/* Built-in Ready-to-use Music Presets & Direct URL */}
+                <div className="space-y-2.5">
+                  <p className="text-xs font-semibold text-slate-700">Chọn nhanh nhạc nền có sẵn:</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    {[
+                      {
+                        label: "Hộp nhạc Lãng mạn",
+                        url: "/audio/romantic-musicbox.wav",
+                      },
+                      {
+                        label: "Piano Kỷ niệm",
+                        url: "/audio/piano-memories.wav",
+                      },
+                      {
+                        label: "Chuông Giáng Sinh",
+                        url: "/audio/christmas-bell.wav",
+                      },
+                    ].map((preset) => {
+                      const active = content.features?.backgroundMusicUrl === preset.url;
+                      return (
+                        <button
+                          key={preset.url}
+                          type="button"
+                          onClick={() =>
+                            triggerDirty({
+                              ...content,
+                              features: {
+                                ...content.features,
+                                backgroundMusicUrl: preset.url,
+                              },
+                            })
+                          }
+                          className={`px-3 py-2 rounded-xl border text-left text-xs font-semibold transition flex items-center gap-2 ${
+                            active
+                              ? "border-indigo-600 bg-indigo-50 text-indigo-800 shadow-xs"
+                              : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700"
+                          }`}
+                        >
+                          <Music className="w-3.5 h-3.5 shrink-0 text-indigo-600" />
+                          <span className="truncate">{preset.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
                 {/* Audio Upload and Player */}
                 <div className="space-y-3">
                   <label className="cursor-pointer w-full py-4 rounded-2xl border-2 border-dashed border-slate-300 hover:border-rose-400 bg-slate-50/60 hover:bg-rose-50/40 flex flex-col items-center justify-center gap-1.5 transition text-slate-600 hover:text-rose-600">
@@ -1135,7 +1407,13 @@ function EditorContent({ invitationId }: { invitationId: string }) {
                   {/* Unlock Button */}
                   <button
                     type="button"
-                    onClick={() => {
+                    onClick={async () => {
+                      if (autosaveTimerRef.current) {
+                        clearTimeout(autosaveTimerRef.current);
+                        autosaveTimerRef.current = null;
+                      }
+                      await saveDraft(content);
+
                       if (isFreeProduct) {
                         setIsFreeUnlockOpen(true);
                       } else {
@@ -1239,6 +1517,7 @@ function EditorContent({ invitationId }: { invitationId: string }) {
                       giftId={invitationMeta.id}
                       publicUrl={publicShareUrl}
                       slug={invitationMeta.slug}
+                      cardTitle={content.title}
                     />
                   </div>
 
