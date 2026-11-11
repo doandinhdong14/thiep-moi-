@@ -44,14 +44,17 @@ export default function CheckoutOrderPage() {
   const [checkingStatus, setCheckingStatus] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [payosLoading, setPayosLoading] = useState(false);
+  const [payosInitError, setPayosInitError] = useState<string | null>(null);
   const [payosQr, setPayosQr] = useState<PayOSQrInfo | null>(null);
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [simulating, setSimulating] = useState(false);
+  const [redirectCountdown, setRedirectCountdown] = useState<number | null>(null);
 
   const pollTimerRef = useRef<NodeJS.Timeout | null>(null);
   const payosInitAttemptedRef = useRef<string | null>(null);
+  const sawUnpaidRef = useRef<boolean>(false);
 
   const loadOrder = useCallback(
     async (silent = false) => {
@@ -63,18 +66,24 @@ export default function CheckoutOrderPage() {
         if (!res.ok) {
           if (res.status === 401) {
             router.push(`/auth/sign-in?callbackUrl=/checkout/${orderId}`);
-            return;
+            return null;
           }
           throw new Error("Không thể tải thông tin đơn hàng.");
         }
         const data = await res.json();
         const loadedOrder = data.data.order;
+        if (loadedOrder?.status && loadedOrder.status !== "PAID") {
+          sawUnpaidRef.current = true;
+        }
         setOrder(loadedOrder);
         if (loadedOrder?.payosQr) {
           setPayosQr(loadedOrder.payosQr);
+          setPayosInitError(null);
         }
+        return loadedOrder;
       } catch (err: any) {
         if (!silent) setError(err.message || "Đã xảy ra lỗi.");
+        return null;
       } finally {
         if (!silent) setLoading(false);
       }
@@ -85,26 +94,29 @@ export default function CheckoutOrderPage() {
   useEffect(() => {
     if (orderId) {
       payosInitAttemptedRef.current = null;
+      sawUnpaidRef.current = false;
+      setRedirectCountdown(null);
       setPayosQr(null);
+      setPayosInitError(null);
       loadOrder();
     }
   }, [orderId, loadOrder]);
 
-  // Keep payment polling strictly in-app every 3.5 seconds while unpaid
+  // Keep payment polling strictly in-app every 3 seconds while unpaid and PayOS is configured
   useEffect(() => {
-    if (order && order.status !== "PAID") {
+    if (order && order.status !== "PAID" && order.payosConfigured) {
       pollTimerRef.current = setInterval(() => {
         loadOrder(true);
-      }, 3500);
+      }, 3000);
     }
     return () => {
       if (pollTimerRef.current) clearInterval(pollTimerRef.current);
     };
-  }, [order?.status, loadOrder]);
+  }, [order?.status, order?.payosConfigured, loadOrder]);
 
   const initializeInAppPayOSQr = useCallback(async () => {
     setPayosLoading(true);
-    setError(null);
+    setPayosInitError(null);
     try {
       const res = await fetch(`/api/v1/orders/${orderId}/payos-link`, {
         method: "POST",
@@ -120,8 +132,10 @@ export default function CheckoutOrderPage() {
       if (data.data?.payosQr) {
         setPayosQr(data.data.payosQr);
       }
-    } catch {
-      // Fall back quietly to built-in in-app VietQR instructions without interrupting checkout
+    } catch (err: any) {
+      setPayosInitError(
+        err?.message || "Không thể kết nối PayOS để tạo mã VietQR tự động."
+      );
     } finally {
       setPayosLoading(false);
     }
@@ -142,6 +156,40 @@ export default function CheckoutOrderPage() {
     }
   }, [order, payosQr, initializeInAppPayOSQr]);
 
+  // Auto-redirect back to editor/target right after live transition to PAID
+  useEffect(() => {
+    if (order?.status === "PAID" && sawUnpaidRef.current && redirectCountdown === null) {
+      setRedirectCountdown(3);
+    }
+  }, [order?.status, redirectCountdown]);
+
+  useEffect(() => {
+    if (redirectCountdown === null || !order || order.status !== "PAID") return;
+    if (redirectCountdown <= 0) {
+      const context = order.purchaseContext || {};
+      const giftId = context.giftId || order.lines?.[0]?.referenceId;
+      const purpose = order.purpose || context.purpose;
+      let targetUrl = "/dashboard";
+      if (purpose === "image_credits") {
+        targetUrl = giftId ? `/editor/${giftId}?step=images&paid=image_credits` : "/editor";
+      } else if (purpose === "audio_credits") {
+        targetUrl = giftId ? `/editor/${giftId}?step=audio&paid=audio_credits` : "/editor";
+      } else if (purpose === "gift_unlock") {
+        targetUrl = giftId ? `/editor/${giftId}?step=finish&paid=gift_unlock` : "/dashboard";
+      } else if (purpose === "gift_renewal") {
+        targetUrl = giftId ? `/editor/${giftId}?step=finish&paid=gift_renewal` : "/dashboard";
+      } else if (purpose === "tip") {
+        targetUrl = giftId ? `/editor/${giftId}?step=finish&paid=tip` : "/";
+      }
+      router.push(targetUrl);
+      return;
+    }
+    const timer = setTimeout(() => {
+      setRedirectCountdown((prev) => (prev !== null ? prev - 1 : null));
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [redirectCountdown, order, router]);
+
   const handleCopy = (text: string, field: string) => {
     navigator.clipboard.writeText(text);
     setCopiedField(field);
@@ -151,7 +199,15 @@ export default function CheckoutOrderPage() {
   const handleCheckPaymentNow = async () => {
     setCheckingStatus(true);
     setError(null);
-    await loadOrder(true);
+    setMessage(null);
+    const latest = await loadOrder(true);
+    if (latest && latest.status !== "PAID") {
+      setMessage(
+        order?.payosConfigured
+          ? "Chưa ghi nhận giao dịch chuyển khoản mới. Nếu bạn vừa chuyển xong, vui lòng đợi vài giây để hệ thống tự động kích hoạt."
+          : "Đơn hàng hiện đang ở chế độ đối soát thủ công (PayOS chưa được cấu hình)."
+      );
+    }
     setCheckingStatus(false);
   };
 
@@ -168,7 +224,10 @@ export default function CheckoutOrderPage() {
         throw new Error(data.error?.message || "Không thể gửi xác nhận.");
       }
       setMessage(data.data.message);
-      await loadOrder(true);
+      const latest = await loadOrder(true);
+      if (data.data?.paid || latest?.status === "PAID") {
+        setPayosInitError(null);
+      }
     } catch (err: any) {
       setError(err.message || "Đã xảy ra lỗi.");
     } finally {
@@ -330,17 +389,58 @@ export default function CheckoutOrderPage() {
                   </h3>
                   <p className="text-xs text-slate-500">
                     {isPayosActive
-                      ? "Tự động xác nhận & cộng quyền lợi trong 3 giây sau khi chuyển khoản"
+                      ? "Tự động xác nhận & kích hoạt ngay sau khi chuyển khoản"
+                      : order.payosConfigured
+                      ? "Đang chuẩn bị mã VietQR tự động PayOS..."
                       : "Mở app Ngân hàng bất kỳ và quét mã QR bên dưới"}
                   </p>
                 </div>
               </div>
 
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] font-semibold">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                {isPayosActive ? "Đối soát tự động 24/7" : "VietQR 24/7"}
-              </span>
+              {order.payosConfigured ? (
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] font-semibold">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  Đối soát tự động 24/7
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200 text-[11px] font-semibold">
+                  Đối soát thủ công
+                </span>
+              )}
             </div>
+
+            {order.payosConfigured && !isPayosActive && payosInitError && (
+              <div
+                data-testid="payos-init-error"
+                className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs flex flex-wrap items-center justify-between gap-3"
+              >
+                <div className="flex items-start gap-2">
+                  <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-semibold">Không thể tạo mã VietQR tự động PayOS</p>
+                    <p className="text-amber-800/90 mt-0.5">{payosInitError}</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={initializeInAppPayOSQr}
+                  disabled={payosLoading}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 disabled:opacity-60 text-white font-semibold transition shrink-0"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${payosLoading ? "animate-spin" : ""}`} />
+                  <span>Tạo lại mã QR PayOS</span>
+                </button>
+              </div>
+            )}
+
+            {!order.payosConfigured && (
+              <div className="p-3 rounded-2xl bg-amber-50/80 border border-amber-200/80 text-amber-900 text-xs flex items-start gap-2">
+                <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                <span>
+                  Cổng đối soát tự động PayOS chưa được cấu hình trên môi trường này. Chuyển khoản xong hãy bấm nút xác nhận bên dưới (hoặc dùng nút Sandbox Test nếu đang thử nghiệm).
+                </span>
+              </div>
+            )}
 
             <div className="grid grid-cols-1 md:grid-cols-[260px_1fr] gap-6 items-start">
               {/* Embedded QR Code Column */}
@@ -390,7 +490,9 @@ export default function CheckoutOrderPage() {
                 </div>
 
                 <p className="text-[11px] text-slate-400 text-center leading-relaxed">
-                  Hệ thống tự động kiểm tra trạng thái thanh toán mỗi 3 giây.
+                  {order.payosConfigured
+                    ? "Hệ thống tự động kiểm tra trạng thái thanh toán mỗi 3 giây."
+                    : "Chuyển khoản xong, bấm nút xác nhận bên dưới để gửi đối soát."}
                 </p>
               </div>
 
@@ -487,11 +589,15 @@ export default function CheckoutOrderPage() {
                 >
                   {submitting ? (
                     <>
-                      <Loader2 className="w-4 h-4 animate-spin" /> Đang gửi xác nhận...
+                      <Loader2 className="w-4 h-4 animate-spin" />{" "}
+                      {isPayosActive ? "Đang kiểm tra giao dịch..." : "Đang gửi xác nhận..."}
                     </>
                   ) : (
                     <>
-                      <CheckCircle2 className="w-4 h-4" /> Tôi đã chuyển khoản — kiểm tra &amp; kích hoạt
+                      <CheckCircle2 className="w-4 h-4" />{" "}
+                      {isPayosActive
+                        ? "Tôi đã chuyển khoản — kiểm tra & kích hoạt"
+                        : "Tôi đã chuyển khoản xong"}
                     </>
                   )}
                 </button>
@@ -559,6 +665,11 @@ export default function CheckoutOrderPage() {
               <p className="text-xs text-emerald-700 max-w-md mx-auto">
                 Quyền lợi của bạn đã được kích hoạt tự động trên hệ thống Ding Dong Gift.
               </p>
+              {redirectCountdown !== null && redirectCountdown > 0 && (
+                <p className="text-xs font-semibold text-emerald-800">
+                  Tự động quay lại sau {redirectCountdown}s...
+                </p>
+              )}
               <div className="pt-2 flex flex-col sm:flex-row gap-3 justify-center">
                 <Link
                   href={targetUrl}
@@ -567,6 +678,15 @@ export default function CheckoutOrderPage() {
                   <span>{ctaText}</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
+                {redirectCountdown !== null && (
+                  <button
+                    type="button"
+                    onClick={() => setRedirectCountdown(null)}
+                    className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-white border border-emerald-200 text-emerald-800 font-semibold text-xs rounded-full hover:bg-emerald-100/60 transition"
+                  >
+                    <span>Ở lại trang này</span>
+                  </button>
+                )}
                 <Link
                   href="/dashboard"
                   className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-white border border-slate-200 text-slate-700 font-semibold text-xs rounded-full hover:bg-slate-50 transition"

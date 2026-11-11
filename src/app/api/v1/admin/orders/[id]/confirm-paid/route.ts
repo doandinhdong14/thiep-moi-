@@ -3,7 +3,7 @@ import prisma from "@/lib/prisma";
 import { requireRole } from "@/lib/auth/session";
 import { apiSuccess, apiError, handleApiError } from "@/lib/api/response";
 import { logAudit } from "@/lib/audit";
-import { fulfillOrder } from "@/lib/payments/fulfillment";
+import { createAffiliateCommissionForOrder, fulfillOrder } from "@/lib/payments/fulfillment";
 
 export async function POST(
   req: NextRequest,
@@ -75,94 +75,11 @@ export async function POST(
         });
       }
 
-      // Fulfill based on order purpose (media credits, gift unlock, renewal, etc.)
+      // Fulfill based on order purpose (media credits, gift unlock, renewal, digital plans)
       await fulfillOrder(order.id, tx);
 
-      // 3. Create Entitlements for digital plans
-      let purchaseInvitationId: string | null = null;
-      if (order.purchaseContext) {
-        try {
-          const parsed = JSON.parse(order.purchaseContext);
-          purchaseInvitationId = parsed.invitationId || null;
-        } catch {}
-      }
-
-      for (const line of order.lines) {
-        if (line.productType === "DIGITAL_PLAN" && line.referenceId) {
-          const plan = await tx.plan.findUnique({ where: { id: line.referenceId } });
-          const durationDays = plan?.defaultDurationDays || 30;
-          const expiresAt = new Date(now.getTime() + durationDays * 24 * 60 * 60 * 1000);
-
-          await tx.entitlement.create({
-            data: {
-              ownerId: order.buyerId,
-              planId: line.referenceId,
-              invitationId: purchaseInvitationId,
-              sourceOrderLineId: line.id,
-              beginsAt: now,
-              expiresAt,
-              status: "ACTIVE",
-            },
-          });
-        }
-      }
-
-      // 4. Commission ledger 10% for referred affiliate
-      let commissionCreated = null;
-      if (order.referredAffiliateId) {
-        const affiliate = await tx.affiliateProfile.findUnique({
-          where: { id: order.referredAffiliateId },
-        });
-
-        // Self-referral safety guard
-        if (affiliate && affiliate.userId !== order.buyerId && affiliate.status === "APPROVED") {
-          const defaultProgram = await tx.affiliateProgram.findFirst({
-            where: { code: "DEFAULT_10", active: true },
-          });
-
-          if (defaultProgram) {
-            // Eligible revenue = sum of commissionEligible lines
-            const eligibleBaseVnd = order.lines
-              .filter((l) => l.commissionEligible)
-              .reduce((sum, l) => sum + l.totalVnd, 0);
-
-            // integer 10% (1000 bps)
-            const commissionAmountVnd = Math.floor((eligibleBaseVnd * defaultProgram.rateBps) / 10000);
-
-            if (commissionAmountVnd > 0) {
-              const holdDays = defaultProgram.holdDays || 14;
-              const holdUntil = new Date(now.getTime() + holdDays * 24 * 60 * 60 * 1000);
-
-              const comm = await tx.commission.create({
-                data: {
-                  orderId: order.id,
-                  affiliateId: affiliate.id,
-                  programId: defaultProgram.id,
-                  programRateBpsSnapshot: defaultProgram.rateBps,
-                  eligibleBaseVnd,
-                  amountVnd: commissionAmountVnd,
-                  status: "PENDING",
-                  holdUntil,
-                  approvedAt: now,
-                },
-              });
-
-              await tx.commissionLedgerEntry.create({
-                data: {
-                  commissionId: comm.id,
-                  affiliateId: affiliate.id,
-                  type: "EARNED",
-                  amountVnd: commissionAmountVnd,
-                  idempotencyKey: `comm_earned_${order.id}`,
-                  effectiveAt: now,
-                },
-              });
-
-              commissionCreated = comm;
-            }
-          }
-        }
-      }
+      // Commission ledger 10% for referred affiliate
+      const commissionCreated = await createAffiliateCommissionForOrder(order.id, now, tx);
 
       return { updatedOrder, commission: commissionCreated };
     });

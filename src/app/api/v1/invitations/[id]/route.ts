@@ -7,6 +7,7 @@ import { apiSuccess, apiError, handleApiError } from "@/lib/api/response";
 import { logAudit } from "@/lib/audit";
 import { InvitationContentSchema } from "@/lib/templates/schema";
 import { TEMPLATES_REGISTRY } from "@/lib/templates/registry";
+import { syncPendingPayOSOrdersForUser } from "@/lib/payments/payos";
 
 export async function GET(
   req: NextRequest,
@@ -14,6 +15,7 @@ export async function GET(
 ) {
   try {
     const user = await requireAuth();
+    await syncPendingPayOSOrdersForUser(user.id, { giftId: params.id });
     const inv = await prisma.invitation.findUnique({
       where: { id: params.id },
       include: {
@@ -56,6 +58,7 @@ export async function GET(
         privacyMode: inv.privacyMode,
         hasPasscode: !!inv.passcodeHash,
         publishedAt: inv.publishedAt,
+        expiresAt: inv.expiresAt,
         createdAt: inv.createdAt,
         updatedAt: inv.updatedAt,
         occasion: inv.occasion,

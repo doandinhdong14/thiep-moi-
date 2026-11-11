@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import prisma from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth/session";
 import { apiSuccess, handleApiError } from "@/lib/api/response";
+import { syncPendingPayOSOrdersForUser } from "@/lib/payments/payos";
 
 export async function GET(req: NextRequest) {
   try {
@@ -15,6 +16,8 @@ export async function GET(req: NextRequest) {
         },
       });
     }
+
+    await syncPendingPayOSOrdersForUser(user.id);
 
     const dbUser = await prisma.user.findUnique({
       where: { id: user.id },

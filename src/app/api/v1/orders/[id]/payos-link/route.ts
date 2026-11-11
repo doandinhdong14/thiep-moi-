@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import prisma from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth/session";
 import { apiSuccess, apiError, handleApiError } from "@/lib/api/response";
-import { createPayOSPaymentLink } from "@/lib/payments/payos";
+import { createPayOSPaymentLink, syncPayOSOrderStatus } from "@/lib/payments/payos";
 
 export async function POST(
   req: NextRequest,
@@ -32,8 +32,16 @@ export async function POST(
       });
     }
 
+    const syncResult = await syncPayOSOrderStatus(order.id);
+    if (syncResult.paid) {
+      return apiSuccess({
+        message: "Đơn hàng đã được thanh toán.",
+        alreadyPaid: true,
+      });
+    }
+
     const host = req.headers.get("x-forwarded-host") || req.headers.get("host") || "";
-    const proto = req.headers.get("x-forwarded-proto") || "https";
+    const proto = req.headers.get("x-forwarded-proto") || (host.includes("localhost") ? "http" : "https");
     const origin = host ? `${proto}://${host}` : "";
 
     const payosQr = await createPayOSPaymentLink({

@@ -5,6 +5,7 @@ import { getCurrentUser, createSession } from "@/lib/auth/session";
 import { apiSuccess, apiError, handleApiError } from "@/lib/api/response";
 import { logAudit } from "@/lib/audit";
 import { CATALOG_PRODUCTS, TEST_MEDIA_CREDIT_PRICE_VND, TEST_PRODUCT_PRICE_VND } from "@/data/catalogData";
+import { syncPendingPayOSOrdersForUser } from "@/lib/payments/payos";
 
 const CreateOrderSchema = z.object({
   purpose: z.enum([
@@ -72,9 +73,12 @@ export async function POST(req: NextRequest) {
       titleSnapshot = `Ủng hộ shop Ding Dong Gift (${unitPriceVnd.toLocaleString("vi-VN")}đ)`;
       productType = "TIP";
     } else if (data.purpose === "gift_renewal") {
-      unitPriceVnd = 39000;
-      totalVnd = 39000;
-      titleSnapshot = `Gia hạn thời hạn thiệp 1 năm`;
+      const isOneMonth = data.amountVnd === 19000;
+      unitPriceVnd = isOneMonth ? 19000 : 39000;
+      totalVnd = unitPriceVnd;
+      titleSnapshot = isOneMonth
+        ? `Gia hạn thời hạn thiệp 1 tháng`
+        : `Gia hạn thời hạn thiệp 1 năm`;
       productType = "RENEWAL";
       referenceId = data.giftId || null;
     } else if (data.purpose === "gift_unlock") {
@@ -93,6 +97,7 @@ export async function POST(req: NextRequest) {
         }
       }
       totalVnd = unitPriceVnd || TEST_PRODUCT_PRICE_VND;
+      unitPriceVnd = totalVnd;
       productType = "GIFT_UNLOCK";
     } else {
       unitPriceVnd = TEST_PRODUCT_PRICE_VND;
@@ -102,11 +107,19 @@ export async function POST(req: NextRequest) {
     const randomSuffix = Math.random().toString(36).substring(2, 6).toUpperCase();
     const orderNumber = `DDG-${Date.now().toString(36).toUpperCase()}-${randomSuffix}`;
 
+    const durationDays =
+      data.purpose === "gift_renewal"
+        ? totalVnd <= 19000
+          ? 30
+          : 365
+        : undefined;
+
     const purchaseContext = JSON.stringify({
       purpose: data.purpose,
       giftId: data.giftId,
       step: data.returnContext?.step,
       quantity: data.quantity,
+      durationDays,
       returnContext: data.returnContext,
     });
 
@@ -175,6 +188,8 @@ export async function GET(req: NextRequest) {
     if (!user) {
       return apiSuccess({ orders: [] });
     }
+
+    await syncPendingPayOSOrdersForUser(user.id);
 
     const orders = await prisma.order.findMany({
       where: { buyerId: user.id },

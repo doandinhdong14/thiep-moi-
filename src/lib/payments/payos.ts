@@ -2,7 +2,7 @@ import { PayOS } from "@payos/node";
 import { env } from "@/lib/config/env";
 import prisma from "@/lib/prisma";
 import crypto from "crypto";
-import { fulfillOrder } from "./fulfillment";
+import { createAffiliateCommissionForOrder, fulfillOrder } from "./fulfillment";
 import { generateQrDataUrl } from "@/lib/qr";
 import { buildSafeVietQrDescription, resolveVietQRBank } from "./vietqr";
 
@@ -21,28 +21,51 @@ export interface InAppPayOSQrPayload {
 }
 
 let payosInstance: PayOS | null = null;
+let payosConfigSignature = "";
+const confirmedWebhookUrls = new Set<string>();
 
 export function getPayOSClient(): PayOS | null {
-  const clientId = process.env.PAYOS_CLIENT_ID || env.PAYOS_CLIENT_ID;
-  const apiKey = process.env.PAYOS_API_KEY || env.PAYOS_API_KEY;
-  const checksumKey = process.env.PAYOS_CHECKSUM_KEY || env.PAYOS_CHECKSUM_KEY;
+  const clientId = (process.env.PAYOS_CLIENT_ID || env.PAYOS_CLIENT_ID || "").trim();
+  const apiKey = (process.env.PAYOS_API_KEY || env.PAYOS_API_KEY || "").trim();
+  const checksumKey = (process.env.PAYOS_CHECKSUM_KEY || env.PAYOS_CHECKSUM_KEY || "").trim();
 
   if (!clientId || !apiKey || !checksumKey) {
     return null;
   }
 
-  if (!payosInstance) {
+  const nextSignature = `${clientId}:${apiKey}:${checksumKey}`;
+  if (!payosInstance || payosConfigSignature !== nextSignature) {
     payosInstance = new PayOS({
       clientId,
       apiKey,
       checksumKey,
     });
+    payosConfigSignature = nextSignature;
   }
   return payosInstance;
 }
 
+async function ensurePayOSWebhookRegistered(
+  payos: PayOS,
+  webhookUrl: string,
+  baseUrl: string
+): Promise<void> {
+  if (!webhookUrl || confirmedWebhookUrls.has(webhookUrl)) return;
+  try {
+    const webhookHost = new URL(webhookUrl).host;
+    const appHost = new URL(baseUrl).host;
+    if (!webhookHost || webhookHost !== appHost || webhookHost.includes("localhost")) {
+      return;
+    }
+    confirmedWebhookUrls.add(webhookUrl);
+    await payos.webhooks.confirm(webhookUrl);
+  } catch {
+    confirmedWebhookUrls.delete(webhookUrl);
+  }
+}
+
 export function generatePayOSOrderCode(): number {
-  // Generate a safe unique 10 to 12 digit integer
+  // Generate a safe unique 10 to 13 digit integer
   const nowSec = Math.floor(Date.now() / 1000);
   const rand = Math.floor(Math.random() * 900) + 100;
   return Number(`${nowSec}${rand}`);
@@ -125,25 +148,63 @@ export async function createPayOSPaymentLink({
   const returnUrl = `${baseUrl}/checkout/${order.id}?status=success`;
   const cancelUrl = `${baseUrl}/checkout/${order.id}?status=cancelled`;
 
-  // PayOS description max 25 chars alphanumeric
-  const description = buildSafeVietQrDescription(`DDG ${order.orderNumber}`, 25);
+  const configuredWebhookUrl = (process.env.PAYOS_WEBHOOK_URL || env.PAYOS_WEBHOOK_URL || "").trim();
+  if (configuredWebhookUrl.startsWith("https://")) {
+    void ensurePayOSWebhookRegistered(payos, configuredWebhookUrl, baseUrl);
+  }
 
-  const items = order.lines.map((l) => ({
+  // PayOS description max 25 chars alphanumeric (some non-linked banks allow max 9 chars)
+  const compactOrderNumber = order.orderNumber.replace(/^DDG-?/i, "");
+  const primaryDescription =
+    buildSafeVietQrDescription(`DDG ${compactOrderNumber}`, 25) ||
+    `DDG${String(orderCode).slice(-8)}`;
+
+  const rawItems = order.lines.map((l) => ({
     name: l.titleSnapshot.slice(0, 50),
-    quantity: l.quantity,
-    price: l.unitPriceVnd,
+    quantity: Math.max(1, l.quantity),
+    price: Math.max(0, l.unitPriceVnd),
   }));
+  const itemsSum = rawItems.reduce((sum, item) => sum + item.quantity * item.price, 0);
+  const items =
+    rawItems.length > 0 && itemsSum === order.totalVnd && rawItems.every((i) => i.price > 0)
+      ? rawItems
+      : [
+          {
+            name: (order.lines[0]?.titleSnapshot || `Don hang ${order.orderNumber}`).slice(0, 50),
+            quantity: 1,
+            price: order.totalVnd,
+          },
+        ];
 
-  const paymentData = {
-    orderCode,
-    amount: order.totalVnd,
-    description,
-    returnUrl,
-    cancelUrl,
-    items,
-  };
+  let response;
+  try {
+    response = await payos.paymentRequests.create({
+      orderCode,
+      amount: order.totalVnd,
+      description: primaryDescription,
+      returnUrl,
+      cancelUrl,
+      items,
+    });
+  } catch (err: any) {
+    const shortDescription =
+      buildSafeVietQrDescription(compactOrderNumber, 9) ||
+      `DDG${String(orderCode).slice(-6)}`;
+    const errMessage = String(err?.message || "");
+    if (shortDescription !== primaryDescription && /mô tả|description|9|ký tự/i.test(errMessage)) {
+      response = await payos.paymentRequests.create({
+        orderCode,
+        amount: order.totalVnd,
+        description: shortDescription,
+        returnUrl,
+        cancelUrl,
+        items,
+      });
+    } else {
+      throw err;
+    }
+  }
 
-  const response = await payos.paymentRequests.create(paymentData);
   const bank = resolveVietQRBank(response.bin);
   const qrDataUrl = await generateQrDataUrl(response.qrCode, { width: 320, margin: 2 });
 
@@ -190,20 +251,28 @@ export async function processPayOSWebhookPayload(webhookBody: any) {
     verifiedData = await payos.webhooks.verify(webhookBody);
   } catch (err: any) {
     // If webhook is a test ping from PayOS console (e.g. orderCode 123 or sample), allow gracefully
-    if (webhookBody?.data?.orderCode === 123 || webhookBody?.data?.description === "test") {
+    if (
+      webhookBody?.data?.orderCode === 123 ||
+      webhookBody?.data?.description === "test" ||
+      webhookBody?.data?.description === "VQRIO123"
+    ) {
       return { success: true, message: "PayOS test webhook ping verified successfully." };
     }
     throw new Error(`Xác thực chữ ký Webhook PayOS thất bại: ${err.message}`);
   }
 
-  const { orderCode, code, reference, paymentLinkId } = verifiedData;
+  if (Number(verifiedData?.orderCode) === 123) {
+    return { success: true, message: "PayOS test webhook ping verified successfully." };
+  }
+
+  const { orderCode, code, reference, paymentLinkId, amount } = verifiedData;
 
   // 2. Idempotency Check in PaymentWebhookEvent
-  const providerEventId = `${orderCode}_${reference || paymentLinkId || Date.now()}`;
   const payloadHash = crypto
     .createHash("sha256")
     .update(JSON.stringify(webhookBody))
     .digest("hex");
+  const providerEventId = `${orderCode}_${reference || paymentLinkId || payloadHash.slice(0, 16)}`;
 
   const existingEvent = await prisma.paymentWebhookEvent.findUnique({
     where: {
@@ -240,7 +309,18 @@ export async function processPayOSWebhookPayload(webhookBody: any) {
   });
 
   // Only proceed if payment code is "00" (successful)
-  if (code !== "00") {
+  const isSuccessCode =
+    code === "00" || (!code && webhookBody?.code === "00" && webhookBody?.success === true);
+  if (!isSuccessCode) {
+    await prisma.paymentWebhookEvent.update({
+      where: {
+        provider_providerEventId: {
+          provider: "payos",
+          providerEventId,
+        },
+      },
+      data: { status: "IGNORED", processedAt: new Date() },
+    });
     return { success: true, message: `Bỏ qua trạng thái không thành công: ${code}` };
   }
 
@@ -260,6 +340,15 @@ export async function processPayOSWebhookPayload(webhookBody: any) {
   });
 
   if (!paymentAttempt) {
+    await prisma.paymentWebhookEvent.update({
+      where: {
+        provider_providerEventId: {
+          provider: "payos",
+          providerEventId,
+        },
+      },
+      data: { status: "IGNORED", processedAt: new Date() },
+    });
     return { success: true, message: `Không tìm thấy đơn hàng tương ứng với PayOS orderCode: ${orderCode}` };
   }
 
@@ -279,7 +368,28 @@ export async function processPayOSWebhookPayload(webhookBody: any) {
     return { success: true, message: "Đơn hàng đã được đánh dấu thanh toán trước đó." };
   }
 
-  // 4. Atomic transaction to mark Order PAID, create Entitlements and Commissions
+  // Verify full amount has been paid before unlocking (supports split transfers via PayOS API check)
+  if (typeof amount === "number" && order.totalVnd > 0 && amount < order.totalVnd) {
+    const link = await payos.paymentRequests.get(Number(orderCode)).catch(() => null);
+    const totalPaid = link?.amountPaid ?? amount;
+    if (link?.status !== "PAID" && totalPaid < order.totalVnd) {
+      await prisma.paymentWebhookEvent.update({
+        where: {
+          provider_providerEventId: {
+            provider: "payos",
+            providerEventId,
+          },
+        },
+        data: { status: "PARTIAL", processedAt: new Date() },
+      });
+      return {
+        success: true,
+        message: `Đã nhận ${totalPaid.toLocaleString("vi-VN")}đ / ${order.totalVnd.toLocaleString("vi-VN")}đ, chờ đủ số tiền.`,
+      };
+    }
+  }
+
+  // 4. Atomic transaction to mark Order PAID, fulfill perks, create Entitlements and Commissions
   await finalizePaidOrderFromPayOS({
     orderId: order.id,
     paymentAttemptId: paymentAttempt.id,
@@ -317,101 +427,17 @@ export async function finalizePaidOrderFromPayOS({
     });
 
     if (claim.count > 0) {
-      const order = await tx.order.findUnique({
-        where: { id: orderId },
-        include: { lines: true },
+      await tx.paymentAttempt.update({
+        where: { id: paymentAttemptId },
+        data: {
+          status: "PAID",
+          paidAt: now,
+          rawSafeMetadata: JSON.stringify(rawMetadata),
+        },
       });
 
-      if (order) {
-        await tx.paymentAttempt.update({
-          where: { id: paymentAttemptId },
-          data: {
-            status: "PAID",
-            paidAt: now,
-            rawSafeMetadata: JSON.stringify(rawMetadata),
-          },
-        });
-
-        await fulfillOrder(order.id, tx);
-
-        let purchaseInvitationId: string | null = null;
-        if (order.purchaseContext) {
-          try {
-            const parsed = JSON.parse(order.purchaseContext);
-            purchaseInvitationId = parsed.invitationId || null;
-          } catch {}
-        }
-
-        for (const line of order.lines) {
-          if (line.productType === "DIGITAL_PLAN" && line.referenceId) {
-            const plan = await tx.plan.findUnique({ where: { id: line.referenceId } });
-            const durationDays = plan?.defaultDurationDays || 30;
-            const expiresAt = new Date(now.getTime() + durationDays * 24 * 60 * 60 * 1000);
-
-            await tx.entitlement.create({
-              data: {
-                ownerId: order.buyerId,
-                planId: line.referenceId,
-                invitationId: purchaseInvitationId,
-                sourceOrderLineId: line.id,
-                beginsAt: now,
-                expiresAt,
-                status: "ACTIVE",
-              },
-            });
-          }
-        }
-
-        if (order.referredAffiliateId) {
-          const affiliate = await tx.affiliateProfile.findUnique({
-            where: { id: order.referredAffiliateId },
-          });
-
-          if (affiliate && affiliate.userId !== order.buyerId && affiliate.status === "APPROVED") {
-            const defaultProgram = await tx.affiliateProgram.findFirst({
-              where: { code: "DEFAULT_10", active: true },
-            });
-
-            if (defaultProgram) {
-              const eligibleBaseVnd = order.lines
-                .filter((l) => l.commissionEligible)
-                .reduce((sum, l) => sum + l.totalVnd, 0);
-
-              const commissionAmountVnd = Math.floor((eligibleBaseVnd * defaultProgram.rateBps) / 10000);
-
-              if (commissionAmountVnd > 0) {
-                const holdDays = defaultProgram.holdDays || 14;
-                const holdUntil = new Date(now.getTime() + holdDays * 24 * 60 * 60 * 1000);
-
-                const comm = await tx.commission.create({
-                  data: {
-                    orderId: order.id,
-                    affiliateId: affiliate.id,
-                    programId: defaultProgram.id,
-                    programRateBpsSnapshot: defaultProgram.rateBps,
-                    eligibleBaseVnd,
-                    amountVnd: commissionAmountVnd,
-                    status: "PENDING",
-                    holdUntil,
-                    approvedAt: now,
-                  },
-                });
-
-                await tx.commissionLedgerEntry.create({
-                  data: {
-                    commissionId: comm.id,
-                    affiliateId: affiliate.id,
-                    type: "EARNED",
-                    amountVnd: commissionAmountVnd,
-                    idempotencyKey: `comm_earned_${order.id}`,
-                    effectiveAt: now,
-                  },
-                });
-              }
-            }
-          }
-        }
-      }
+      await fulfillOrder(orderId, tx);
+      await createAffiliateCommissionForOrder(orderId, now, tx);
     }
 
     if (providerEventId) {
@@ -433,47 +459,121 @@ export async function finalizePaidOrderFromPayOS({
 
 /**
  * Checks PayOS status directly for active pending payment attempts so in-app checkout confirms
- * immediately even if webhook delivery lags.
+ * immediately even if webhook delivery lags or is unreachable (e.g., local development).
  */
 export async function syncPayOSOrderStatus(orderId: string): Promise<{ synced: boolean; paid: boolean }> {
   const payos = getPayOSClient();
   if (!payos) return { synced: false, paid: false };
 
-  const attempt = await prisma.paymentAttempt.findFirst({
+  const order = await prisma.order.findUnique({
+    where: { id: orderId },
+    select: { id: true, status: true, totalVnd: true },
+  });
+  if (!order) return { synced: false, paid: false };
+  if (order.status === "PAID") return { synced: true, paid: true };
+
+  const attempts = await prisma.paymentAttempt.findMany({
     where: {
       orderId,
       provider: "payos",
       status: "PENDING",
     },
     orderBy: { createdAt: "desc" },
+    take: 5,
   });
 
-  if (!attempt?.providerRef) return { synced: false, paid: false };
-  const orderCode = Number(attempt.providerRef);
-  if (!Number.isFinite(orderCode) || orderCode <= 0) return { synced: false, paid: false };
+  if (attempts.length === 0) return { synced: false, paid: false };
 
-  try {
-    const link = await payos.paymentRequests.get(orderCode);
-    if (link.status === "PAID" || (link.amount > 0 && link.amountPaid >= link.amount)) {
-      await finalizePaidOrderFromPayOS({
-        orderId,
-        paymentAttemptId: attempt.id,
-        rawMetadata: link,
-      });
-      return { synced: true, paid: true };
+  let anySynced = false;
+  for (const attempt of attempts) {
+    if (!attempt.providerRef) continue;
+    const orderCode = Number(attempt.providerRef);
+    if (!Number.isFinite(orderCode) || orderCode <= 0) continue;
+
+    try {
+      const link = await payos.paymentRequests.get(orderCode);
+      anySynced = true;
+
+      const isPaid =
+        link.status === "PAID" ||
+        (link.amount > 0 && link.amountPaid >= link.amount) ||
+        (order.totalVnd > 0 && link.amountPaid >= order.totalVnd);
+
+      if (isPaid) {
+        await finalizePaidOrderFromPayOS({
+          orderId,
+          paymentAttemptId: attempt.id,
+          rawMetadata: link,
+        });
+        return { synced: true, paid: true };
+      }
+
+      if (link.status === "CANCELLED" || link.status === "EXPIRED") {
+        await prisma.paymentAttempt.update({
+          where: { id: attempt.id },
+          data: { status: link.status === "CANCELLED" ? "CANCELLED" : "FAILED" },
+        });
+      }
+    } catch {
+      // Try remaining pending attempts before returning
     }
-
-    if (link.status === "CANCELLED" || link.status === "EXPIRED") {
-      await prisma.paymentAttempt.update({
-        where: { id: attempt.id },
-        data: { status: link.status === "CANCELLED" ? "CANCELLED" : "FAILED" },
-      });
-      return { synced: true, paid: false };
-    }
-
-    return { synced: true, paid: false };
-  } catch {
-    return { synced: false, paid: false };
   }
+
+  return { synced: anySynced, paid: false };
+}
+
+/**
+ * Syncs recent pending PayOS orders for a user so returning to the editor or dashboard
+ * immediately reflects completed transfers even if the user left the checkout page early.
+ */
+export async function syncPendingPayOSOrdersForUser(
+  userId: string,
+  options?: { giftId?: string }
+): Promise<number> {
+  const payos = getPayOSClient();
+  if (!payos) return 0;
+
+  const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
+  const pendingOrders = await prisma.order.findMany({
+    where: {
+      buyerId: userId,
+      status: { in: ["PENDING", "TRANSFER_SUBMITTED"] },
+      createdAt: { gte: since },
+      paymentAttempts: {
+        some: {
+          provider: "payos",
+          status: "PENDING",
+        },
+      },
+    },
+    select: {
+      id: true,
+      purchaseContext: true,
+      lines: { select: { referenceId: true } },
+    },
+    orderBy: { createdAt: "desc" },
+    take: 5,
+  });
+
+  if (pendingOrders.length === 0) return 0;
+
+  const prioritized = options?.giftId
+    ? [...pendingOrders].sort((a, b) => {
+        const aMatch =
+          a.purchaseContext?.includes(options.giftId!) ||
+          a.lines.some((l) => l.referenceId === options.giftId);
+        const bMatch =
+          b.purchaseContext?.includes(options.giftId!) ||
+          b.lines.some((l) => l.referenceId === options.giftId);
+        return Number(bMatch) - Number(aMatch);
+      })
+    : pendingOrders;
+
+  let paidCount = 0;
+  for (const ord of prioritized.slice(0, 3)) {
+    const res = await syncPayOSOrderStatus(ord.id);
+    if (res.paid) paidCount += 1;
+  }
+  return paidCount;
 }
 

@@ -3,6 +3,7 @@ import prisma from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth/session";
 import { apiSuccess, apiError, handleApiError } from "@/lib/api/response";
 import { logAudit } from "@/lib/audit";
+import { getPayOSClient, syncPayOSOrderStatus } from "@/lib/payments/payos";
 
 export async function POST(
   req: NextRequest,
@@ -23,14 +24,65 @@ export async function POST(
     }
 
     if (order.status === "PAID") {
-      return apiError("Đơn hàng đã được thanh toán thành công.", "ALREADY_PAID", 400);
+      return apiSuccess({
+        paid: true,
+        alreadyPaid: true,
+        order: {
+          id: order.id,
+          orderNumber: order.orderNumber,
+          status: order.status,
+          paymentStatus: order.paymentStatus,
+        },
+        message: "Đơn hàng đã được thanh toán và kích hoạt tự động!",
+      });
     }
 
     if (order.status === "CANCELLED" || order.status === "REFUNDED") {
       return apiError("Đơn hàng đã bị hủy hoặc hoàn tiền.", "INVALID_STATUS", 400);
     }
 
-    // Update order status to TRANSFER_SUBMITTED and record payment attempt
+    // If PayOS is configured, check PayOS immediately instead of forcing manual review
+    if (getPayOSClient()) {
+      const syncResult = await syncPayOSOrderStatus(order.id);
+      if (syncResult.paid) {
+        const paidOrder = await prisma.order.findUnique({ where: { id: order.id } });
+        return apiSuccess({
+          paid: true,
+          order: {
+            id: paidOrder?.id || order.id,
+            orderNumber: paidOrder?.orderNumber || order.orderNumber,
+            status: paidOrder?.status || "PAID",
+            paymentStatus: paidOrder?.paymentStatus || "PAID",
+          },
+          message: "Thanh toán đã được xác nhận tự động và kích hoạt thành công!",
+        });
+      }
+
+      const activePayosAttempt = await prisma.paymentAttempt.findFirst({
+        where: {
+          orderId: order.id,
+          provider: "payos",
+          status: "PENDING",
+        },
+      });
+
+      if (activePayosAttempt) {
+        return apiSuccess({
+          paid: false,
+          autoChecking: true,
+          order: {
+            id: order.id,
+            orderNumber: order.orderNumber,
+            status: order.status,
+            paymentStatus: order.paymentStatus,
+          },
+          message:
+            "Chưa ghi nhận giao dịch chuyển khoản mới trên PayOS. Hệ thống vẫn đang tự động kiểm tra mỗi 3 giây — vui lòng đợi trong giây lát.",
+        });
+      }
+    }
+
+    // Fallback when PayOS is not configured or manual QR was used: record TRANSFER_SUBMITTED for admin review
     const updated = await prisma.$transaction(async (tx) => {
       const ord = await tx.order.update({
         where: { id: order.id },
@@ -65,6 +117,7 @@ export async function POST(
     });
 
     return apiSuccess({
+      paid: false,
       order: {
         id: updated.id,
         orderNumber: updated.orderNumber,
