@@ -3,6 +3,8 @@ import Link from "next/link";
 import prisma from "@/lib/prisma";
 import { Store, MapPin, Phone, Package, ArrowRight, Sparkles } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 interface ShopsPageProps {
   searchParams?: {
     city?: string;

@@ -2,6 +2,8 @@ import Link from "next/link";
 import prisma from "@/lib/prisma";
 import { Sparkles, ArrowRight, Heart, GraduationCap, Cake, Users, Home, Briefcase, PartyPopper } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 export default async function OccasionsPage() {
   const categories = await prisma.occasionCategory.findMany({
     where: { active: true },

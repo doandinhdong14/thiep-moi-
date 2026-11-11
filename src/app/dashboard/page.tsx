@@ -5,6 +5,8 @@ import { getCurrentUser } from "@/lib/auth/session";
 import LogoutButton from "@/components/auth/LogoutButton";
 import { PlusCircle, Sparkles, Eye, Users, QrCode, ExternalLink, Edit3, Heart, Shield, Store, Coins, Settings } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 export default async function DashboardPage() {
   const user = await getCurrentUser();
   if (!user) {

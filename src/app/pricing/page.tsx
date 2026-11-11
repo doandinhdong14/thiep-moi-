@@ -3,6 +3,8 @@ import prisma from "@/lib/prisma";
 import { Check, Sparkles, HelpCircle } from "lucide-react";
 import PlanSelectButton from "@/components/pricing/PlanSelectButton";
 
+export const dynamic = "force-dynamic";
+
 export default async function PricingPage() {
   const plans = await prisma.plan.findMany({
     where: { active: true },
