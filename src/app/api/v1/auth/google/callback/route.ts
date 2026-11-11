@@ -42,6 +42,25 @@ interface GoogleUserInfo {
   locale?: string;
 }
 
+function parseJwt(token: string): Record<string, unknown> | null {
+  try {
+    const parts = token.split(".");
+    if (parts.length < 2) return null;
+    const base64Url = parts[1];
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    const jsonPayload = decodeURIComponent(
+      Buffer.from(base64, "base64")
+        .toString("utf8")
+        .split("")
+        .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+        .join("")
+    );
+    return JSON.parse(jsonPayload);
+  } catch {
+    return null;
+  }
+}
+
 export async function GET(req: NextRequest) {
   const origin = getAppOrigin(req);
   const { searchParams } = new URL(req.url);
@@ -55,6 +74,8 @@ export async function GET(req: NextRequest) {
   const state = searchParams.get("state");
 
   let returnTo = "/dashboard";
+  let stateRedirectUri: string | undefined;
+
   if (state) {
     try {
       const parsed = JSON.parse(Buffer.from(state, "base64url").toString("utf8"));
@@ -66,8 +87,11 @@ export async function GET(req: NextRequest) {
       ) {
         returnTo = parsed.returnTo;
       }
+      if (parsed.redirectUri && typeof parsed.redirectUri === "string") {
+        stateRedirectUri = parsed.redirectUri;
+      }
     } catch {
-      // Fallback to default /dashboard
+      // Fallback to default
     }
   }
 
@@ -75,17 +99,17 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(new URL("/login?error=missing_code", origin));
   }
 
-  const clientId = process.env.GOOGLE_CLIENT_ID;
-  const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+  const clientId = (process.env.GOOGLE_CLIENT_ID || "").trim();
+  const clientSecret = (process.env.GOOGLE_CLIENT_SECRET || "").trim();
 
   if (!clientId || !clientSecret) {
     return NextResponse.redirect(new URL("/login?error=oauth_not_configured", origin));
   }
 
-  const redirectUri = `${origin}/api/v1/auth/google/callback`;
+  const redirectUri = stateRedirectUri || `${origin}/api/v1/auth/google/callback`;
 
   try {
-    // 1. Exchange authorization code for access token
+    // 1. Exchange authorization code for tokens
     const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -105,19 +129,34 @@ export async function GET(req: NextRequest) {
       return NextResponse.redirect(new URL("/login?error=token_exchange_failed", origin));
     }
 
-    // 2. Fetch user information with access token
-    const userInfoRes = await fetch("https://www.googleapis.com/oauth2/v2/userinfo", {
-      headers: {
-        Authorization: `Bearer ${tokenData.access_token}`,
-      },
-    });
+    // 2. Fetch user information
+    let googleUser: GoogleUserInfo = {};
 
-    if (!userInfoRes.ok) {
-      console.error("Failed to fetch Google userinfo:", await userInfoRes.text());
-      return NextResponse.redirect(new URL("/login?error=fetch_user_failed", origin));
+    try {
+      const userInfoRes = await fetch("https://www.googleapis.com/oauth2/v2/userinfo", {
+        headers: {
+          Authorization: `Bearer ${tokenData.access_token}`,
+        },
+      });
+
+      if (userInfoRes.ok) {
+        googleUser = await userInfoRes.json();
+      }
+    } catch (err) {
+      console.warn("Could not fetch userinfo endpoint, falling back to id_token:", err);
     }
 
-    const googleUser: GoogleUserInfo = await userInfoRes.json();
+    // Fallback: extract claims from id_token if userinfo didn't populate
+    if (!googleUser.email && tokenData.id_token) {
+      const idPayload = parseJwt(tokenData.id_token);
+      if (idPayload) {
+        googleUser = {
+          email: typeof idPayload.email === "string" ? idPayload.email : undefined,
+          name: typeof idPayload.name === "string" ? idPayload.name : undefined,
+          picture: typeof idPayload.picture === "string" ? idPayload.picture : undefined,
+        };
+      }
+    }
 
     if (!googleUser.email) {
       return NextResponse.redirect(new URL("/login?error=no_email_provided", origin));
@@ -167,6 +206,17 @@ export async function GET(req: NextRequest) {
     } else {
       if (user.status !== "ACTIVE") {
         return NextResponse.redirect(new URL("/login?error=account_suspended", origin));
+      }
+
+      // If user had no role, give default CREATOR
+      if (user.roles.length === 0) {
+        await prisma.roleAssignment.create({
+          data: {
+            userId: user.id,
+            role: "CREATOR",
+            grantedBy: "GOOGLE_OAUTH",
+          },
+        });
       }
 
       // Sync avatar or verified status if changed
@@ -224,4 +274,3 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(new URL("/login?error=oauth_error", origin));
   }
 }
-

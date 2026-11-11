@@ -24,7 +24,7 @@ function getAppOrigin(req: NextRequest): string {
 
 export async function GET(req: NextRequest) {
   const origin = getAppOrigin(req);
-  const clientId = process.env.GOOGLE_CLIENT_ID;
+  const clientId = (process.env.GOOGLE_CLIENT_ID || "").trim();
 
   if (!clientId) {
     return NextResponse.redirect(new URL("/login?error=oauth_not_configured", origin));
@@ -35,14 +35,15 @@ export async function GET(req: NextRequest) {
   const safeReturnTo =
     rawReturnTo.startsWith("/") && !rawReturnTo.startsWith("//") ? rawReturnTo : "/dashboard";
 
+  const redirectUri = `${origin}/api/v1/auth/google/callback`;
+
   const nonce = crypto.randomBytes(16).toString("hex");
   const statePayload = {
     nonce,
     returnTo: safeReturnTo,
+    redirectUri,
   };
   const state = Buffer.from(JSON.stringify(statePayload)).toString("base64url");
-
-  const redirectUri = `${origin}/api/v1/auth/google/callback`;
 
   const authUrl = new URL("https://accounts.google.com/o/oauth2/v2/auth");
   authUrl.searchParams.set("client_id", clientId);
@@ -64,4 +65,3 @@ export async function GET(req: NextRequest) {
 
   return response;
 }
-
