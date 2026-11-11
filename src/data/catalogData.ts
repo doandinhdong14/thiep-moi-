@@ -1,3 +1,8 @@
+import {
+  TEMPLATES_REGISTRY,
+  isTemplateVisible,
+} from "@/lib/templates/registry";
+
 export interface CatalogProduct {
   id: string;
   slug: string;
@@ -6,6 +11,9 @@ export interface CatalogProduct {
   previewImage?: string;
   previewVideo?: string;
   badge?: string;
+  numberCode?: string;
+  displayOrder?: number;
+  defaultHidden?: boolean;
   price: number;
   compareAtPrice?: number;
   category: string;
@@ -701,7 +709,7 @@ const RAW_CATALOG_PRODUCTS: CatalogProduct[] = [
 export const TEST_PRODUCT_PRICE_VND = 2000;
 export const TEST_MEDIA_CREDIT_PRICE_VND = TEST_PRODUCT_PRICE_VND;
 
-export const CATALOG_PRODUCTS: CatalogProduct[] = RAW_CATALOG_PRODUCTS.map((item) => {
+export const ALL_CATALOG_PRODUCTS: CatalogProduct[] = RAW_CATALOG_PRODUCTS.map((item) => {
   const price = TEST_PRODUCT_PRICE_VND;
   const compareAtPrice =
     item.compareAtPrice && item.compareAtPrice > price
@@ -710,14 +718,84 @@ export const CATALOG_PRODUCTS: CatalogProduct[] = RAW_CATALOG_PRODUCTS.map((item
       ? item.price
       : 49000;
 
+  const tpl = TEMPLATES_REGISTRY[item.slug];
+  const isDefaultVisible = Boolean(tpl && !tpl.defaultHidden);
+  const cleanTitle = tpl?.numberCode
+    ? `${tpl.numberCode} · ${item.title.replace(/^Thiệp\s*\d+\s*:\s*/i, "")}`
+    : item.title;
+
   return {
     ...item,
+    title: cleanTitle,
     price,
     compareAtPrice,
     previewImage: item.previewImage || resolveTemplatePreviewImage(item.slug, item.demoUrl),
-    badge: item.slug.startsWith("thiep-") ? "Tương tác 3D" : item.badge,
+    numberCode: tpl?.numberCode,
+    displayOrder: tpl?.displayOrder,
+    defaultHidden: !isDefaultVisible,
+    badge: tpl?.badge || (item.slug.startsWith("thiep-") ? "Tương tác 3D" : item.badge),
   };
-});
+}).sort((a, b) => (a.displayOrder ?? 999) - (b.displayOrder ?? 999));
+
+export function isCatalogProductVisible(
+  item: CatalogProduct,
+  visibilityOverrides?: Record<string, boolean>
+): boolean {
+  const tpl = TEMPLATES_REGISTRY[item.slug];
+  if (tpl) {
+    return isTemplateVisible(tpl, visibilityOverrides);
+  }
+  if (
+    visibilityOverrides &&
+    Object.prototype.hasOwnProperty.call(visibilityOverrides, item.slug)
+  ) {
+    return Boolean(visibilityOverrides[item.slug]);
+  }
+  return !item.defaultHidden;
+}
+
+export function getVisibleCatalogProducts(
+  visibilityOverrides?: Record<string, boolean>
+): CatalogProduct[] {
+  return ALL_CATALOG_PRODUCTS.filter((item) =>
+    isCatalogProductVisible(item, visibilityOverrides)
+  );
+}
+
+export function findCatalogProductBySlug(slug?: string): CatalogProduct | undefined {
+  if (!slug) return undefined;
+  return ALL_CATALOG_PRODUCTS.find((p) => p.slug === slug);
+}
+
+export const CATALOG_PRODUCTS: CatalogProduct[] = getVisibleCatalogProducts();
+
+export function getVisibleCatalogCategories(products: CatalogProduct[]): CatalogCategory[] {
+  const activeSlugs = new Set(products.map((p) => p.categorySlug));
+  return CATALOG_CATEGORIES.filter((cat) => cat.slug === "all" || activeSlugs.has(cat.slug));
+}
+
+export function getVisibleCollections(products: CatalogProduct[]): CollectionItem[] {
+  const byCategory = new Map<string, CatalogProduct[]>();
+  for (const product of products) {
+    const arr = byCategory.get(product.categorySlug) || [];
+    arr.push(product);
+    byCategory.set(product.categorySlug, arr);
+  }
+
+  return COLLECTIONS_LIST.flatMap((col) => {
+    const matched = byCategory.get(col.categorySlug);
+    if (!matched || matched.length === 0) return [];
+    const first = matched[0];
+    return [
+      {
+        ...col,
+        productCount: matched.length,
+        previewImage: first.previewImage || col.previewImage,
+        image: first.coverImage || col.image,
+      },
+    ];
+  });
+}
 
 export const COLLECTIONS_LIST: CollectionItem[] = [
   {

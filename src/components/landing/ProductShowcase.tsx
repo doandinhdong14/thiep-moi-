@@ -10,20 +10,25 @@ import {
 } from "lucide-react";
 import { productList, topicChips, ProductItem } from "@/data/landingData";
 import ProductDemoModal from "@/components/modals/ProductDemoModal";
-import { CATALOG_PRODUCTS, CatalogProduct } from "@/data/catalogData";
+import { findCatalogProductBySlug, CatalogProduct } from "@/data/catalogData";
 import ProductShowcaseCard from "./ProductShowcaseCard";
 import styles from "./ProductShowcase.module.css";
 
-export default function ProductShowcase() {
+interface ProductShowcaseProps {
+  initialProducts?: ProductItem[];
+}
+
+export default function ProductShowcase({ initialProducts }: ProductShowcaseProps) {
   const sectionRef = useRef<HTMLElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [demoProduct, setDemoProduct] = useState<CatalogProduct | null>(null);
   const [demoModalOpen, setDemoModalOpen] = useState(false);
+  const activeItems = initialProducts && initialProducts.length > 0 ? initialProducts : productList;
   const itemsPerPage = 12;
-  const totalPages = Math.ceil(productList.length / itemsPerPage);
+  const totalPages = Math.max(1, Math.ceil(activeItems.length / itemsPerPage));
 
-  const displayedProducts = productList.slice(
+  const displayedProducts = activeItems.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
@@ -51,7 +56,7 @@ export default function ProductShowcase() {
   };
 
   const handleOpenDemo = (prod: ProductItem) => {
-    const matched = CATALOG_PRODUCTS.find((p) => p.slug === prod.slug);
+    const matched = findCatalogProductBySlug(prod.slug);
     if (matched) {
       setDemoProduct(matched);
     } else {
@@ -86,7 +91,7 @@ export default function ProductShowcase() {
         <div className="flex items-center justify-center gap-2.5 mb-8 sm:mb-10 text-center">
           <Sparkles className="w-6 h-6 sm:w-7 sm:h-7 text-[#ff6b61] shrink-0" />
           <h2 className="text-2xl sm:text-3xl lg:text-[38px] font-bold bg-gradient-to-r from-[#ff6b61] to-[#fa416a] bg-clip-text text-transparent">
-            Hơn 50+ sản phẩm đang chờ bạn khám phá
+            Bộ sưu tập {activeItems.length} mẫu thiệp tương tác độc quyền (#01 – #{String(activeItems.length).padStart(2, "0")})
           </h2>
         </div>
 

@@ -4,7 +4,7 @@ import { requireAuth } from "@/lib/auth/session";
 import { apiSuccess, apiError, handleApiError } from "@/lib/api/response";
 import { logAudit } from "@/lib/audit";
 import { generateShortCode } from "@/lib/utils/slug";
-import { CATALOG_PRODUCTS } from "@/data/catalogData";
+import { findCatalogProductBySlug } from "@/data/catalogData";
 
 export async function POST(
   req: NextRequest,
@@ -36,7 +36,7 @@ export async function POST(
 
     // Verify template price: free only when catalog price is 0 (or fallback non-premium template)
     const templateSlug = inv.templateVersion.template.slug;
-    const catalogItem = CATALOG_PRODUCTS.find((p) => p.slug === templateSlug);
+    const catalogItem = findCatalogProductBySlug(templateSlug);
     const isFree = catalogItem ? catalogItem.price === 0 : !inv.templateVersion.template.isPremium;
 
     if (!isFree && inv.status !== "PUBLISHED") {

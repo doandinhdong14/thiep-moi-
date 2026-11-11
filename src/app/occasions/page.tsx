@@ -1,20 +1,26 @@
 import Link from "next/link";
 import prisma from "@/lib/prisma";
-import { Sparkles, ArrowRight, Heart, GraduationCap, Cake, Users, Home, Briefcase, PartyPopper } from "lucide-react";
+import { Sparkles, ArrowRight } from "lucide-react";
+import { getEffectiveVisibleTemplates } from "@/lib/templates/adminConfig";
 
 export const dynamic = "force-dynamic";
 
 export default async function OccasionsPage() {
-  const categories = await prisma.occasionCategory.findMany({
-    where: { active: true },
-    include: {
-      occasions: {
-        where: { active: true },
-        orderBy: { sortOrder: "asc" },
+  const [categories, visibleTemplates] = await Promise.all([
+    prisma.occasionCategory.findMany({
+      where: { active: true },
+      include: {
+        occasions: {
+          where: { active: true },
+          orderBy: { sortOrder: "asc" },
+        },
       },
-    },
-    orderBy: { sortOrder: "asc" },
-  });
+      orderBy: { sortOrder: "asc" },
+    }),
+    getEffectiveVisibleTemplates(),
+  ]);
+
+  const activeOccasionKeys = new Set<string>(visibleTemplates.map((t) => t.occasionKey));
 
   return (
     <div className="flex-1 bg-slate-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -44,7 +50,7 @@ export default async function OccasionsPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {cat.occasions.map((occ) => {
-                  const isReady = ["wedding", "graduation", "birthday", "love"].includes(occ.formPresetKey);
+                  const isReady = activeOccasionKeys.has(occ.formPresetKey);
                   return (
                     <div
                       key={occ.id}

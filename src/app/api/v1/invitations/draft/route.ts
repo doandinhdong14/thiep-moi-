@@ -5,10 +5,10 @@ import { getCurrentUser, createSession } from "@/lib/auth/session";
 import { apiSuccess, apiError, handleApiError } from "@/lib/api/response";
 import { logAudit } from "@/lib/audit";
 import { generateUniqueSlug, generateShortCode } from "@/lib/utils/slug";
-import { getTemplateDemoContent, TEMPLATES_REGISTRY } from "@/lib/templates/registry";
+import { getTemplateDemoContent, DEFAULT_TEMPLATE_SLUG } from "@/lib/templates/registry";
 
 const DraftSchema = z.object({
-  templateSlug: z.string().default("love-galaxy"),
+  templateSlug: z.string().default(DEFAULT_TEMPLATE_SLUG),
   forceNew: z.boolean().optional(),
 });
 

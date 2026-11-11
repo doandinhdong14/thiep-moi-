@@ -11,6 +11,7 @@ import {
   LayoutDashboard,
   ArrowLeft,
   Activity,
+  Sparkles,
 } from "lucide-react";
 import { BrandMark } from "@/components/common/BrandLogo";
 
@@ -19,6 +20,7 @@ export default function AdminHeader() {
 
   const navItems = [
     { href: "/admin", label: "Tổng quan", icon: LayoutDashboard, exact: true },
+    { href: "/admin/templates", label: "Kho Mẫu & Ghi chú", icon: Sparkles, exact: false },
     { href: "/admin/users", label: "Người dùng & Phân quyền", icon: Users, exact: false },
     { href: "/admin/payments", label: "Thanh toán & Đơn hàng", icon: CreditCard, exact: false },
     { href: "/admin/shops", label: "Đối tác Shop", icon: Store, exact: false },

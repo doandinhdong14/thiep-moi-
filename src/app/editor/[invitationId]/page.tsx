@@ -4,9 +4,9 @@ import { useState, useEffect, useRef, useCallback, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import TemplateRenderer from "@/components/template-renderer/TemplateRenderer";
-import { TEMPLATES_REGISTRY } from "@/lib/templates/registry";
+import { TEMPLATES_REGISTRY, DEFAULT_TEMPLATE_SLUG } from "@/lib/templates/registry";
 import { InvitationContent } from "@/lib/templates/schema";
-import { CATALOG_PRODUCTS } from "@/data/catalogData";
+import { findCatalogProductBySlug } from "@/data/catalogData";
 import EditorStepper, { StepKey } from "@/components/editor/EditorStepper";
 import SaveStatusBar from "@/components/editor/SaveStatusBar";
 import SuggestionSheet from "@/components/editor/SuggestionSheet";
@@ -406,7 +406,7 @@ function EditorContent({ invitationId }: { invitationId: string }) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          templateSlug: invitationMeta?.templateSlug || "love-galaxy",
+          templateSlug: invitationMeta?.templateSlug || DEFAULT_TEMPLATE_SLUG,
           forceNew: true,
         }),
       });
@@ -429,9 +429,9 @@ function EditorContent({ invitationId }: { invitationId: string }) {
   }
 
   const isUnlocked = invitationMeta.status === "PUBLISHED";
-  const catalogItem = CATALOG_PRODUCTS.find((p) => p.slug === invitationMeta.templateSlug);
+  const catalogItem = findCatalogProductBySlug(invitationMeta.templateSlug);
   const isFreeProduct = !catalogItem || catalogItem.price === 0;
-  const templateMeta = TEMPLATES_REGISTRY[invitationMeta.templateSlug] || TEMPLATES_REGISTRY["love-galaxy"];
+  const templateMeta = TEMPLATES_REGISTRY[invitationMeta.templateSlug] || TEMPLATES_REGISTRY[DEFAULT_TEMPLATE_SLUG];
   const publicShareUrl = typeof window !== "undefined" ? `${window.location.origin}/i/${invitationMeta.slug}` : "";
 
   // Expiration days calculation

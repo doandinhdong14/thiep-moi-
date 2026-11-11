@@ -23,6 +23,10 @@ export interface TemplateMeta {
   interactiveUrl?: string;
   badge?: string;
   icon?: string;
+  displayOrder?: number;
+  numberCode?: string;
+  defaultHidden?: boolean;
+  sourceFile?: string;
 }
 
 export const TEMPLATES_REGISTRY: Record<string, TemplateMeta> = {
@@ -400,8 +404,151 @@ export const TEMPLATES_REGISTRY: Record<string, TemplateMeta> = {
   },
 };
 
+export interface UserTemplateSequenceEntry {
+  slug: string;
+  number: number;
+  code: string;
+  cleanTitle: string;
+  badge: string;
+  sourceFile: string;
+}
+
+/**
+ * Canonical 1..10 sequential numbering for the user-provided interactive templates.
+ * Note: filenames start at thiep-3.html (thiep-1/2 were not provided), followed by
+ * thiep-4..thiep-10, thiep-giang-sinh, and thiep-xmas.
+ */
+export const USER_TEMPLATE_SEQUENCE: readonly UserTemplateSequenceEntry[] = [
+  {
+    slug: "thiep-3",
+    number: 1,
+    code: "#01",
+    cleanTitle: "Một Tấm Vé Hẹn Hò ♡",
+    badge: "Mẫu #01 · Vé Hẹn Hò",
+    sourceFile: "public/templates/thiep-3.html",
+  },
+  {
+    slug: "thiep-4",
+    number: 2,
+    code: "#02",
+    cleanTitle: "Gửi Em Một Vũ Trụ ✨",
+    badge: "Mẫu #02 · Vũ Trụ 7 Cảnh",
+    sourceFile: "public/templates/thiep-4.html",
+  },
+  {
+    slug: "thiep-5",
+    number: 3,
+    code: "#03",
+    cleanTitle: "Khu Vườn Kỷ Niệm – Phong Thư Tình Yêu 🌸",
+    badge: "Mẫu #03 · Khóa PIN & 3D",
+    sourceFile: "public/templates/thiep-5.html",
+  },
+  {
+    slug: "thiep-6",
+    number: 4,
+    code: "#04",
+    cleanTitle: "Mùa Thu Kỷ Niệm – Bức Thư Giữa Mùa Lá Rụng 🍁",
+    badge: "Mẫu #04 · Mùa Thu Lá Phong",
+    sourceFile: "public/templates/thiep-6.html",
+  },
+  {
+    slug: "thiep-7",
+    number: 5,
+    code: "#05",
+    cleanTitle: "Đại Dương Tình Yêu & Ánh Sáng Biển Sâu 🌊",
+    badge: "Mẫu #05 · Thư Trong Chai",
+    sourceFile: "public/templates/thiep-7.html",
+  },
+  {
+    slug: "thiep-8",
+    number: 6,
+    code: "#06",
+    cleanTitle: "Vũ Trụ Trái Tim & Bì Thư 3D 💖",
+    badge: "Mẫu #06 · Tim Particle 3D",
+    sourceFile: "public/templates/thiep-8.html",
+  },
+  {
+    slug: "thiep-9",
+    number: 7,
+    code: "#07",
+    cleanTitle: "Vũ Điệu Cực Quang & Trái Tim Pha Lê 3D 🌌",
+    badge: "Mẫu #07 · Cực Quang 3D",
+    sourceFile: "public/templates/thiep-9.html",
+  },
+  {
+    slug: "thiep-10",
+    number: 8,
+    code: "#08",
+    cleanTitle: "Boarding Pass – Chuyến Bay Hạnh Phúc ✈️",
+    badge: "Mẫu #08 · Boarding Pass",
+    sourceFile: "public/templates/thiep-10.html",
+  },
+  {
+    slug: "thiep-giang-sinh",
+    number: 9,
+    code: "#09",
+    cleanTitle: "Thiệp Giáng Sinh – Đêm Noel Diệu Kỳ 🎄",
+    badge: "Mẫu #09 · Noel Lung Linh",
+    sourceFile: "public/templates/thiep-giang-sinh.html",
+  },
+  {
+    slug: "thiep-xmas",
+    number: 10,
+    code: "#10",
+    cleanTitle: "Christmas Special – Hộp Quà Giáng Sinh Lung Linh 🎅",
+    badge: "Mẫu #10 · Christmas 3D",
+    sourceFile: "public/templates/thiep-xmas.html",
+  },
+];
+
+const USER_SEQUENCE_BY_SLUG = new Map(
+  USER_TEMPLATE_SEQUENCE.map((item) => [item.slug, item])
+);
+
+// Enrich registry entries uniformly from the canonical sequence table.
+for (const [slug, meta] of Object.entries(TEMPLATES_REGISTRY)) {
+  const userEntry = USER_SEQUENCE_BY_SLUG.get(slug);
+  if (userEntry) {
+    meta.displayOrder = userEntry.number;
+    meta.numberCode = userEntry.code;
+    meta.defaultHidden = false;
+    meta.sourceFile = userEntry.sourceFile;
+    meta.title = `${userEntry.code} · ${userEntry.cleanTitle}`;
+    meta.badge = userEntry.badge;
+  } else {
+    meta.defaultHidden = true;
+    meta.sourceFile = "React Built-in Component";
+  }
+}
+
+export const DEFAULT_TEMPLATE_SLUG = "thiep-8";
+
+export function isTemplateVisible(
+  tpl: TemplateMeta,
+  visibilityOverrides?: Record<string, boolean>
+): boolean {
+  if (visibilityOverrides && Object.prototype.hasOwnProperty.call(visibilityOverrides, tpl.slug)) {
+    return Boolean(visibilityOverrides[tpl.slug]);
+  }
+  return !tpl.defaultHidden;
+}
+
+export function getVisibleTemplates(
+  visibilityOverrides?: Record<string, boolean>
+): TemplateMeta[] {
+  return Object.values(TEMPLATES_REGISTRY)
+    .filter((tpl) => isTemplateVisible(tpl, visibilityOverrides))
+    .sort((a, b) => (a.displayOrder ?? 999) - (b.displayOrder ?? 999));
+}
+
+export function getAllTemplatesOrdered(): TemplateMeta[] {
+  return Object.values(TEMPLATES_REGISTRY).sort(
+    (a, b) => (a.displayOrder ?? 999) - (b.displayOrder ?? 999)
+  );
+}
+
 export function getTemplateDemoContent(slug: string): InvitationContent {
-  const meta = TEMPLATES_REGISTRY[slug] || TEMPLATES_REGISTRY["wedding-classic"];
+  const meta = TEMPLATES_REGISTRY[slug] || TEMPLATES_REGISTRY[DEFAULT_TEMPLATE_SLUG];
 
   switch (slug) {
     case "wedding-classic":
@@ -846,7 +993,7 @@ export function getTemplateDemoContent(slug: string): InvitationContent {
       };
 
     default:
-      return getTemplateDemoContent("wedding-classic");
+      return getTemplateDemoContent(DEFAULT_TEMPLATE_SLUG);
   }
 }
 

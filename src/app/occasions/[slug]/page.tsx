@@ -1,11 +1,13 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import prisma from "@/lib/prisma";
-import { TEMPLATES_REGISTRY } from "@/lib/templates/registry";
 import { templateMetaToProductItem } from "@/data/landingData";
 import ProductShowcaseCard from "@/components/landing/ProductShowcaseCard";
 import styles from "@/components/landing/ProductShowcase.module.css";
 import { Sparkles } from "lucide-react";
+import { getEffectiveVisibleTemplates } from "@/lib/templates/adminConfig";
+
+export const dynamic = "force-dynamic";
 
 export default async function OccasionDetailPage({
   params,
@@ -21,10 +23,10 @@ export default async function OccasionDetailPage({
     notFound();
   }
 
-  // Filter templates matching this vertical
-  const matchingTemplates = Object.values(TEMPLATES_REGISTRY).filter(
-    (t) => t.occasionKey === occasion.formPresetKey
-  );
+  // Filter active visible templates matching this vertical; fallback to all active user templates
+  const allVisible = await getEffectiveVisibleTemplates();
+  const matched = allVisible.filter((t) => t.occasionKey === occasion.formPresetKey);
+  const matchingTemplates = matched.length > 0 ? matched : allVisible;
 
   return (
     <div className="flex-1 bg-slate-50 py-12 px-4 sm:px-6 lg:px-8">

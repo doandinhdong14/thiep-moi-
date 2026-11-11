@@ -5,12 +5,12 @@ import { requireAuth } from "@/lib/auth/session";
 import { apiSuccess, apiError, handleApiError } from "@/lib/api/response";
 import { logAudit } from "@/lib/audit";
 import { generateUniqueSlug, generateShortCode } from "@/lib/utils/slug";
-import { getTemplateDemoContent } from "@/lib/templates/registry";
+import { getTemplateDemoContent, DEFAULT_TEMPLATE_SLUG } from "@/lib/templates/registry";
 
 const createInvitationSchema = z.object({
   occasionSlug: z.string().optional(),
   occasionKey: z.string().optional(),
-  templateSlug: z.string().default("wedding-classic"),
+  templateSlug: z.string().default(DEFAULT_TEMPLATE_SLUG),
   title: z.string().optional(),
 });
 

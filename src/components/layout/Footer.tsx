@@ -69,22 +69,22 @@ export default function Footer() {
             <ul className="space-y-2 text-xs text-slate-400">
               <li>
                 <Link href="/products" className="hover:text-rose-400 transition-colors">
-                  Tất cả mẫu thiệp
+                  Tất cả mẫu thiệp (#01 – #10)
                 </Link>
               </li>
               <li>
-                <Link href="/occasions/wedding-ceremony" className="hover:text-rose-400 transition-colors">
-                  Thiệp cưới & Đính hôn
+                <Link href="/products?category=hen-ho" className="hover:text-rose-400 transition-colors">
+                  Thiệp Hẹn hò & Vé bay
                 </Link>
               </li>
               <li>
-                <Link href="/occasions/personal-birthday" className="hover:text-rose-400 transition-colors">
-                  Thiệp sinh nhật & Thôi nôi
+                <Link href="/products?category=valentine" className="hover:text-rose-400 transition-colors">
+                  Thiệp Vũ trụ & Cực quang
                 </Link>
               </li>
               <li>
-                <Link href="/occasions/university-graduation" className="hover:text-rose-400 transition-colors">
-                  Lễ tốt nghiệp
+                <Link href="/products?category=ky-niem" className="hover:text-rose-400 transition-colors">
+                  Kỷ niệm & Giáng sinh
                 </Link>
               </li>
               <li>
@@ -102,28 +102,28 @@ export default function Footer() {
             </h4>
             <ul className="space-y-2 text-xs text-slate-400">
               <li>
-                <Link href="/occasions/love-confession" className="hover:text-rose-400 transition-colors">
-                  QR tình yêu & Tỏ tình
+                <Link href="/templates/thiep-3" className="hover:text-rose-400 transition-colors">
+                  #01 · Một Tấm Vé Hẹn Hò
                 </Link>
               </li>
               <li>
-                <Link href="/templates/wedding-classic" className="hover:text-rose-400 transition-colors">
-                  Thiệp cưới hoàng gia
+                <Link href="/templates/thiep-5" className="hover:text-rose-400 transition-colors">
+                  #03 · Khu Vườn Khóa PIN 3D
                 </Link>
               </li>
               <li>
-                <Link href="/templates/love-galaxy" className="hover:text-rose-400 transition-colors">
-                  Trái tim QR 3D
+                <Link href="/templates/thiep-8" className="hover:text-rose-400 transition-colors">
+                  #06 · Vũ Trụ Trái Tim 3D
                 </Link>
               </li>
               <li>
-                <Link href="/templates/birthday-fun" className="hover:text-rose-400 transition-colors">
-                  Pháo hoa sinh nhật
+                <Link href="/templates/thiep-10" className="hover:text-rose-400 transition-colors">
+                  #08 · Boarding Pass Hạnh Phúc
                 </Link>
               </li>
               <li>
-                <Link href="/templates/love-letter" className="hover:text-rose-400 transition-colors">
-                  Thư tay phong bì ảo
+                <Link href="/templates/thiep-xmas" className="hover:text-rose-400 transition-colors">
+                  #10 · Hộp Quà Giáng Sinh
                 </Link>
               </li>
             </ul>

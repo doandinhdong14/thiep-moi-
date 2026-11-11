@@ -44,6 +44,8 @@ export interface ProductItem {
   videoGuideUrl?: string;
   category?: string;
   badge?: string;
+  numberCode?: string;
+  displayOrder?: number;
 }
 
 export interface TestimonialItem {
@@ -119,7 +121,7 @@ export const heroSlides: HeroSlide[] = [
     tagline: "Pháo Hoa Rực Rỡ & Bất Ngờ Ngọt Ngào",
     description: "Tạo bất ngờ cho người thân với thiệp mời sinh nhật sinh động, âm nhạc tự chọn và mã QR in thiệp vật lý.",
     ctaLabel: "KHÁM PHÁ NGAY",
-    ctaHref: "/occasions/personal-birthday",
+    ctaHref: "/products",
   },
   {
     id: "slide-4",
@@ -129,7 +131,7 @@ export const heroSlides: HeroSlide[] = [
     tagline: "Trao Gửi Lời Yêu Chân Thành Nhất",
     description: "Trang tỏ tình bí mật kèm phong thư cảm xúc, trái tim 3D và lời hứa cho ngày kỷ niệm.",
     ctaLabel: "TẠO THIỆP TỎ TÌNH",
-    ctaHref: "/occasions/love-confession",
+    ctaHref: "/products?category=hen-ho",
   },
 ];
 
@@ -148,6 +150,8 @@ export function catalogProductToProductItem(item: CatalogProduct): ProductItem {
     videoGuideUrl: item.videoGuideUrl,
     category: item.category,
     badge: item.badge,
+    numberCode: item.numberCode,
+    displayOrder: item.displayOrder,
   };
 }
 
@@ -162,6 +166,8 @@ export function templateMetaToProductItem(tpl: TemplateMeta): ProductItem {
     demoUrl: `/templates/${tpl.slug}`,
     category: tpl.occasionTitle,
     badge: tpl.isPremium ? "PREMIUM" : tpl.badge,
+    numberCode: tpl.numberCode,
+    displayOrder: tpl.displayOrder,
   };
 }
 
@@ -272,70 +278,58 @@ const CORE_LANDING_PRODUCTS: ProductItem[] = [
   },
 ];
 
-const CORE_PRODUCT_SLUGS = new Set(CORE_LANDING_PRODUCTS.map((p) => p.slug));
-
-// Include all interactive and occasion templates from CATALOG_PRODUCTS after the 8 core items
-// so each 12-card page forms full balanced rows across desktop (4 cols), tablet (3 cols), and mobile (2 cols).
-const EXTRA_LANDING_PRODUCTS: ProductItem[] = CATALOG_PRODUCTS.filter(
-  (item) => !CORE_PRODUCT_SLUGS.has(item.slug)
-)
-  .slice(0, 16)
-  .map(catalogProductToProductItem);
-
-export const productList: ProductItem[] = [...CORE_LANDING_PRODUCTS, ...EXTRA_LANDING_PRODUCTS].map(
-  (item) => ({
-    ...item,
-    priceVnd: TEST_PRODUCT_PRICE_VND,
-  })
-);
+export const productList: ProductItem[] = CATALOG_PRODUCTS.map((item) => ({
+  ...catalogProductToProductItem(item),
+  priceVnd: TEST_PRODUCT_PRICE_VND,
+}));
 
 export const topicChips: { label: string; href: string }[] = [
-  { label: "QR tình yêu", href: "/occasions/love-confession" },
-  { label: "Cách tạo QR tình yêu", href: "/occasions/love-confession" },
-  { label: "Mã QR tỏ tình", href: "/occasions/love-confession" },
-  { label: "Trái tim QR 3D", href: "/templates/love-galaxy" },
-  { label: "Pháo hoa tình yêu", href: "/templates/birthday-fun" },
-  { label: "Thiệp cưới online", href: "/occasions/wedding-ceremony" },
-  { label: "Thiệp sinh nhật đẹp", href: "/occasions/personal-birthday" },
-  { label: "Sổ lưu bút số", href: "/templates/wedding-classic" },
+  { label: "#01 Vé hẹn hò", href: "/templates/thiep-3" },
+  { label: "#02 Gửi em vũ trụ", href: "/templates/thiep-4" },
+  { label: "#03 Khu vườn khóa PIN", href: "/templates/thiep-5" },
+  { label: "#05 Đại dương tình yêu", href: "/templates/thiep-7" },
+  { label: "#06 Trái tim 3D", href: "/templates/thiep-8" },
+  { label: "#07 Cực quang pha lê", href: "/templates/thiep-9" },
+  { label: "#08 Vé máy bay", href: "/templates/thiep-10" },
+  { label: "#09 & #10 Giáng sinh", href: "/templates/thiep-xmas" },
 ];
 
 export const testimonialsList: TestimonialItem[] = [
   {
     id: "test-1",
-    quote: "Trang web thiệp cưới của chúng mình nhận được vô số lời khen từ bạn bè và họ hàng. Hiệu ứng mở thiệp rất sang trọng!",
+    quote: "Mẫu vé hẹn hò #01 và trái tim 3D #06 giúp mình tạo món quà kỷ niệm cực ấn tượng — người nhận mở link quét QR bất ngờ vô cùng!",
     author: "Hoàng Long & Minh Thư",
-    role: "Lễ cưới tháng 10/2026",
+    role: "Cặp đôi kỷ niệm 1 năm",
     rating: 5,
     avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80",
-    tag: "Thiệp cưới Hoàng Gia",
+    tag: "#01 · Một Tấm Vé Hẹn Hò",
   },
   {
     id: "test-2",
-    quote: "Mình dùng Secret Letter để tỏ tình với crush vào dịp 100 ngày quen nhau, bạn ấy xúc động suýt khóc. Cảm ơn Ding Dong Gift nhiều!",
+    quote: "Mình dùng mẫu #03 Khu Vườn Kỷ Niệm có khóa PIN bí mật để gửi lời chúc, thêm ảnh và nhạc nền rất cảm xúc!",
     author: "Quốc Bảo & Thu Hà",
     role: "Cặp đôi kỷ niệm 100 ngày",
     rating: 5,
     avatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80",
-    tag: "Thư tay bí mật",
+    tag: "#03 · Khu Vườn Khóa PIN",
   },
   {
     id: "test-3",
-    quote: "Mã QR in lên backdrop tiệc sinh nhật của con gái quét là ra album ảnh và nhạc nền dễ thương lắm. Thao tác cực kỳ dễ làm.",
+    quote: "Sau khi chuyển khoản nhận ngay link copy và mã QR trang trí hoa cực xinh, quét ra thiệp sạch đẹp không hề có quảng cáo.",
     author: "Chị Ngọc Mai",
-    role: "Tiệc sinh nhật 1 tuổi bé Bơ",
+    role: "Khách hàng thân thiết",
     rating: 5,
     avatarUrl: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=200&q=80",
-    tag: "Sinh nhật Confetti",
+    tag: "#06 · Vũ Trụ Trái Tim 3D",
   },
   {
     id: "test-4",
-    quote: "Thiệp mời tốt nghiệp đại học của lớp mình gửi cho thầy cô ai cũng khen hiện đại, văn minh và tiện theo dõi số người tham dự.",
+    quote: "Mẫu Boarding Pass #08 ghi tên hai đứa và chặng bay kỷ niệm nhìn cực kỳ xịn, thao tác chỉ 3 phút là xong!",
     author: "Thanh Tùng",
-    role: "Đại diện lớp K18 ĐHQG",
+    role: "Tạo thiệp tặng bạn gái",
     rating: 5,
     avatarUrl: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80",
-    tag: "Lễ tốt nghiệp The Next Chapter",
+    tag: "#08 · Boarding Pass Hạnh Phúc",
   },
 ];
 

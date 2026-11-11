@@ -133,21 +133,28 @@ export default function ProductShowcaseCard({
     : null;
 
   const topOverlay =
-    product.category || product.badge || hasDiscount ? (
+    product.numberCode || product.category || product.badge || hasDiscount ? (
       <div className="absolute top-0 inset-x-0 z-20 p-2 sm:p-2.5 lg:p-3 flex items-start justify-between gap-1.5 pointer-events-none">
-        {product.category ? (
-          <span className="px-2 py-1 sm:px-2.5 rounded-full bg-black/55 backdrop-blur-xs text-white/95 text-[9.5px] sm:text-[10.5px] font-medium leading-none tracking-tight truncate max-w-[66%] shadow-xs border border-white/15">
-            {product.category}
-          </span>
-        ) : (
-          <span />
-        )}
+        <div className="flex items-center gap-1 min-w-0 max-w-[70%]">
+          {product.numberCode && (
+            <span className="px-2 py-1 rounded-full bg-white text-slate-950 text-[10px] sm:text-[11px] font-extrabold leading-none tracking-tight shadow-md shrink-0">
+              {product.numberCode}
+            </span>
+          )}
+          {product.category && (
+            <span className="px-2 py-1 sm:px-2.5 rounded-full bg-black/55 backdrop-blur-xs text-white/95 text-[9.5px] sm:text-[10.5px] font-medium leading-none tracking-tight truncate shadow-xs border border-white/15">
+              {product.category}
+            </span>
+          )}
+        </div>
 
         {(product.badge || hasDiscount) && (
           <div className="flex flex-col-reverse items-end sm:flex-row sm:items-center gap-1 shrink-0">
             {product.badge && (
               <span className="px-2 py-1 rounded-full bg-amber-400/95 text-slate-950 text-[9px] sm:text-[10.5px] font-bold leading-none shadow-xs">
-                {product.badge}
+                {product.numberCode
+                  ? product.badge.replace(/^Mẫu\s*#\d+\s*·\s*/i, "")
+                  : product.badge}
               </span>
             )}
             {hasDiscount && (

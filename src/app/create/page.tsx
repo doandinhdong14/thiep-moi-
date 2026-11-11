@@ -3,7 +3,11 @@
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { TEMPLATES_REGISTRY } from "@/lib/templates/registry";
+import {
+  DEFAULT_TEMPLATE_SLUG,
+  getVisibleTemplates,
+  type TemplateMeta,
+} from "@/lib/templates/registry";
 import { Sparkles, ArrowRight, ArrowLeft, Check, Loader2, Heart, Lock } from "lucide-react";
 
 function CreateInvitationForm() {
@@ -11,36 +15,70 @@ function CreateInvitationForm() {
   const searchParams = useSearchParams();
   const preselectedTemplate = searchParams.get("template");
 
+  const [availableTemplates, setAvailableTemplates] = useState<TemplateMeta[]>(() =>
+    getVisibleTemplates()
+  );
   const [step, setStep] = useState<1 | 2>(preselectedTemplate ? 2 : 1);
-  const [selectedOccasion, setSelectedOccasion] = useState<string>("wedding");
+  const [selectedOccasion, setSelectedOccasion] = useState<string>("love");
   const [selectedTemplate, setSelectedTemplate] = useState<string>(
-    preselectedTemplate || "wedding-classic"
+    preselectedTemplate || DEFAULT_TEMPLATE_SLUG
   );
   const [title, setTitle] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    let active = true;
+    fetch("/api/v1/templates")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((payload) => {
+        if (!active) return;
+        const list = payload?.data?.templates as TemplateMeta[] | undefined;
+        if (Array.isArray(list) && list.length > 0) {
+          setAvailableTemplates(list);
+          if (!preselectedTemplate && !list.some((t) => t.slug === selectedTemplate)) {
+            setSelectedTemplate(list[0].slug);
+          }
+        }
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [preselectedTemplate]);
+
   const occasions = [
-    { key: "wedding", title: "Lễ cưới & Đính hôn", desc: "Ivory Ceremony, Bloom & Vows", icon: "💍" },
-    { key: "graduation", title: "Lễ tốt nghiệp", desc: "The Next Chapter, Grad Party!", icon: "🎓" },
-    { key: "birthday", title: "Sinh nhật & Thôi nôi", desc: "Confetti Pop, Candlelight", icon: "🎂" },
-    { key: "love", title: "Tình yêu & Tỏ tình", desc: "Secret Letter, Written in the Stars", icon: "💌" },
+    { key: "love", title: "Tình yêu, Tỏ tình & Kỷ niệm", desc: "Vé hẹn hò #01, Vũ trụ #02, Khóa PIN #03-#04, Trái tim 3D #06, Vé bay #08...", icon: "💌" },
+    { key: "christmas", title: "Giáng Sinh & Noel Diệu Kỳ", desc: "Thiệp Giáng Sinh #09 & Hộp Quà 3D #10", icon: "🎄" },
+    { key: "birthday", title: "Sinh nhật & Thôi nôi", desc: "Tùy chỉnh thiệp tương tác cho người thương", icon: "🎂" },
+    { key: "all", title: `Tất cả mẫu đang mở (#01 – #${String(availableTemplates.length).padStart(2, "0")})`, desc: "Xem toàn bộ các mẫu thiệp đánh số hiện có", icon: "✨" },
   ];
 
-  const templates = Object.values(TEMPLATES_REGISTRY).filter(
-    (t) => t.occasionKey === selectedOccasion
-  );
+  const getOccasionTemplates = (occKey: string) => {
+    if (occKey === "christmas") {
+      return availableTemplates.filter(
+        (t) => t.slug.includes("giang-sinh") || t.slug.includes("xmas")
+      );
+    }
+    if (occKey === "all") return availableTemplates;
+    const filtered = availableTemplates.filter((t) => t.occasionKey === occKey);
+    return filtered.length > 0 ? filtered : availableTemplates;
+  };
+
+  const templates = getOccasionTemplates(selectedOccasion);
 
   const handleCreate = async () => {
     setLoading(true);
     setError(null);
+    const effectiveOccasion =
+      selectedOccasion === "christmas" || selectedOccasion === "all" ? "love" : selectedOccasion;
 
     try {
       const res = await fetch("/api/v1/invitations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          occasionKey: selectedOccasion,
+          occasionKey: effectiveOccasion,
           templateSlug: selectedTemplate,
           title: title.trim() || undefined,
         }),
@@ -112,7 +150,7 @@ function CreateInvitationForm() {
                   key={occ.key}
                   onClick={() => {
                     setSelectedOccasion(occ.key);
-                    const matching = Object.values(TEMPLATES_REGISTRY).find((t) => t.occasionKey === occ.key);
+                    const matching = getOccasionTemplates(occ.key)[0];
                     if (matching) setSelectedTemplate(matching.slug);
                     setStep(2);
                   }}
@@ -172,12 +210,17 @@ function CreateInvitationForm() {
                     }`}
                   >
                     <div
-                      className="p-6 text-center h-36 flex flex-col justify-center"
+                      className="p-6 text-center h-36 flex flex-col justify-center relative"
                       style={{
                         backgroundColor: tpl.theme.background,
                         color: tpl.theme.foreground,
                       }}
                     >
+                      {tpl.numberCode && (
+                        <span className="absolute top-3 left-3 px-2.5 py-0.5 rounded-full bg-white text-slate-950 text-[11px] font-extrabold shadow">
+                          {tpl.numberCode}
+                        </span>
+                      )}
                       <span
                         className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider mb-2 border mx-auto"
                         style={{

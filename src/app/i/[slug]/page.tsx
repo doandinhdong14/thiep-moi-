@@ -5,7 +5,7 @@ import { cookies } from "next/headers";
 import prisma from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth/session";
 import TemplateRenderer from "@/components/template-renderer/TemplateRenderer";
-import { TEMPLATES_REGISTRY } from "@/lib/templates/registry";
+import { TEMPLATES_REGISTRY, DEFAULT_TEMPLATE_SLUG } from "@/lib/templates/registry";
 import {
   INTERACTIVE_TEMPLATE_URLS,
   hydrateInteractiveHtml,
@@ -135,7 +135,7 @@ export default async function PublicInvitationPage({
   const latestRev = inv.revisions[0];
   const content = latestRev ? JSON.parse(latestRev.contentJson) : null;
   const templateSlug = inv.templateVersion.template.slug;
-  const templateMeta = TEMPLATES_REGISTRY[templateSlug] || TEMPLATES_REGISTRY["wedding-classic"];
+  const templateMeta = TEMPLATES_REGISTRY[templateSlug] || TEMPLATES_REGISTRY[DEFAULT_TEMPLATE_SLUG];
 
   let interactiveHtml: string | undefined;
   if (content && INTERACTIVE_TEMPLATE_URLS[templateSlug]) {

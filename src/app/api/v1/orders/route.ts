@@ -4,7 +4,7 @@ import prisma from "@/lib/prisma";
 import { getCurrentUser, createSession } from "@/lib/auth/session";
 import { apiSuccess, apiError, handleApiError } from "@/lib/api/response";
 import { logAudit } from "@/lib/audit";
-import { CATALOG_PRODUCTS, TEST_MEDIA_CREDIT_PRICE_VND, TEST_PRODUCT_PRICE_VND } from "@/data/catalogData";
+import { findCatalogProductBySlug, TEST_MEDIA_CREDIT_PRICE_VND, TEST_PRODUCT_PRICE_VND } from "@/data/catalogData";
 import { syncPendingPayOSOrdersForUser } from "@/lib/payments/payos";
 
 const CreateOrderSchema = z.object({
@@ -88,8 +88,8 @@ export async function POST(req: NextRequest) {
           include: { templateVersion: { include: { template: true } } },
         });
         if (inv) {
-          const catalogItem = CATALOG_PRODUCTS.find(
-            (p) => p.slug === inv.templateVersion.template.slug
+          const catalogItem = findCatalogProductBySlug(
+            inv.templateVersion.template.slug
           );
           unitPriceVnd = catalogItem?.price ?? TEST_PRODUCT_PRICE_VND;
           titleSnapshot = `Mở khóa thiệp: ${inv.title}`;

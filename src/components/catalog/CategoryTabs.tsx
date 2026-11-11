@@ -18,11 +18,13 @@ import { CATALOG_CATEGORIES, CatalogCategory } from "@/data/catalogData";
 interface CategoryTabsProps {
   activeCategory: string; // slug or 'all'
   onSelectCategory: (slug: string) => void;
+  categories?: CatalogCategory[];
 }
 
 export default function CategoryTabs({
   activeCategory,
   onSelectCategory,
+  categories = CATALOG_CATEGORIES,
 }: CategoryTabsProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -60,7 +62,7 @@ export default function CategoryTabs({
         aria-label="Danh mục sản phẩm"
         className="max-w-[1180px] mx-auto px-4 flex items-center gap-3 sm:gap-6 overflow-x-auto no-scrollbar scroll-smooth py-1"
       >
-        {CATALOG_CATEGORIES.map((category: CatalogCategory) => {
+        {categories.map((category: CatalogCategory) => {
           const isActive =
             activeCategory === category.slug ||
             (activeCategory === "" && category.slug === "all");

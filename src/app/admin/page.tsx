@@ -2,8 +2,23 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import prisma from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth/session";
-import { CreditCard, Users, Store, Gift, Share2, Activity, ArrowRight, UserCheck } from "lucide-react";
+import {
+  CreditCard,
+  Users,
+  Store,
+  Gift,
+  Share2,
+  Activity,
+  ArrowRight,
+  UserCheck,
+  Sparkles,
+  NotebookPen,
+  Eye,
+  EyeOff,
+} from "lucide-react";
 import { BrandMark } from "@/components/common/BrandLogo";
+import { getAllTemplatesOrdered, isTemplateVisible } from "@/lib/templates/registry";
+import { getAdminTemplatesConfig } from "@/lib/templates/adminConfig";
 
 export const dynamic = "force-dynamic";
 
@@ -13,14 +28,31 @@ export default async function AdminPortalPage() {
     redirect("/dashboard");
   }
 
-  const [totalUsers, totalOrders, totalShops, totalGiftCards] = await Promise.all([
+  const [totalUsers, totalOrders, totalShops, totalGiftCards, templatesConfig] = await Promise.all([
     prisma.user.count(),
     prisma.order.count(),
     prisma.shop.count(),
     prisma.giftCard.count(),
+    getAdminTemplatesConfig(),
   ]);
 
+  const allTemplates = getAllTemplatesOrdered();
+  const visibleTemplates = allTemplates.filter((t) =>
+    isTemplateVisible(t, templatesConfig.visibilityOverrides)
+  );
+  const hiddenTemplates = allTemplates.filter(
+    (t) => !isTemplateVisible(t, templatesConfig.visibilityOverrides)
+  );
+
   const sections = [
+    {
+      title: "Kho Mẫu Thiệp & Ghi chú (#01–#10)",
+      desc: "Xem danh sách 10 mẫu đã đưa vào đánh số #01–#10, bật/tắt ẩn hiện các mẫu gốc và lưu sổ tay ghi chú vận hành.",
+      href: "/admin/templates",
+      icon: Sparkles,
+      color: "from-rose-600 to-fuchsia-600",
+      badge: `${visibleTemplates.length} hiện / ${hiddenTemplates.length} ẩn`,
+    },
     {
       title: "Người dùng & Phân quyền",
       desc: "Quản lý danh sách tài khoản, gán quyền Quản trị/Chủ shop/CTV, kích hoạt/khóa tài khoản và cấp credits.",
@@ -141,6 +173,100 @@ export default async function AdminPortalPage() {
                 </Link>
               );
             })}
+          </div>
+        </div>
+
+        {/* Immediate Overview of Numbered Templates & Admin Notes */}
+        <div className="bg-white rounded-3xl border border-slate-200/80 shadow-xs p-6 sm:p-8 space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-100 pb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+                <NotebookPen className="w-5 h-5" />
+              </div>
+              <div>
+                <h2 className="text-lg font-serif font-bold text-slate-900">
+                  Sổ Tay Đánh Số Mẫu Thiệp (#01 – #{String(visibleTemplates.length).padStart(2, "0")}) & Ghi Chú Admin
+                </h2>
+                <p className="text-xs text-slate-500">
+                  Tổng hợp đầy đủ trạng thái các mẫu bạn đã đưa vào, file HTML nguồn và danh sách {hiddenTemplates.length} mẫu gốc đang ẩn.
+                </p>
+              </div>
+            </div>
+
+            <Link
+              href="/admin/templates"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-900 text-white hover:bg-slate-800 text-xs font-semibold shrink-0 w-fit"
+            >
+              <span>Quản lý Ẩn/Hiện & Sửa Ghi chú</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr className="border-b border-slate-200 text-slate-500 uppercase tracking-wider text-[11px]">
+                  <th className="py-2.5 pr-3">Số #</th>
+                  <th className="py-2.5 px-3">Slug / File HTML</th>
+                  <th className="py-2.5 px-3">Tên mẫu</th>
+                  <th className="py-2.5 px-3">Trạng thái</th>
+                  <th className="py-2.5 pl-3">Ghi chú nhanh</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {visibleTemplates.map((tpl, idx) => (
+                  <tr key={tpl.slug} className="hover:bg-slate-50/70">
+                    <td className="py-2.5 pr-3">
+                      <span className="inline-flex px-2 py-0.5 rounded-full bg-rose-600 text-white font-extrabold text-[11px]">
+                        {tpl.numberCode || `#${String(idx + 1).padStart(2, "0")}`}
+                      </span>
+                    </td>
+                    <td className="py-2.5 px-3 font-mono text-slate-700 whitespace-nowrap">
+                      <div>{tpl.slug}</div>
+                      <div className="text-[10px] text-slate-400">{tpl.sourceFile}</div>
+                    </td>
+                    <td className="py-2.5 px-3 font-semibold text-slate-900">
+                      <Link href={`/templates/${tpl.slug}`} className="hover:text-rose-600">
+                        {tpl.title}
+                      </Link>
+                    </td>
+                    <td className="py-2.5 px-3 whitespace-nowrap">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-semibold border border-emerald-200">
+                        <Eye className="w-3 h-3" />
+                        <span>Đang hiện</span>
+                      </span>
+                    </td>
+                    <td className="py-2.5 pl-3 text-slate-600 max-w-md">
+                      {templatesConfig.templateNotes[tpl.slug] || tpl.description}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {hiddenTemplates.length > 0 && (
+            <div className="rounded-2xl bg-slate-50 border border-slate-200/80 p-4 flex flex-wrap items-center justify-between gap-3 text-xs">
+              <div className="flex items-center gap-2 text-slate-600">
+                <EyeOff className="w-4 h-4 text-slate-400 shrink-0" />
+                <span>
+                  <strong>{hiddenTemplates.length} mẫu gốc đang ẩn khỏi khách hàng:</strong>{" "}
+                  {hiddenTemplates.map((t) => t.slug).join(", ")}
+                </span>
+              </div>
+              <Link href="/admin/templates" className="text-rose-600 font-semibold hover:underline">
+                Xem hoặc bật lại →
+              </Link>
+            </div>
+          )}
+
+          <div className="rounded-2xl bg-amber-50/60 border border-amber-200/70 p-4 space-y-2">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-amber-900">
+              Ghi chú vận hành chi tiết
+            </h3>
+            <pre className="whitespace-pre-wrap font-mono text-[11.5px] leading-relaxed text-slate-700 overflow-x-auto">
+              {templatesConfig.generalNotes}
+            </pre>
           </div>
         </div>
       </div>
