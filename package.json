@@ -5,8 +5,8 @@
   "scripts": {
     "dev": "node scripts/prisma-prepare.js && next dev",
     "prebuild": "node scripts/prisma-prepare.js",
-    "build": "node scripts/prisma-prepare.js && prisma generate && prisma db push --skip-generate && tsx prisma/seed.ts && next build",
-    "start": "next start",
+    "build": "node scripts/prisma-prepare.js && prisma generate && next build",
+    "start": "node scripts/prisma-prepare.js && prisma db push --skip-generate && tsx prisma/seed.ts && next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "db:prepare": "node scripts/prisma-prepare.js",
