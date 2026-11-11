@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ShoppingCart, X, Plus, Minus, Loader2, Sparkles } from "lucide-react";
+import { TEST_MEDIA_CREDIT_PRICE_VND } from "@/data/catalogData";
 
 interface BuyCreditsModalProps {
   isOpen: boolean;
@@ -19,14 +20,21 @@ export default function BuyCreditsModal({
 }: BuyCreditsModalProps) {
   const router = useRouter();
   const isImage = type === "image_credits";
-  const unitPrice = isImage ? 2000 : 10000;
-  const defaultQty = isImage ? 10 : 1;
+  const unitPrice = TEST_MEDIA_CREDIT_PRICE_VND;
+  const defaultQty = 1;
   const minQty = 1;
   const maxQty = 100;
 
   const [quantity, setQuantity] = useState<number>(defaultQty);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      setQuantity(defaultQty);
+      setError(null);
+    }
+  }, [isOpen, type, defaultQty]);
 
   if (!isOpen) return null;
 
@@ -79,12 +87,10 @@ export default function BuyCreditsModal({
             </div>
             <div>
               <h3 className="font-bold text-sm text-slate-900">
-                {isImage ? "Mua thêm ảnh" : "Mua thêm lượt tải nhạc"}
+                {isImage ? "Mua thêm lượt tải ảnh" : "Mua thêm lượt tải nhạc"}
               </h3>
-              <p className="text-[11px] text-slate-400">
-                {isImage
-                  ? "Đơn giá: 2.000 VND / ảnh"
-                  : "Đơn giá: 10.000 VND / bài nhạc"}
+              <p className="text-[11px] text-slate-400" data-testid="buy-credits-unit-price">
+                Đơn giá: {unitPrice.toLocaleString("vi-VN")} VND / {isImage ? "ảnh" : "bài nhạc"}
               </p>
             </div>
           </div>

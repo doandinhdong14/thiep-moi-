@@ -4,7 +4,7 @@ import prisma from "@/lib/prisma";
 import { getCurrentUser, createSession } from "@/lib/auth/session";
 import { apiSuccess, apiError, handleApiError } from "@/lib/api/response";
 import { logAudit } from "@/lib/audit";
-import { CATALOG_PRODUCTS, TEST_PRODUCT_PRICE_VND } from "@/data/catalogData";
+import { CATALOG_PRODUCTS, TEST_MEDIA_CREDIT_PRICE_VND, TEST_PRODUCT_PRICE_VND } from "@/data/catalogData";
 
 const CreateOrderSchema = z.object({
   purpose: z.enum([
@@ -57,14 +57,14 @@ export async function POST(req: NextRequest) {
     let referenceId: string | null = null;
 
     if (data.purpose === "image_credits") {
-      unitPriceVnd = 2000;
+      unitPriceVnd = TEST_MEDIA_CREDIT_PRICE_VND;
       totalVnd = data.quantity * unitPriceVnd;
       titleSnapshot = `Mua thêm ${data.quantity} lượt tải ảnh`;
       productType = "MEDIA_CREDIT";
     } else if (data.purpose === "audio_credits") {
-      unitPriceVnd = 10000;
+      unitPriceVnd = TEST_MEDIA_CREDIT_PRICE_VND;
       totalVnd = data.quantity * unitPriceVnd;
-      titleSnapshot = `Mua thêm ${data.quantity} lượt bài nhạc nền`;
+      titleSnapshot = `Mua thêm ${data.quantity} lượt tải nhạc nền`;
       productType = "MEDIA_CREDIT";
     } else if (data.purpose === "tip") {
       unitPriceVnd = data.amountVnd || 20000;

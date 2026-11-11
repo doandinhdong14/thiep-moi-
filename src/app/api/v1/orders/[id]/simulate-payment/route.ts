@@ -9,6 +9,17 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
+    const allowSandboxSimulation =
+      process.env.NODE_ENV !== "production" || process.env.PAYMENT_MODE === "sandbox";
+
+    if (!allowSandboxSimulation) {
+      return apiError(
+        "Thanh toán thử nghiệm chỉ khả dụng trong môi trường Sandbox.",
+        "FORBIDDEN",
+        403
+      );
+    }
+
     const user = await getCurrentUser();
     const order = await prisma.order.findUnique({
       where: { id: params.id },

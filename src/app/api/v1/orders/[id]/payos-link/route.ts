@@ -36,7 +36,7 @@ export async function POST(
     const proto = req.headers.get("x-forwarded-proto") || "https";
     const origin = host ? `${proto}://${host}` : "";
 
-    const payosResult = await createPayOSPaymentLink({
+    const payosQr = await createPayOSPaymentLink({
       order: {
         id: order.id,
         orderNumber: order.orderNumber,
@@ -48,7 +48,7 @@ export async function POST(
 
     return apiSuccess({
       orderId: order.id,
-      ...payosResult,
+      payosQr,
     });
   } catch (err) {
     return handleApiError(err);
