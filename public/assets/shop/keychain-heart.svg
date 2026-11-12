@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" fill="none">
+  <rect width="640" height="640" rx="36" fill="#FFF7F9"/>
+  <circle cx="320" cy="310" r="180" fill="#FDE4EC" opacity="0.7"/>
+  <!-- Gold Keyring -->
+  <circle cx="320" cy="175" r="46" stroke="#C9A25B" stroke-width="14"/>
+  <rect x="310" y="218" width="20" height="44" rx="8" fill="#C9A25B"/>
+  <!-- Velvet Heart -->
+  <path d="M320 470C205 395 160 325 182 272C198 232 248 225 288 256C304 268 314 282 320 294C326 282 336 268 352 256C392 225 442 232 458 272C480 325 435 395 320 470Z" fill="#FF5C8D" stroke="#D1406C" stroke-width="5"/>
+  <path d="M232 280C245 262 270 258 288 272" stroke="#FFD6E4" stroke-width="6" stroke-linecap="round"/>
+  <text x="320" y="575" text-anchor="middle" fill="#8C6E74" font-family="sans-serif" font-size="16" font-weight="600">Ảnh minh họa • Móc khóa Trái Tim</text>
+</svg>
+

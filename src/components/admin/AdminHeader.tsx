@@ -20,6 +20,7 @@ export default function AdminHeader() {
 
   const navItems = [
     { href: "/admin", label: "Tổng quan", icon: LayoutDashboard, exact: true },
+    { href: "/admin/qua-tang", label: "Cửa hàng quà", icon: Store, exact: false },
     { href: "/admin/templates", label: "Kho Mẫu & Ghi chú", icon: Sparkles, exact: false },
     { href: "/admin/users", label: "Người dùng & Phân quyền", icon: Users, exact: false },
     { href: "/admin/payments", label: "Thanh toán & Đơn hàng", icon: CreditCard, exact: false },

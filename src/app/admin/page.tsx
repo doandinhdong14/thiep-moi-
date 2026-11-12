@@ -28,11 +28,12 @@ export default async function AdminPortalPage() {
     redirect("/dashboard");
   }
 
-  const [totalUsers, totalOrders, totalShops, totalGiftCards, templatesConfig] = await Promise.all([
+  const [totalUsers, totalOrders, totalShops, totalGiftCards, totalStoreOrders, templatesConfig] = await Promise.all([
     prisma.user.count(),
     prisma.order.count(),
     prisma.shop.count(),
     prisma.giftCard.count(),
+    prisma.storeOrder.count(),
     getAdminTemplatesConfig(),
   ]);
 
@@ -45,6 +46,14 @@ export default async function AdminPortalPage() {
   );
 
   const sections = [
+    {
+      title: "Cửa hàng quà (Quà tặng tận tay)",
+      desc: "Quản lý sản phẩm vật lý, tồn kho, đối soát chuyển khoản, đóng gói in QR từng hộp quà, vận chuyển và cấu hình shop.",
+      href: "/admin/qua-tang",
+      icon: Store,
+      color: "from-pink-500 to-rose-600",
+      badge: `${totalStoreOrders} đơn quà`,
+    },
     {
       title: "Kho Mẫu Thiệp & Ghi chú (#01–#10)",
       desc: "Xem danh sách 10 mẫu đã đưa vào đánh số #01–#10, bật/tắt ẩn hiện các mẫu gốc và lưu sổ tay ghi chú vận hành.",

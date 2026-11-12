@@ -26,7 +26,13 @@ export function middleware(req: NextRequest) {
   const method = req.method;
 
   // 1. CSRF Protection for state-changing API requests
-  if (pathname.startsWith("/api/v1/") && ["POST", "PUT", "PATCH", "DELETE"].includes(method)) {
+  const isProtectedApi =
+    pathname.startsWith("/api/v1/") ||
+    pathname.startsWith("/api/shop/") ||
+    pathname.startsWith("/api/gifts/") ||
+    pathname.startsWith("/api/admin/shop/");
+
+  if (isProtectedApi && ["POST", "PUT", "PATCH", "DELETE"].includes(method)) {
     const origin = req.headers.get("origin");
     const host = req.headers.get("host");
 
@@ -85,10 +91,36 @@ export function middleware(req: NextRequest) {
     }
   }
 
+  if (
+    pathname.startsWith("/api/gifts/") ||
+    pathname.startsWith("/api/shop/checkout") ||
+    pathname.startsWith("/api/shop/uploads") ||
+    pathname.startsWith("/api/shop/orders/")
+  ) {
+    const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "127.0.0.1";
+    const key = `shop_${pathname.split("/").slice(0, 4).join("_")}_${ip}`;
+    if (isRateLimited(key, 45, 60000)) {
+      return NextResponse.json(
+        {
+          error: {
+            code: "RATE_LIMITED",
+            message: "Thao tác quá nhanh, vui lòng thử lại sau ít phút.",
+          },
+        },
+        { status: 429, headers: { "Retry-After": "60" } }
+      );
+    }
+  }
+
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/api/v1/:path*"],
+  matcher: [
+    "/api/v1/:path*",
+    "/api/shop/:path*",
+    "/api/gifts/:path*",
+    "/api/admin/shop/:path*",
+  ],
 };
 

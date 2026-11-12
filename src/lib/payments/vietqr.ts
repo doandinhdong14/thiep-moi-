@@ -4,7 +4,7 @@ export interface VietQRBankInfo {
   name: string;
 }
 
-const VIETQR_BANKS: VietQRBankInfo[] = [
+export const VIETQR_BANKS: VietQRBankInfo[] = [
   { bin: "970407", code: "TCB", name: "Techcombank (Ngân hàng TMCP Kỹ Thương Việt Nam)" },
   { bin: "970422", code: "MB", name: "MB Bank (Ngân hàng TMCP Quân Đội)" },
   { bin: "970436", code: "VCB", name: "Vietcombank (Ngân hàng Ngoại Thương Việt Nam)" },

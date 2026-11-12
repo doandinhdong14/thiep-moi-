@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "@/styles/shop.css";
 import SiteChrome from "@/components/layout/SiteChrome";
 
 export const metadata: Metadata = {
@@ -27,7 +28,7 @@ export default function RootLayout({
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `try{if(window.self!==window.top||location.search.indexOf('embed=true')!==-1){document.documentElement.classList.add('is-embed-frame');}}catch(e){}`,
+            __html: `try{var p=location.pathname||"";if(location.search.indexOf("embed=true")!==-1||p.indexOf("/templates/")===0||p.indexOf("/i/")===0||p.indexOf("/mo-qua/")===0){document.documentElement.classList.add("is-embed-frame");}}catch(e){}`,
           }}
         />
         <style

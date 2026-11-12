@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="640" y2="640" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFF9F5"/>
+      <stop offset="1" stop-color="#FDECF0"/>
+    </linearGradient>
+    <linearGradient id="box" x1="180" y1="260" x2="460" y2="520" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#F8E6EA"/>
+    </linearGradient>
+    <linearGradient id="ribbon" x1="280" y1="220" x2="360" y2="520" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FF5C8D"/>
+      <stop offset="1" stop-color="#D94575"/>
+    </linearGradient>
+  </defs>
+  <rect width="640" height="640" rx="48" fill="url(#bg)"/>
+  <circle cx="510" cy="145" r="76" fill="#FAD4DF" opacity="0.45"/>
+  <circle cx="135" cy="485" r="95" fill="#FFF1E7" opacity="0.9"/>
+  <ellipse cx="320" cy="528" rx="165" ry="22" fill="#E9CBD3" opacity="0.55"/>
+  <!-- Scarf peek -->
+  <path d="M180 280C220 205 420 205 460 280" fill="#F2DCE2" stroke="#D898AA" stroke-width="4"/>
+  <!-- Gift box body -->
+  <rect x="165" y="290" width="310" height="225" rx="22" fill="url(#box)" stroke="#EBD5DC" stroke-width="3"/>
+  <rect x="150" y="245" width="340" height="58" rx="16" fill="#FFFFFF" stroke="#E5C7D0" stroke-width="3"/>
+  <!-- Ribbon -->
+  <rect x="296" y="245" width="48" height="270" fill="url(#ribbon)"/>
+  <rect x="165" y="382" width="310" height="36" fill="#FF5C8D" opacity="0.86"/>
+  <!-- Bow -->
+  <path d="M320 245C275 180 205 200 225 245C245 262 290 258 320 245Z" fill="#FF79A3"/>
+  <path d="M320 245C365 180 435 200 415 245C395 262 350 258 320 245Z" fill="#E84E7D"/>
+  <circle cx="320" cy="245" r="18" fill="#D94575"/>
+  <!-- Floating Envelope QR Tag -->
+  <g transform="translate(388 120) rotate(8)">
+    <rect width="140" height="96" rx="16" fill="#FFFDF9" stroke="#E4C1CB" stroke-width="3"/>
+    <path d="M8 14L70 58L132 14" stroke="#E892A9" stroke-width="3" fill="none"/>
+    <circle cx="70" cy="55" r="14" fill="#FF5C8D"/>
+    <path d="M70 61C63 55 61 50 64 47C66 45 69 47 70 49C71 47 74 45 76 47C79 50 77 55 70 61Z" fill="#FFFFFF"/>
+  </g>
+  <!-- Sparkles -->
+  <path d="M148 182L153 196L167 201L153 206L148 220L143 206L129 201L143 196Z" fill="#C9A25B"/>
+  <circle cx="496" cy="312" r="6" fill="#FF5C8D" opacity="0.6"/>
+</svg>
+

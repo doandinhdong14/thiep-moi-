@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" fill="none">
+  <rect width="640" height="640" rx="36" fill="#FFF7F4"/>
+  <circle cx="320" cy="295" r="205" fill="#FDECF0" opacity="0.65"/>
+  <!-- Open Gift Box Base -->
+  <rect x="135" y="215" width="370" height="270" rx="28" fill="#FFFDFB" stroke="#E4C8D0" stroke-width="5"/>
+  <rect x="160" y="240" width="320" height="220" rx="20" fill="#FDF2F5"/>
+  <!-- Rolled Scarf -->
+  <rect x="182" y="265" width="135" height="170" rx="24" fill="#F4DCE3" stroke="#D195A7" stroke-width="3.5"/>
+  <path d="M210 265V435M250 265V435M290 265V435" stroke="#E2B6C4" stroke-width="2" stroke-dasharray="8 6"/>
+  <!-- Cozy Mittens -->
+  <rect x="336" y="265" width="120" height="92" rx="38" fill="#EFE0D4" stroke="#C5A391" stroke-width="3.5"/>
+  <!-- QR Greeting Card inside box -->
+  <rect x="336" y="372" width="120" height="72" rx="14" fill="#FFFFFF" stroke="#E892A9" stroke-width="3"/>
+  <path d="M342 380L396 416L450 380" stroke="#FF5C8D" stroke-width="3"/>
+  <circle cx="396" cy="414" r="10" fill="#FF5C8D"/>
+  <text x="320" y="575" text-anchor="middle" fill="#8C6E74" font-family="sans-serif" font-size="16" font-weight="600">Ảnh minh họa • Set Đông Ấm (Khăn + Găng + Thiệp)</text>
+</svg>
+

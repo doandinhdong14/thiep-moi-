@@ -7,9 +7,7 @@ import {
   Home,
   LayoutGrid,
   Sparkles,
-  PackageCheck,
   Handshake,
-  PhoneCall,
   Gift,
   LogIn,
   Menu,
@@ -20,9 +18,11 @@ import {
   PlusCircle,
   Store,
   Settings,
+  ShoppingBag,
 } from "lucide-react";
 import { BrandLogo } from "@/components/common/BrandLogo";
 import VoucherModal from "@/components/landing/VoucherModal";
+import { useOptionalShopCart } from "@/components/shop/ShopCartContext";
 
 interface UserProfile {
   id: string;
@@ -33,6 +33,8 @@ interface UserProfile {
 
 export default function Navbar() {
   const pathname = usePathname();
+  const shopCart = useOptionalShopCart();
+  const cartCount = shopCart?.cart?.itemCount || 0;
   const [user, setUser] = useState<UserProfile | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [voucherModalOpen, setVoucherModalOpen] = useState(false);
@@ -59,6 +61,20 @@ export default function Navbar() {
     return () => window.removeEventListener("auth-change", handleAuthChange);
   }, [pathname, fetchUser]);
 
+  // Close mobile menu on route change and lock background scroll while open
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [mobileMenuOpen]);
+
   // Handle ESC key for mobile menu
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -81,31 +97,32 @@ export default function Navbar() {
     { label: "Trang chủ", href: "/", icon: Home, active: pathname === "/" },
     { label: "Sản phẩm", href: "/products", icon: LayoutGrid, active: pathname === "/products" },
     { label: "Bộ sưu tập", href: "/collections", icon: Sparkles, active: pathname.startsWith("/collections") || pathname.startsWith("/templates") },
-    { label: "Đơn hàng của tôi", href: "/dashboard", icon: PackageCheck, active: pathname.startsWith("/dashboard") },
+    { label: "Cửa hàng quà", href: "/qua-tang", icon: ShoppingBag, active: pathname.startsWith("/qua-tang") },
     { label: "Đối tác", href: "/partners", icon: Handshake, active: pathname.startsWith("/partners") || pathname.startsWith("/affiliate") },
-    { label: "Liên hệ", href: "/#contact", icon: PhoneCall, active: false },
   ];
 
   return (
     <>
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-100 shadow-[0_1px_3px_rgba(0,0,0,0.03)] h-16">
-        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 h-full">
-          <div className="flex items-center justify-between h-full">
+      <header className="sticky top-0 z-[55] bg-white/95 backdrop-blur-md border-b border-slate-100 shadow-[0_1px_3px_rgba(0,0,0,0.03)] h-16">
+        <div className="max-w-[1440px] mx-auto px-3 sm:px-6 lg:px-8 h-full">
+          <div className="flex items-center justify-between gap-2 h-full">
             {/* 1. Left Zone: Brand Logo */}
-            <BrandLogo size="md" theme="light" />
+            <div className="min-w-0 shrink flex items-center">
+              <BrandLogo size="md" theme="light" />
+            </div>
 
             {/* 2. Middle Zone: Navigation */}
-            <nav className="hidden lg:flex items-center gap-1 xl:gap-2 h-full text-[14px] font-medium text-slate-700">
+            <nav className="hidden xl:flex items-center gap-0.5 2xl:gap-1 min-w-0 h-full text-[13px] 2xl:text-[14px] font-medium text-slate-700">
               {navLinks.map((item) => {
                 const IconComponent = item.icon;
                 return (
                   <Link
                     key={item.label}
                     href={item.href}
-                    className={`relative flex items-center gap-1.5 px-3 py-2 h-full hover:text-[#fa416a] transition-colors ${item.active ? "text-[#fa416a] font-semibold" : "text-slate-600"
+                    className={`relative flex items-center gap-1.5 px-2 2xl:px-3 py-2 h-full whitespace-nowrap hover:text-[#fa416a] transition-colors ${item.active ? "text-[#fa416a] font-semibold" : "text-slate-600"
                       }`}
                   >
-                    <IconComponent className="w-4 h-4 stroke-[1.8]" />
+                    <IconComponent className="hidden 2xl:inline w-4 h-4 stroke-[1.8]" />
                     <span>{item.label}</span>
                     {item.active && (
                       <span className="absolute bottom-0 left-2 right-2 h-[2.5px] bg-[#fa416a] rounded-t-full" />
@@ -115,36 +132,56 @@ export default function Navbar() {
               })}
             </nav>
 
-            {/* 3. Right Zone: Actions */}
-            <div className="hidden sm:flex items-center gap-3 shrink-0">
+            {/* 3. Right Zone: Desktop/Tablet Actions */}
+            <div className="hidden md:flex items-center gap-2 2xl:gap-2.5 shrink-0">
+              {shopCart && (
+                <button
+                  id="ddg-nav-cart-btn"
+                  type="button"
+                  onClick={() => shopCart.openDrawer("cart")}
+                  aria-label={`Mở giỏ quà (${cartCount} sản phẩm) và đơn hàng của tôi`}
+                  title="Giỏ quà & Đơn hàng của tôi"
+                  className="relative inline-flex items-center justify-center w-9 h-9 rounded-full bg-[#FFF9F5] hover:bg-[#FDECF0] border border-[#F2DCE2] text-[#3E2A2D] transition-colors cursor-pointer"
+                >
+                  <ShoppingBag className="w-[18px] h-[18px] text-[#FF5C8D]" />
+                  <span
+                    className={`absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold inline-flex items-center justify-center ring-2 ring-white ${
+                      cartCount > 0 ? "bg-[#FF5C8D] text-white" : "bg-[#F3DCE3] text-[#7C6368]"
+                    } ${shopCart.badgePopped ? "ddg-badge-pop" : ""}`}
+                  >
+                    {cartCount}
+                  </span>
+                </button>
+              )}
+
               {/* Voucher Button */}
               <button
                 onClick={() => setVoucherModalOpen(true)}
-                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#fff0f3] hover:bg-rose-100 border border-rose-200 text-[#fa416a] text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+                className="flex items-center gap-1.5 px-2.5 2xl:px-3 py-1.5 rounded-full bg-[#fff0f3] hover:bg-rose-100 border border-rose-200 text-[#fa416a] text-xs font-semibold shadow-xs transition-colors cursor-pointer"
                 title="Nhận mã voucher giảm giá"
               >
                 <Gift className="w-3.5 h-3.5" />
-                <span>Nhận voucher</span>
+                <span className="hidden 2xl:inline">Nhận voucher</span>
               </button>
 
               {/* Authentication Actions */}
               {user ? (
-                <div className="flex items-center gap-1.5 sm:gap-2">
+                <div className="flex items-center gap-1 2xl:gap-1.5">
                   <Link
                     href="/create"
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-[#ff6b61] to-[#fa416a] hover:opacity-95 text-white text-xs font-semibold rounded-md shadow-sm shadow-rose-200 transition-all"
+                    className="flex items-center gap-1.5 px-2.5 2xl:px-3 py-1.5 bg-gradient-to-r from-[#ff6b61] to-[#fa416a] hover:opacity-95 text-white text-xs font-semibold rounded-md shadow-sm shadow-rose-200 transition-all whitespace-nowrap"
                   >
                     <PlusCircle className="w-3.5 h-3.5" />
-                    <span className="hidden md:inline">Tạo thiệp mới</span>
+                    <span className="hidden md:inline">Tạo thiệp</span>
                   </Link>
 
                   <Link
                     href="/dashboard"
-                    className="flex items-center gap-1.5 px-2.5 py-1.5 text-slate-700 hover:text-[#fa416a] text-xs font-medium rounded-md hover:bg-rose-50 transition-colors"
+                    className="flex items-center gap-1 px-2 py-1.5 text-slate-700 hover:text-[#fa416a] text-xs font-medium rounded-md hover:bg-rose-50 transition-colors"
                     title="Bảng điều khiển thiệp mời"
                   >
                     <UserIcon className="w-3.5 h-3.5 text-[#fa416a]" />
-                    <span className="max-w-[90px] truncate">{user.name}</span>
+                    <span className="hidden 2xl:inline max-w-[90px] truncate">{user.name}</span>
                   </Link>
 
                   <Link
@@ -197,19 +234,41 @@ export default function Navbar() {
               )}
             </div>
 
-            {/* Mobile menu trigger */}
-            <div className="flex lg:hidden items-center gap-2">
+            {/* Mobile & Tablet menu trigger */}
+            <div className="flex xl:hidden items-center gap-1 sm:gap-1.5 shrink-0">
+              {shopCart && (
+                <button
+                  id="ddg-mobile-cart-btn"
+                  type="button"
+                  onClick={() => shopCart.openDrawer("cart")}
+                  className="relative inline-flex items-center justify-center w-9 h-9 text-[#3E2A2D] hover:bg-rose-50 rounded-full md:hidden"
+                  aria-label={`Mở giỏ quà (${cartCount} sản phẩm) và đơn hàng của tôi`}
+                  title="Giỏ quà & Đơn hàng của tôi"
+                >
+                  <ShoppingBag className="w-[19px] h-[19px] text-[#FF5C8D]" />
+                  <span
+                    className={`absolute -top-0.5 -right-0.5 min-w-[17px] h-[17px] px-1 rounded-full text-[10px] font-bold inline-flex items-center justify-center ring-2 ring-white ${
+                      cartCount > 0 ? "bg-[#FF5C8D] text-white" : "bg-[#F3DCE3] text-[#7C6368]"
+                    } ${shopCart.badgePopped ? "ddg-badge-pop" : ""}`}
+                  >
+                    {cartCount}
+                  </span>
+                </button>
+              )}
+
               <button
                 onClick={() => setVoucherModalOpen(true)}
-                className="p-2 text-[#fa416a] hover:bg-rose-50 rounded-lg sm:hidden"
+                className="w-9 h-9 inline-flex items-center justify-center text-[#fa416a] hover:bg-rose-50 rounded-full md:hidden"
                 aria-label="Nhận voucher"
               >
                 <Gift className="w-5 h-5" />
               </button>
 
               <button
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="p-2 text-slate-700 hover:text-[#fa416a] rounded-lg focus:outline-none"
+                id="ddg-mobile-menu-btn"
+                type="button"
+                onClick={() => setMobileMenuOpen((prev) => !prev)}
+                className="w-10 h-10 inline-flex items-center justify-center text-slate-700 hover:text-[#fa416a] hover:bg-rose-50 rounded-xl focus:outline-none transition-colors cursor-pointer"
                 aria-label="Mở danh mục điều hướng"
                 aria-expanded={mobileMenuOpen}
               >
@@ -218,10 +277,26 @@ export default function Navbar() {
             </div>
           </div>
         </div>
+      </header>
 
-        {/* Mobile Drawer */}
-        {mobileMenuOpen && (
-          <div className="lg:hidden border-b border-rose-100 bg-white px-4 pt-3 pb-6 space-y-2 shadow-lg animate-fadeIn">
+      {/* Mobile & Tablet Fixed Overlay Drawer (outside h-16 header so it scrolls freely on all phones) */}
+      {mobileMenuOpen && (
+        <div
+          id="ddg-mobile-drawer"
+          className="xl:hidden fixed inset-x-0 top-16 bottom-0 z-[55]"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Danh mục điều hướng"
+        >
+          {/* Backdrop */}
+          <div
+            className="fixed inset-x-0 top-16 bottom-0 bg-slate-900/35 backdrop-blur-[2px]"
+            onClick={() => setMobileMenuOpen(false)}
+            aria-hidden="true"
+          />
+
+          {/* Scrollable Sheet */}
+          <div className="relative z-10 border-b border-rose-100 bg-white px-4 pt-3 pb-6 space-y-2 shadow-2xl max-h-[calc(100dvh-4rem)] overflow-y-auto">
             {navLinks.map((item) => {
               const IconComp = item.icon;
               return (
@@ -241,6 +316,32 @@ export default function Navbar() {
             })}
 
             <div className="pt-3 border-t border-slate-100 space-y-2">
+              {shopCart && (
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      shopCart.openDrawer("cart");
+                    }}
+                    className="flex items-center justify-center gap-1.5 px-3 py-2 bg-[#FFF9F5] text-[#3E2A2D] text-xs font-semibold rounded-lg border border-[#F2DCE2]"
+                  >
+                    <ShoppingBag className="w-3.5 h-3.5 text-[#FF5C8D]" />
+                    <span>Giỏ quà ({cartCount})</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      shopCart.openDrawer("orders");
+                    }}
+                    className="flex items-center justify-center gap-1.5 px-3 py-2 bg-white text-[#D94575] text-xs font-semibold rounded-lg border border-[#F2DCE2]"
+                  >
+                    <span>Đơn hàng của tôi</span>
+                  </button>
+                </div>
+              )}
+
               <button
                 onClick={() => {
                   setMobileMenuOpen(false);
@@ -325,8 +426,8 @@ export default function Navbar() {
               )}
             </div>
           </div>
-        )}
-      </header>
+        </div>
+      )}
 
       {/* Voucher Modal */}
       <VoucherModal isOpen={voucherModalOpen} onClose={() => setVoucherModalOpen(false)} />

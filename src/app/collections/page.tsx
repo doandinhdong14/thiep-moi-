@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import Breadcrumb from "@/components/common/Breadcrumb";
 import CollectionGrid from "@/components/collections/CollectionGrid";
 import { getVisibleCollections } from "@/data/catalogData";
@@ -35,6 +36,14 @@ export default async function CollectionsPage() {
           <p className="text-sm sm:text-base text-slate-500 leading-relaxed">
             Các bộ sưu tập thiệp tương tác 3D đang mở bán (#01 – #{String(visibleProducts.length).padStart(2, "0")})
           </p>
+          <div className="pt-1">
+            <Link
+              href="/qua-tang"
+              className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-[#FFF9F5] border border-[#F2DCE2] text-xs font-semibold text-[#D94575] hover:bg-[#FDECF0] transition-colors"
+            >
+              Muốn gửi thêm món quà thật kèm thiệp QR? → Cửa hàng quà
+            </Link>
+          </div>
         </div>
 
         <div className="mt-14 sm:mt-16">

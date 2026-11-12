@@ -36,6 +36,10 @@ model User {
   giftCardsOwned       GiftCard[]
   shopRequestsMade     ShopRequest[]
   auditLogs            AuditLog[]
+  storeCarts           StoreCart[]
+  storeOrders          StoreOrder[]
+  storeWishlist        StoreWishlistItem[]
+  storeAuditLogs       StoreAuditLog[]
 }
 
 model Session {
@@ -861,5 +865,443 @@ model SystemSetting {
   valueJson String
   updatedBy String?
   updatedAt DateTime @updatedAt
+}
+
+// ==========================================
+// 11. CUA HANG QUA / PHYSICAL GIFT STORE
+// ==========================================
+
+model StoreCategory {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  description String?
+  iconName    String?
+  coverImage  String?
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  products StoreProduct[]
+
+  @@index([isActive, sortOrder])
+}
+
+model StoreProduct {
+  id                      String   @id @default(cuid())
+  categoryId              String
+  slug                    String   @unique
+  name                    String
+  subtitle                String?
+  shortDesc               String?
+  description             String?
+  materialCare            String?
+  giftNote                String?
+  productType             String   @default("SINGLE") // SINGLE, COMBO, ADDON
+  status                  String   @default("DRAFT")  // DRAFT, ACTIVE, ARCHIVED
+  isFeatured              Boolean  @default(false)
+  sortOrder               Int      @default(0)
+  tagsJson                String   @default("[]")
+  occasionTagsJson        String   @default("[]")
+  imagesJson              String   @default("[]")
+  boxSpecsJson            String   @default("{}")
+  comboItemsJson          String   @default("[]")
+  cardIncluded            Boolean  @default(true)
+  cardPriceVnd            Int      @default(0)
+  eligibleTemplateIdsJson String   @default("[]")
+  defaultTemplateId       String?
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  category      StoreCategory       @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  variants      StoreVariant[]
+  wishlistItems StoreWishlistItem[]
+
+  @@index([categoryId, status])
+  @@index([status, isFeatured, sortOrder])
+}
+
+model StoreVariant {
+  id            String   @id @default(cuid())
+  productId     String
+  sku           String   @unique
+  name          String
+  colorName     String?
+  colorHex      String?
+  sizeLabel     String?
+  materialLabel String?
+  priceVnd      Int
+  compareAtVnd  Int?
+  imageUrl      String?
+  isActive      Boolean  @default(true)
+  isDefault     Boolean  @default(false)
+  sortOrder     Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  product      StoreProduct             @relation(fields: [productId], references: [id], onDelete: Cascade)
+  inventory    StoreInventory?
+  movements    StoreInventoryMovement[]
+  cartItems    StoreCartItem[]
+  orderItems   StoreOrderItem[]
+  reservations StoreStockReservation[]
+
+  @@index([productId, isActive, sortOrder])
+}
+
+model StoreInventory {
+  id                String   @id @default(cuid())
+  variantId         String   @unique
+  onHand            Int      @default(0)
+  reserved          Int      @default(0)
+  lowStockThreshold Int      @default(5)
+  updatedAt         DateTime @updatedAt
+
+  variant StoreVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+}
+
+model StoreInventoryMovement {
+  id            String   @id @default(cuid())
+  variantId     String
+  type          String   // IMPORT, ADJUST, RESERVE, RELEASE, SALE_DEDUCT, RETURN_RESTOCK
+  deltaOnHand   Int      @default(0)
+  deltaReserved Int      @default(0)
+  onHandAfter   Int
+  reservedAfter Int
+  orderId       String?
+  reason        String?
+  actorId       String?
+  createdAt     DateTime @default(now())
+
+  variant StoreVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+
+  @@index([variantId, createdAt])
+  @@index([orderId])
+}
+
+model StoreGiftCustomization {
+  id                String    @id @default(cuid())
+  guestToken        String?
+  userId            String?
+  templateSlug      String
+  cardPlanCode      String    @default("DEFAULT")
+  cardUpgradeFeeVnd Int       @default(0)
+  giftWrapCode      String    @default("NONE")
+  giftWrapFeeVnd    Int       @default(0)
+  recipientName     String    @default("")
+  senderName        String    @default("")
+  title             String    @default("")
+  message           String    @default("")
+  occasion          String?
+  musicTrackId      String?
+  photoUrlsJson     String    @default("[]")
+  presetColor       String?
+  status            String    @default("DRAFT") // DRAFT, ATTACHED, LOCKED
+  previewReady      Boolean   @default(true)
+  lockedAt          DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  cartItem      StoreCartItem?
+  cartItemUnits StoreCartItemUnit[]
+  giftUnits     StoreOrderGiftUnit[]
+
+  @@index([guestToken])
+  @@index([userId])
+}
+
+model StoreCart {
+  id         String   @id @default(cuid())
+  guestToken String?  @unique
+  userId     String?
+  promoCode  String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user  User?           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items StoreCartItem[]
+
+  @@index([userId])
+}
+
+model StoreCartItem {
+  id              String   @id @default(cuid())
+  cartId          String
+  variantId       String
+  quantity        Int
+  customizationId String?  @unique
+  giftWrapCode    String   @default("NONE")
+  note            String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  cart          StoreCart               @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  variant       StoreVariant            @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  customization StoreGiftCustomization? @relation(fields: [customizationId], references: [id], onDelete: SetNull)
+  units         StoreCartItemUnit[]
+
+  @@index([cartId])
+  @@index([variantId])
+}
+
+model StoreCartItemUnit {
+  id              String   @id @default(cuid())
+  cartItemId      String
+  unitIndex       Int
+  customizationId String?
+  giftWrapCode    String   @default("NONE")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  cartItem      StoreCartItem           @relation(fields: [cartItemId], references: [id], onDelete: Cascade)
+  customization StoreGiftCustomization? @relation(fields: [customizationId], references: [id], onDelete: SetNull)
+
+  @@unique([cartItemId, unitIndex])
+}
+
+model StoreOrder {
+  id                    String    @id @default(cuid())
+  orderCode             String    @unique
+  idempotencyKey        String    @unique
+  userId                String?
+  guestAccessTokenHash  String?
+  customerName          String
+  customerPhone         String
+  customerEmail         String?
+  recipientName         String
+  recipientPhone        String
+  provinceCode          String
+  provinceName          String
+  districtName          String
+  wardName              String
+  streetAddress         String
+  addressNote           String?
+  shippingZone          String    @default("INNER_CITY") // INNER_CITY, REGIONAL, REMOTE, CUSTOM_QUOTE
+  shippingMethodCode    String    @default("STANDARD")
+  deliveryNote          String?
+  status                String    @default("PENDING_PAYMENT") // DRAFT, PENDING_PAYMENT, PAYMENT_REVIEW_REQUESTED, PAID, PACKING, READY_TO_SHIP, SHIPPED, DELIVERED, COMPLETED, CANCELLED, REFUND_PENDING_MANUAL, REFUNDED, EXPIRED, STOCK_CONFLICT_REFUND_NEEDED
+  paymentMethod         String    @default("bank_transfer")   // bank_transfer, payos, cod
+  paymentStatus         String    @default("UNPAID")          // UNPAID, REVIEW_REQUESTED, PAID, REFUND_PENDING_MANUAL, REFUNDED, FAILED
+  subtotalVnd           Int
+  giftWrapFeeVnd        Int       @default(0)
+  giftCardFeeVnd        Int       @default(0)
+  shippingFeeVnd        Int       @default(0)
+  shippingQuoteRequired Boolean   @default(false)
+  discountVnd           Int       @default(0)
+  totalVnd              Int
+  promoCode             String?
+  reservationExpiresAt  DateTime?
+  paidAt                DateTime?
+  packingStartedAt      DateTime?
+  shippedAt             DateTime?
+  deliveredAt           DateTime?
+  cancelledAt           DateTime?
+  cancelReason          String?
+  internalNotes         String?
+  needsStockResolution  Boolean   @default(false)
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  user          User?                   @relation(fields: [userId], references: [id], onDelete: SetNull)
+  items         StoreOrderItem[]
+  giftUnits     StoreOrderGiftUnit[]
+  payments      StorePayment[]
+  reservations  StoreStockReservation[]
+  shipments     StoreShipment[]
+  giftCardLinks StoreGiftCardLink[]
+  auditLogs     StoreAuditLog[]
+
+  @@index([userId, createdAt])
+  @@index([status, createdAt])
+  @@index([customerPhone])
+}
+
+model StoreOrderItem {
+  id                  String   @id @default(cuid())
+  orderId             String
+  variantId           String?
+  productId           String?
+  skuSnapshot         String
+  productNameSnapshot String
+  variantNameSnapshot String
+  imageSnapshot       String?
+  unitPriceVnd        Int
+  quantity            Int
+  lineTotalVnd        Int
+  createdAt           DateTime @default(now())
+
+  order     StoreOrder           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  variant   StoreVariant?        @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  giftUnits StoreOrderGiftUnit[]
+
+  @@index([orderId])
+}
+
+model StoreOrderGiftUnit {
+  id                 String    @id @default(cuid())
+  orderId            String
+  orderItemId        String
+  unitIndex          Int
+  unitLabel          String
+  boxReferenceCode   String
+  customizationId    String?
+  templateSlug       String
+  cardSnapshotJson   String    @default("{}")
+  cardPlanCode       String    @default("DEFAULT")
+  durationDays       Int?
+  cardUpgradeFeeVnd  Int       @default(0)
+  giftWrapCode       String    @default("NONE")
+  giftWrapFeeVnd     Int       @default(0)
+  giftTokenHash      String    @unique
+  giftTokenEncrypted String
+  cardState          String    @default("PREPARING") // PREPARING, READY_UNOPENED, ACTIVE, EXPIRED, DISABLED
+  packingStatus      String    @default("PENDING")   // PENDING, SCANNED_VERIFIED, PACKED
+  isCardLocked       Boolean   @default(false)
+  readyAt            DateTime?
+  firstOpenedAt      DateTime?
+  expiresAt          DateTime?
+  openCount          Int       @default(0)
+  lastOpenedAt       DateTime?
+  qrVersion          Int       @default(1)
+  qrPrintedAt        DateTime?
+  qrVerifyCount      Int       @default(0)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  order         StoreOrder              @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderItem     StoreOrderItem          @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
+  customization StoreGiftCustomization? @relation(fields: [customizationId], references: [id], onDelete: SetNull)
+  giftCardLink  StoreGiftCardLink?
+
+  @@unique([orderId, unitIndex])
+  @@index([orderItemId])
+  @@index([cardState])
+}
+
+model StoreStockReservation {
+  id          String    @id @default(cuid())
+  orderId     String
+  variantId   String
+  quantity    Int
+  status      String    @default("ACTIVE") // ACTIVE, COMMITTED, RELEASED, EXPIRED
+  expiresAt   DateTime
+  releasedAt  DateTime?
+  committedAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  order   StoreOrder   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  variant StoreVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+
+  @@index([orderId, status])
+  @@index([variantId, status, expiresAt])
+}
+
+model StorePayment {
+  id                String    @id @default(cuid())
+  orderId           String
+  provider          String    // bank_transfer, payos, cod
+  providerRef       String?
+  amountVnd         Int
+  status            String    @default("PENDING") // PENDING, REVIEW_REQUESTED, PAID, FAILED, EXPIRED, REFUND_PENDING_MANUAL, REFUNDED
+  qrPayload         String?
+  transferContent   String?
+  checkoutUrl       String?
+  paymentNote       String?
+  requestedReviewAt DateTime?
+  verifiedBy        String?
+  verifiedAt        DateTime?
+  rawMetaJson       String    @default("{}")
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  order  StoreOrder          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  events StorePaymentEvent[]
+
+  @@index([orderId])
+  @@index([provider, providerRef])
+}
+
+model StorePaymentEvent {
+  id          String   @id @default(cuid())
+  paymentId   String
+  provider    String
+  eventId     String   @unique
+  eventType   String
+  payloadJson String
+  status      String   @default("PROCESSED")
+  createdAt   DateTime @default(now())
+
+  payment StorePayment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+
+  @@index([paymentId])
+}
+
+model StoreShipment {
+  id          String    @id @default(cuid())
+  orderId     String
+  carrierName String?
+  trackingCode String?
+  trackingUrl String?
+  status      String    @default("PENDING_PACK") // PENDING_PACK, READY_TO_SHIP, IN_TRANSIT, DELIVERED, RETURNED
+  shippedAt   DateTime?
+  deliveredAt DateTime?
+  note        String?
+  updatedBy   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  order StoreOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+}
+
+model StoreGiftCardLink {
+  id           String   @id @default(cuid())
+  orderId      String
+  giftUnitId   String   @unique
+  invitationId String?
+  templateSlug String
+  provider     String   @default("INTERNAL_REGISTRY")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  order    StoreOrder         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  giftUnit StoreOrderGiftUnit @relation(fields: [giftUnitId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+}
+
+model StoreWishlistItem {
+  id         String   @id @default(cuid())
+  userId     String?
+  guestToken String?
+  productId  String
+  createdAt  DateTime @default(now())
+
+  user    User?        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product StoreProduct @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@unique([guestToken, productId])
+  @@index([productId])
+}
+
+model StoreAuditLog {
+  id         String   @id @default(cuid())
+  orderId    String?
+  actorId    String?
+  action     String
+  targetType String
+  targetId   String?
+  summary    String?
+  metaJson   String   @default("{}")
+  createdAt  DateTime @default(now())
+
+  order StoreOrder? @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  actor User?       @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([orderId, createdAt])
+  @@index([action, createdAt])
 }
 

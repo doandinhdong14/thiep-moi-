@@ -81,11 +81,11 @@ export function BrandLogo({
   const textClass =
     size === "sm"
       ? isDark
-        ? "text-lg font-bold text-white tracking-tight"
-        : "text-lg font-bold bg-gradient-to-r from-[#ff6b61] to-[#fa416a] bg-clip-text text-transparent tracking-tight"
+        ? "text-base sm:text-lg font-bold text-white tracking-tight whitespace-nowrap"
+        : "text-base sm:text-lg font-bold bg-gradient-to-r from-[#ff6b61] to-[#fa416a] bg-clip-text text-transparent tracking-tight whitespace-nowrap"
       : isDark
-      ? "text-xl font-bold text-white tracking-tight"
-      : "text-xl font-bold bg-gradient-to-r from-[#ff6b61] to-[#fa416a] bg-clip-text text-transparent tracking-tight";
+      ? "text-[17px] sm:text-xl font-bold text-white tracking-tight whitespace-nowrap"
+      : "text-[17px] sm:text-xl font-bold bg-gradient-to-r from-[#ff6b61] to-[#fa416a] bg-clip-text text-transparent tracking-tight whitespace-nowrap";
 
   const content = (
     <>
@@ -93,9 +93,9 @@ export function BrandLogo({
         size={size === "sm" ? "sm" : "md"}
         surface={isDark ? "white-card" : "none"}
         alt={showWordmark ? "" : "Ding Dong Gift"}
-        imgClassName="group-hover:scale-105 transition-transform"
+        imgClassName="h-8 sm:h-9 w-auto group-hover:scale-105 transition-transform"
       />
-      {showWordmark && <span className={textClass}>Ding Dong Gift</span>}
+      {showWordmark && <span className={textClass}>{/* wordmark */}Ding Dong Gift</span>}
     </>
   );
 

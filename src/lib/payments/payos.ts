@@ -340,6 +340,26 @@ export async function processPayOSWebhookPayload(webhookBody: any) {
   });
 
   if (!paymentAttempt) {
+    const { tryConfirmShopPayOSOrderByOrderCode } = await import("@/lib/shop/payment");
+    const shopResult = await tryConfirmShopPayOSOrderByOrderCode({
+      payosOrderCode: String(orderCode),
+      amountVnd: typeof amount === "number" ? amount : undefined,
+      eventId: `payos_${providerEventId}`,
+      rawPayload: verifiedData,
+    });
+    if (shopResult.handled) {
+      await prisma.paymentWebhookEvent.update({
+        where: {
+          provider_providerEventId: {
+            provider: "payos",
+            providerEventId,
+          },
+        },
+        data: { status: "PROCESSED", processedAt: new Date() },
+      });
+      return { success: true, message: shopResult.message || "Đơn Cửa hàng quà đã được xác nhận." };
+    }
+
     await prisma.paymentWebhookEvent.update({
       where: {
         provider_providerEventId: {

@@ -94,14 +94,22 @@ export default function TemplateDemoPage({
             </button>
           </div>
 
-          {/* CTA Dùng mẫu này */}
-          <Link
-            href={`/create?template=${template.slug}`}
-            className="px-4 py-2 rounded-full bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs sm:text-sm shadow-md transition-all hover:scale-105 flex items-center gap-1.5"
-          >
-            <span>Dùng mẫu này</span>
-            <ArrowRight className="w-4 h-4" />
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link
+              href={`/qua-tang/tat-ca?template=${template.slug}`}
+              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-2 rounded-full bg-white/10 hover:bg-white/20 text-rose-200 text-xs font-medium transition-colors"
+            >
+              <span>Tặng kèm quà thật</span>
+            </Link>
+            {/* CTA Dùng mẫu này */}
+            <Link
+              href={`/create?template=${template.slug}`}
+              className="px-4 py-2 rounded-full bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs sm:text-sm shadow-md transition-all hover:scale-105 flex items-center gap-1.5"
+            >
+              <span>Dùng mẫu này</span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
         </div>
       </div>
 

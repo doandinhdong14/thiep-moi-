@@ -8,9 +8,17 @@ export default function CookieConsent() {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    // If running inside iframe (e.g. product demo mockup preview), don't show consent banner
-    if (typeof window !== "undefined" && window.self !== window.top) {
-      return;
+    // If running inside explicit card/template embed preview, don't show consent banner
+    if (typeof window !== "undefined") {
+      const p = window.location.pathname || "";
+      if (
+        window.location.search.includes("embed=true") ||
+        p.startsWith("/templates/") ||
+        p.startsWith("/i/") ||
+        p.startsWith("/mo-qua/")
+      ) {
+        return;
+      }
     }
 
     // Check if user already made a decision
@@ -45,7 +53,7 @@ export default function CookieConsent() {
     <div
       role="region"
       aria-label="Thông báo cài đặt cookie"
-      className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-[94%] max-w-[650px] bg-white rounded-2xl shadow-[0_10px_35px_rgba(0,0,0,0.15)] border border-rose-100 p-4 sm:p-5 transition-all duration-300 animate-slideUp"
+      className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 w-[94%] max-w-[650px] bg-white rounded-2xl shadow-[0_10px_35px_rgba(0,0,0,0.15)] border border-rose-100 p-4 sm:p-5 transition-all duration-300 animate-slideUp"
     >
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-start gap-3">

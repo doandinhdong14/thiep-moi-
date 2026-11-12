@@ -1,0 +1,316 @@
+/* Scoped styles for Cua hang qua / Qua tang tan tay (.ddg-shop) */
+
+.ddg-shop {
+  --shop-cream: #ffffff;
+  --shop-blush: #fdecf0;
+  --shop-blush-soft: #fff1e7;
+  --shop-surface: #ffffff;
+  --shop-card-soft: #fdf9f6;
+  --shop-ink: #3e2a2d;
+  --shop-ink-muted: #7c6368;
+  --shop-rose-gold: #e892a9;
+  --shop-pink: #ff5c8d;
+  --shop-pink-dark: #d94575;
+  --shop-gold: #c9a25b;
+  --shop-border: #f2dce2;
+  --shop-shadow-soft: 0 12px 32px -12px rgba(232, 146, 169, 0.24);
+  --shop-shadow-card: 0 8px 24px -10px rgba(62, 42, 45, 0.08);
+
+  --shop-ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --shop-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --shop-ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+
+  --shop-dur-fast: 150ms;
+  --shop-dur-base: 260ms;
+  --shop-dur-slow: 460ms;
+  --shop-dur-hero: 760ms;
+
+  background-color: var(--shop-cream);
+  color: var(--shop-ink);
+}
+
+.ddg-shop-card {
+  background: var(--shop-surface);
+  border: 1px solid var(--shop-border);
+  border-radius: 20px;
+  box-shadow: var(--shop-shadow-card);
+  transition: transform var(--shop-dur-base) var(--shop-ease-soft),
+    box-shadow var(--shop-dur-base) var(--shop-ease-soft),
+    border-color var(--shop-dur-fast) var(--shop-ease-smooth);
+}
+
+.ddg-shop-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shop-shadow-soft);
+  border-color: var(--shop-rose-gold);
+}
+
+.ddg-shop-img-zoom img {
+  transition: transform var(--shop-dur-slow) var(--shop-ease-soft);
+}
+
+.ddg-shop-card:hover .ddg-shop-img-zoom img {
+  transform: scale(1.04);
+}
+
+.ddg-shop-btn-primary {
+  background: linear-gradient(135deg, #ff6c96 0%, #ff5c8d 55%, #eb4778 100%);
+  color: #ffffff;
+  border-radius: 9999px;
+  box-shadow: 0 10px 24px -10px rgba(255, 92, 141, 0.55);
+  transition: transform var(--shop-dur-fast) var(--shop-ease-spring),
+    box-shadow var(--shop-dur-base) var(--shop-ease-soft),
+    opacity var(--shop-dur-fast) var(--shop-ease-smooth);
+}
+
+.ddg-shop-btn-primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 28px -10px rgba(255, 92, 141, 0.65);
+}
+
+.ddg-shop-btn-primary:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.ddg-shop-btn-secondary {
+  background: #ffffff;
+  color: var(--shop-ink);
+  border: 1px solid var(--shop-border);
+  border-radius: 9999px;
+  transition: background-color var(--shop-dur-fast) ease,
+    border-color var(--shop-dur-fast) ease,
+    color var(--shop-dur-fast) ease,
+    transform var(--shop-dur-fast) var(--shop-ease-spring);
+}
+
+.ddg-shop-btn-secondary:hover:not(:disabled) {
+  background: var(--shop-blush);
+  border-color: var(--shop-rose-gold);
+  color: var(--shop-pink-dark);
+}
+
+/* Gentle Float Animation for Hero Gift Vignette */
+@keyframes ddgFloatGentle {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -6px, 0);
+  }
+}
+
+.ddg-float-gentle {
+  animation: ddgFloatGentle 4.2s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* Staggered Hero Reveal */
+@keyframes ddgRevealUp {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.ddg-reveal-stagger {
+  animation: ddgRevealUp var(--shop-dur-hero) var(--shop-ease-soft) both;
+}
+
+.ddg-reveal-delay-1 {
+  animation-delay: 80ms;
+}
+
+.ddg-reveal-delay-2 {
+  animation-delay: 160ms;
+}
+
+.ddg-reveal-delay-3 {
+  animation-delay: 240ms;
+}
+
+/* Continuous Horizontal Editorial Marquee */
+@keyframes ddgMarqueeScroll {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.ddg-marquee-wrap {
+  overflow: hidden;
+  position: relative;
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 5%,
+    #000 95%,
+    transparent
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 5%,
+    #000 95%,
+    transparent
+  );
+}
+
+.ddg-marquee-track {
+  display: flex;
+  width: max-content;
+  gap: 1.25rem;
+  animation: ddgMarqueeScroll 38s linear infinite;
+  will-change: transform;
+}
+
+.ddg-marquee-wrap:hover .ddg-marquee-track,
+.ddg-marquee-wrap:focus-within .ddg-marquee-track,
+.ddg-marquee-wrap[data-paused="true"] .ddg-marquee-track {
+  animation-play-state: paused;
+}
+
+/* Shimmer Skeleton */
+@keyframes ddgSkeletonShimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.ddg-skeleton {
+  background: linear-gradient(90deg, #faeef2 25%, #fff8fa 50%, #faeef2 75%);
+  background-size: 200% 100%;
+  animation: ddgSkeletonShimmer 1.5s infinite linear;
+}
+
+/* Badge Bounce on Add to Cart */
+@keyframes ddgBadgePop {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.28);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.ddg-badge-pop {
+  animation: ddgBadgePop 320ms var(--shop-ease-spring);
+}
+
+/* Envelope Wax Seal Pulse */
+@keyframes ddgSealPulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 92, 141, 0.42);
+  }
+  55% {
+    box-shadow: 0 0 0 14px rgba(255, 92, 141, 0);
+  }
+}
+
+.ddg-seal-pulse {
+  animation: ddgSealPulse 2.6s ease-in-out infinite;
+}
+
+/* Confetti micro hearts on opening card */
+@keyframes ddgHeartFloatOut {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 8px, 0) scale(0.7);
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--tx, 0px), -96px, 0) scale(1.1);
+  }
+}
+
+.ddg-heart-particle {
+  animation: ddgHeartFloatOut 1.4s var(--shop-ease-soft) forwards;
+}
+
+/* Flying clone helper */
+.ddg-fly-clone {
+  position: fixed;
+  z-index: 9999;
+  pointer-events: none;
+  border-radius: 14px;
+  object-fit: cover;
+  box-shadow: 0 12px 24px -8px rgba(255, 92, 141, 0.45);
+  transition: transform 580ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 580ms ease;
+}
+
+/* Horizontal scrollbar hiding utility */
+.ddg-no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.ddg-no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Respect Reduced Motion strictly */
+@media (prefers-reduced-motion: reduce) {
+  .ddg-float-gentle,
+  .ddg-reveal-stagger,
+  .ddg-marquee-track,
+  .ddg-skeleton,
+  .ddg-badge-pop,
+  .ddg-seal-pulse,
+  .ddg-heart-particle {
+    animation: none !important;
+  }
+
+  .ddg-marquee-wrap {
+    overflow-x: auto;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+
+  .ddg-shop-card,
+  .ddg-shop-card:hover,
+  .ddg-shop-img-zoom img,
+  .ddg-shop-btn-primary,
+  .ddg-shop-btn-secondary {
+    transition-duration: 0.01ms !important;
+    transform: none !important;
+  }
+}
+
+/* QR Gift Slip Print Styles (A6 / A7 / 90x55mm) */
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+  .ddg-print-qr-area,
+  .ddg-print-qr-area * {
+    visibility: visible !important;
+  }
+  .ddg-print-qr-area {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    padding: 8mm !important;
+    background: #ffffff !important;
+  }
+  .ddg-no-print {
+    display: none !important;
+  }
+}
+

@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import { seedShopCatalog } from "../src/lib/shop/seed";
 
 const prisma = new PrismaClient();
 
@@ -575,6 +576,8 @@ async function main() {
       },
     });
   }
+
+  await seedShopCatalog(prisma);
 
   console.log("✅ Seed completed successfully!");
 }

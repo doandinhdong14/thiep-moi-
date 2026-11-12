@@ -102,6 +102,13 @@ export default async function DashboardPage() {
               </Link>
             )}
 
+            <Link
+              href="/tai-khoan/don-hang"
+              className="inline-flex items-center gap-1.5 px-3 py-2 bg-[#FFF9F5] border border-[#F2DCE2] hover:bg-[#FDECF0] text-[#D94575] rounded-xl text-xs font-semibold transition-colors"
+            >
+              <span>Đơn quà tặng tận tay</span>
+            </Link>
+
             <LogoutButton />
 
             <Link
