@@ -665,8 +665,8 @@ export default function CheckoutOrderPage() {
             ctaText = "Tiếp tục thêm nhạc";
             successMsg = "Đã cộng thêm lượt tải nhạc vào tài khoản của bạn!";
           } else if (purpose === "gift_unlock") {
-            targetUrl = giftId ? `/editor/${giftId}?step=finish&paid=gift_unlock` : "/dashboard";
-            ctaText = "Vào trình chỉnh sửa thiệp";
+            targetUrl = giftId ? `/editor/${giftId}?step=content&paid=gift_unlock` : "/dashboard";
+            ctaText = "Chỉnh sửa chữ, ảnh & nhạc nền";
             successMsg = "Thanh toán thành công! Thiệp & mã QR của bạn đã sẵn sàng.";
           } else if (purpose === "gift_renewal") {
             targetUrl = giftId ? `/editor/${giftId}?step=finish&paid=gift_renewal` : "/dashboard";

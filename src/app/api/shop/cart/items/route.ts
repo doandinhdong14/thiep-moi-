@@ -9,6 +9,7 @@ import {
 import { handleShopApiError } from "@/lib/shop/api-helpers";
 import { buildCartSummaryView, findOrCreateShopCart } from "@/lib/shop/cart";
 import { releaseExpiredReservations } from "@/lib/shop/inventory";
+import { PHYSICAL_SHOP_LAUNCH_LABEL, PHYSICAL_SHOP_LOCKED } from "@/lib/shop/types";
 
 const AddCartItemSchema = z.object({
   variantId: z.string().min(1),
@@ -20,6 +21,14 @@ const AddCartItemSchema = z.object({
 
 export async function POST(req: Request) {
   try {
+    if (PHYSICAL_SHOP_LOCKED) {
+      return apiError(
+        `Các mặt hàng quà tặng vật lý sẽ chính thức ${PHYSICAL_SHOP_LAUNCH_LABEL.toLowerCase()}.`,
+        "SHOP_COMING_SOON",
+        403,
+      );
+    }
+
     await releaseExpiredReservations().catch(() => 0);
 
     const user = await getCurrentUser();

@@ -21,26 +21,32 @@ export interface AdminTemplatesConfig {
 }
 
 export const DEFAULT_TEMPLATE_NOTES: Record<string, string> = {
+  "card-01-first-gift":
+    "Mẫu #01 (card-01-first-gift) — Thiệp Đầu Tiên 3 Chặng (Bó hoa 3D → Hành trình sao băng 8 màn → Vũ trụ yêu thương 3D): người dùng chỉ chỉnh sửa chữ, thêm/đồng bộ ảnh & chú thích, chọn/tải nhạc nền; giữ nguyên hiệu ứng 3D có sẵn; demo tự chạy.",
+  "card-02-second-gift":
+    "Mẫu #02 (card-02-second-gift) — Thiệp Thứ Hai 3 Chặng (Hoa hồng nở 3D → Hành trình sao băng 8 màn → Đèn trời 3D & Pháo hoa): người dùng chỉ chỉnh sửa chữ, thêm/đồng bộ ảnh & chú thích, lời chúc đèn trời, chọn/tải nhạc nền; giữ nguyên hiệu ứng 3D có sẵn; demo tự chạy.",
+  "card-03-third-gift":
+    "Mẫu #03 (card-03-third-gift) — Thiệp Thứ Ba (Chuyện Tình 55 Trang & Toàn Cảnh Trái Tim Flowtime): người dùng chỉnh sửa chữ, tên đôi lứa, thêm/đồng bộ tối đa 12 ảnh kỷ niệm, chọn/tải nhạc nền; giữ nguyên hiệu ứng không gian 2D Flowtime & Trái Tim có sẵn; demo tự chạy.",
   "thiep-3":
-    "Mẫu #01 (file gốc thiep-3.html) — Vé Hẹn Hò: nhập tên người gửi/nhận, ngày & địa điểm hẹn, lời nhắn, hỗ trợ dải ảnh & nhạc nền.",
+    "Mẫu #04 (file gốc thiep-3.html) — Vé Hẹn Hò: nhập tên người gửi/nhận, ngày & địa điểm hẹn, lời nhắn, hỗ trợ dải ảnh & nhạc nền.",
   "thiep-4":
-    "Mẫu #02 (file gốc thiep-4.html) — Gửi Em Một Vũ Trụ (7 cảnh): hỗ trợ văn bản lời chúc 3D, câu hỏi phản hồi, ảnh kỷ niệm nổi & nhạc nền.",
+    "Mẫu #05 (file gốc thiep-4.html — ĐANG KHÓA, ra mắt 24/11) — Gửi Em Một Vũ Trụ (7 cảnh): hỗ trợ văn bản lời chúc 3D, câu hỏi phản hồi, ảnh kỷ niệm nổi & nhạc nền.",
   "thiep-5":
-    "Mẫu #03 (file gốc thiep-5.html) — Khu Vườn Kỷ Niệm 3D: hỗ trợ khóa PIN bảo vệ bí mật, ngày kỷ niệm, phong thư 3D, album ảnh & nhạc nền.",
+    "Mẫu #06 (file gốc thiep-5.html) — Khu Vườn Kỷ Niệm 3D: hỗ trợ khóa PIN bảo vệ bí mật, ngày kỷ niệm, phong thư 3D, album ảnh & nhạc nền.",
   "thiep-6":
-    "Mẫu #04 (file gốc thiep-6.html) — Mùa Thu Kỷ Niệm: hỗ trợ khóa PIN, chữ thư tay trên nền lá phong rơi, ảnh kỷ niệm & nhạc nền.",
+    "Mẫu #07 (file gốc thiep-6.html) — Mùa Thu Kỷ Niệm: hỗ trợ khóa PIN, chữ thư tay trên nền lá phong rơi, ảnh kỷ niệm & nhạc nền.",
   "thiep-7":
-    "Mẫu #05 (file gốc thiep-7.html) — Đại Dương Tình Yêu: chai thủy tinh đại dương, tùy biến tên/lời chúc, dải ảnh & nhạc nền.",
+    "Mẫu #08 (file gốc thiep-7.html) — Đại Dương Tình Yêu: chai thủy tinh đại dương, tùy biến tên/lời chúc, dải ảnh & nhạc nền.",
   "thiep-8":
-    "Mẫu #06 (file gốc thiep-8.html) — Vũ Trụ Trái Tim Particle & Bì Thư 3D: hiệu ứng tim 3D hạt sáng, ảnh nổi, lời chúc cá nhân hóa & nhạc nền.",
+    "Mẫu #09 (file gốc thiep-8.html) — Vũ Trụ Trái Tim Particle & Bì Thư 3D: hiệu ứng tim 3D hạt sáng, ảnh nổi, lời chúc cá nhân hóa & nhạc nền.",
   "thiep-9":
-    "Mẫu #07 (file gốc thiep-9.html) — Vũ Điệu Cực Quang & Trái Tim Pha Lê 3D: tên người gửi/nhận, thông điệp cực quang, ảnh & nhạc nền.",
+    "Mẫu #10 (file gốc thiep-9.html) — Vũ Điệu Cực Quang & Trái Tim Pha Lê 3D: tên người gửi/nhận, thông điệp cực quang, ảnh & nhạc nền.",
   "thiep-10":
-    "Mẫu #08 (file gốc thiep-10.html) — Boarding Pass Chuyến Bay Hạnh Phúc: hỗ trợ tên hành khách, ngày bay, điểm đi/đến, lời nhắn & ảnh kỷ niệm.",
+    "Mẫu #11 (file gốc thiep-10.html) — Boarding Pass Chuyến Bay Hạnh Phúc: hỗ trợ tên hành khách, ngày bay, điểm đi/đến, lời nhắn & ảnh kỷ niệm.",
   "thiep-giang-sinh":
-    "Mẫu #09 (file gốc thiep-giang-sinh.html) — Thiệp Giáng Sinh Đêm Noel Diệu Kỳ: tuyết rơi 3D, hộp quà mở thư Noel, ảnh & nhạc nền.",
+    "Mẫu #12 (file gốc thiep-giang-sinh.html) — Thiệp Giáng Sinh Đêm Noel Diệu Kỳ: tuyết rơi 3D, hộp quà mở thư Noel, ảnh & nhạc nền.",
   "thiep-xmas":
-    "Mẫu #10 (file gốc thiep-xmas.html) — Christmas Special Hộp Quà 3D: pháo tuyết Giáng Sinh, bưu thiếp Bắc Cực, ảnh & nhạc nền.",
+    "Mẫu #13 (file gốc thiep-xmas.html) — Christmas Special Hộp Quà 3D: pháo tuyết Giáng Sinh, bưu thiếp Bắc Cực, ảnh & nhạc nền.",
   "wedding-classic": "Mẫu gốc nền tảng (đã ẩn khỏi trang bán hàng công khai; giữ trong hệ thống để tương thích link cũ).",
   "wedding-floral": "Mẫu gốc nền tảng (đã ẩn khỏi trang bán hàng công khai).",
   "graduation-classic": "Mẫu gốc nền tảng (đã ẩn khỏi trang bán hàng công khai).",
@@ -54,18 +60,20 @@ export const DEFAULT_TEMPLATE_NOTES: Record<string, string> = {
 export const DEFAULT_GENERAL_NOTES = [
   "=== TỔNG HỢP CẤU HÌNH MẪU THIỆP & VẬN HÀNH ===",
   "",
-  "1. DANH SÁCH 10 MẪU CHÍNH THỨC ĐANG MỞ (ĐÁNH SỐ #01 → #10):",
-  "   - #01 | thiep-3          | public/templates/thiep-3.html          | Một Tấm Vé Hẹn Hò",
-  "   - #02 | thiep-4          | public/templates/thiep-4.html          | Gửi Em Một Vũ Trụ (7 cảnh)",
-  "   - #03 | thiep-5          | public/templates/thiep-5.html          | Khu Vườn Kỷ Niệm (Khóa PIN & 3D)",
-  "   - #04 | thiep-6          | public/templates/thiep-6.html          | Mùa Thu Kỷ Niệm (Khóa PIN & Lá Phong)",
-  "   - #05 | thiep-7          | public/templates/thiep-7.html          | Đại Dương Tình Yêu (Thư Trong Chai)",
-  "   - #06 | thiep-8          | public/templates/thiep-8.html          | Vũ Trụ Trái Tim & Bì Thư 3D (Mặc định)",
-  "   - #07 | thiep-9          | public/templates/thiep-9.html          | Vũ Điệu Cực Quang & Pha Lê 3D",
-  "   - #08 | thiep-10         | public/templates/thiep-10.html         | Boarding Pass – Chuyến Bay Hạnh Phúc",
-  "   - #09 | thiep-giang-sinh | public/templates/thiep-giang-sinh.html | Thiệp Giáng Sinh – Đêm Noel Diệu Kỳ",
-  "   - #10 | thiep-xmas       | public/templates/thiep-xmas.html       | Christmas Special – Hộp Quà 3D",
-  "   * Lưu ý đánh số: Bộ HTML đưa vào bắt đầu từ file thiep-3.html đến thiep-xmas.html (không có thiep-1/thiep-2), hệ thống đã chuẩn hóa đánh số hiển thị công khai liên tục #01 → #10.",
+  "1. DANH SÁCH 13 MẪU CHÍNH THỨC (ĐÁNH SỐ #01 → #13):",
+  "   - #01 | card-01-first-gift  | Card01Player.tsx                       | Thiệp Đầu Tiên – Bó Hoa & Vũ Trụ 3D (Mặc định)",
+  "   - #02 | card-02-second-gift | Card02Player.tsx                       | Thiệp Thứ Hai – Hoa Hồng, Sao Băng & Đèn Trời 3D",
+  "   - #03 | card-03-third-gift  | Card03Player.tsx                       | Thiệp Thứ Ba – Chuyện Tình 55 Trang & Trái Tim Flowtime",
+  "   - #04 | thiep-3             | public/templates/thiep-3.html          | Một Tấm Vé Hẹn Hò",
+  "   - #05 | thiep-4             | public/templates/thiep-4.html          | Gửi Em Một Vũ Trụ (7 cảnh — ĐANG KHÓA)",
+  "   - #06 | thiep-5             | public/templates/thiep-5.html          | Khu Vườn Kỷ Niệm (Khóa PIN & 3D)",
+  "   - #07 | thiep-6             | public/templates/thiep-6.html          | Mùa Thu Kỷ Niệm (Khóa PIN & Lá Phong)",
+  "   - #08 | thiep-7             | public/templates/thiep-7.html          | Đại Dương Tình Yêu (Thư Trong Chai)",
+  "   - #09 | thiep-8             | public/templates/thiep-8.html          | Vũ Trụ Trái Tim & Bì Thư 3D",
+  "   - #10 | thiep-9             | public/templates/thiep-9.html          | Vũ Điệu Cực Quang & Pha Lê 3D",
+  "   - #11 | thiep-10            | public/templates/thiep-10.html         | Boarding Pass – Chuyến Bay Hạnh Phúc",
+  "   - #12 | thiep-giang-sinh    | public/templates/thiep-giang-sinh.html | Thiệp Giáng Sinh – Đêm Noel Diệu Kỳ",
+  "   - #13 | thiep-xmas          | public/templates/thiep-xmas.html       | Christmas Special – Hộp Quà 3D",
   "",
   "2. TRẠNG THÁI MẪU GỐC / MẪU MẪU CŨ:",
   "   - Toàn bộ 8 mẫu React mặc định (wedding-classic, wedding-floral, graduation-classic, graduation-playful, birthday-fun, birthday-minimal, love-letter, love-galaxy) và các thẻ mẫu phụ đã được ẨN khỏi Trang chủ, /products, /templates, /collections và /create.",
@@ -73,7 +81,7 @@ export const DEFAULT_GENERAL_NOTES = [
   "",
   "3. CÁ NHÂN HÓA ẢNH, NHẠC & TRẢ THIỆP SAU THANH TOÁN:",
   "   - Ảnh upload & nhạc người dùng tự tải lên được lưu bền vững trong CSDL (SystemSetting key asset_blob:*) và phát nhạc chuẩn HTTP Range streaming.",
-  "   - Sau khi thanh toán chuyển khoản (2.000đ): khách nhận ngay Link chia sẻ (/i/[slug] kèm nút Sao chép) và Bộ tạo Mã QR với đủ 16 khung trang trí (Hoa Hồng, 20/10, Gift For You, Hoa, Cupid, Mũi Tên, Trái Tim, Trái Tim Khung/Snoopy, Sinh Nhật 1 & 2, Socola 1 & 2, Giáng Sinh 1-3, Pháo Hoa).",
+  "   - Sau khi thanh toán chuyển khoản (2.000đ): khách nhận ngay Link chia sẻ (/i/[slug] kèm nút Sao chép), Bộ tạo Mã QR đủ 16 khung trang trí, và toàn quyền chỉnh sửa chữ, ảnh, nhạc nền (không chỉnh sửa/thêm hiệu ứng có sẵn).",
   "   - Trang thiệp người nhận (/i/[slug]) sạch 100%: KHÔNG quảng cáo, KHÔNG hiển thị bất kỳ logo, liên kết hay thương hiệu Ding Dong Gift nào.",
 ].join("\n");
 

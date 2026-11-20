@@ -20,7 +20,7 @@ export default function PlanSelectButton({
 
   const handleClick = async () => {
     if (isFree) {
-      router.push("/create");
+      router.push("/products");
       return;
     }
 

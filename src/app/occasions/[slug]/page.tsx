@@ -61,7 +61,7 @@ export default async function OccasionDetailPage({
                 key={tpl.slug}
                 product={templateMetaToProductItem(tpl)}
                 index={index}
-                primaryLabel="Dùng mẫu này"
+                primaryLabel="Chỉnh sửa ngay"
                 showGuideLinks={false}
                 showPrice={false}
                 subtitleText={tpl.theme.style}

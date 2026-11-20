@@ -5,7 +5,7 @@ import { getCurrentUser, createSession } from "@/lib/auth/session";
 import { apiSuccess, apiError, handleApiError } from "@/lib/api/response";
 import { logAudit } from "@/lib/audit";
 import { generateUniqueSlug, generateShortCode } from "@/lib/utils/slug";
-import { getTemplateDemoContent, DEFAULT_TEMPLATE_SLUG } from "@/lib/templates/registry";
+import { getTemplateDemoContent, DEFAULT_TEMPLATE_SLUG, isTemplateLocked } from "@/lib/templates/registry";
 
 const DraftSchema = z.object({
   templateSlug: z.string().default(DEFAULT_TEMPLATE_SLUG),
@@ -35,6 +35,14 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json().catch(() => ({}));
     const { templateSlug, forceNew } = DraftSchema.parse(body);
+
+    if (isTemplateLocked(templateSlug)) {
+      return apiError(
+        "Mẫu thiệp này hiện đang khóa và sẽ ra mắt 24/11.",
+        "TEMPLATE_LOCKED",
+        403
+      );
+    }
 
     const template = await prisma.template.findUnique({
       where: { slug: templateSlug },

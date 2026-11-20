@@ -1,14 +1,23 @@
 import { getCurrentUser } from "@/lib/auth/session";
-import { apiSuccess } from "@/lib/api/response";
+import { apiError, apiSuccess } from "@/lib/api/response";
 import {
   readShopGuestToken,
   saveOrderAccessToCookie,
 } from "@/lib/shop/auth";
 import { getRequestBaseUrl, handleShopApiError } from "@/lib/shop/api-helpers";
 import { CheckoutInputSchema, executeShopCheckout } from "@/lib/shop/checkout";
+import { PHYSICAL_SHOP_LAUNCH_LABEL, PHYSICAL_SHOP_LOCKED } from "@/lib/shop/types";
 
 export async function POST(req: Request) {
   try {
+    if (PHYSICAL_SHOP_LOCKED) {
+      return apiError(
+        `Các mặt hàng quà tặng vật lý sẽ chính thức ${PHYSICAL_SHOP_LAUNCH_LABEL.toLowerCase()}.`,
+        "SHOP_COMING_SOON",
+        403,
+      );
+    }
+
     const user = await getCurrentUser();
     const guestToken = readShopGuestToken();
     const input = CheckoutInputSchema.parse(await req.json());

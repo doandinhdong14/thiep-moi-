@@ -30,7 +30,7 @@ export default function PartnerHero() {
       <div className="flex flex-wrap items-center justify-center gap-3.5 mt-8 z-10">
         {/* Primary CTA: White pill with pink text & chat icon */}
         <a
-          href="https://zalo.me"
+          href="https://zalo.me/0362213119"
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center gap-2 h-11 px-6 rounded-full bg-white hover:bg-rose-50 text-[#fa416a] text-xs sm:text-sm font-bold shadow-lg transition-transform duration-200 hover:scale-105"
@@ -41,7 +41,7 @@ export default function PartnerHero() {
 
         {/* Secondary CTA: Transparent pill with white border */}
         <a
-          href={siteConfig.socialLinks.facebook || "https://facebook.com"}
+          href={siteConfig.socialLinks.facebook || "https://www.facebook.com/profile.php?id=61591103040912"}
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center gap-2 h-11 px-6 rounded-full bg-transparent hover:bg-white/15 text-white border-2 border-white text-xs sm:text-sm font-bold transition-all duration-200"

@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import type { TemplateMeta } from "@/lib/templates/registry";
-import { Sparkles, Eye, ArrowRight, CheckCircle2 } from "lucide-react";
+import { createDraftEditorUrl } from "@/lib/templates/openEditor";
+import { Sparkles, Eye, Pencil, Loader2, CheckCircle2, Lock } from "lucide-react";
 
 const OCCASION_LABELS: Record<string, string> = {
   love: "Tình yêu, Kỷ niệm & Noel",
@@ -17,7 +19,23 @@ export default function TemplatesCatalogClient({
 }: {
   templates: TemplateMeta[];
 }) {
+  const router = useRouter();
   const [filter, setFilter] = useState<string>("all");
+  const [openingSlug, setOpeningSlug] = useState<string | null>(null);
+
+  const handleOpenEditor = async (slug: string) => {
+    if (openingSlug) return;
+    setOpeningSlug(slug);
+    try {
+      const editorUrl = await createDraftEditorUrl(slug);
+      router.push(editorUrl);
+    } catch (err) {
+      console.error(err);
+      alert(err instanceof Error ? err.message : "Không thể mở trang chỉnh sửa. Vui lòng thử lại.");
+    } finally {
+      setOpeningSlug(null);
+    }
+  };
 
   const activeKeys = Array.from(new Set(templates.map((t) => t.occasionKey)));
   const tabs = [
@@ -81,21 +99,34 @@ export default function TemplatesCatalogClient({
                 }}
               >
                 {tpl.numberCode && (
-                  <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-white text-slate-950 text-[11px] font-extrabold shadow-md">
+                  <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-white text-slate-950 text-[11px] font-extrabold shadow-md z-10">
                     {tpl.numberCode}
                   </span>
                 )}
-                {tpl.badge && (
-                  <span className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-amber-400/95 text-slate-950 text-[10px] font-bold shadow-xs">
-                    {tpl.numberCode
-                      ? tpl.badge.replace(/^Mẫu\s*#\d+\s*·\s*/i, "")
-                      : tpl.badge}
+                {tpl.isLocked ? (
+                  <span className="absolute top-3 right-3 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-950/90 border border-amber-300/45 text-amber-300 text-[10px] font-bold shadow-md z-10">
+                    <Lock className="w-3 h-3" />
+                    <span>{tpl.launchDateLabel || "Ra mắt 24/11"}</span>
                   </span>
+                ) : (
+                  tpl.badge && (
+                    <span className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-amber-400/95 text-slate-950 text-[10px] font-bold shadow-xs z-10">
+                      {tpl.numberCode
+                        ? tpl.badge.replace(/^Mẫu\s*#\d+\s*·\s*/i, "")
+                        : tpl.badge}
+                    </span>
+                  )
                 )}
-                <p className="text-[11px] uppercase tracking-widest font-semibold opacity-75 mb-1.5">
+                {tpl.isLocked && (
+                  <div
+                    className="absolute inset-0 bg-slate-950/45 backdrop-blur-[1px] z-[5]"
+                    aria-hidden="true"
+                  />
+                )}
+                <p className="relative z-10 text-[11px] uppercase tracking-widest font-semibold opacity-75 mb-1.5">
                   {tpl.occasionTitle}
                 </p>
-                <h2 className="font-serif font-bold text-lg leading-snug line-clamp-2">
+                <h2 className="relative z-10 font-serif font-bold text-lg leading-snug line-clamp-2">
                   {tpl.title}
                 </h2>
               </div>
@@ -109,22 +140,42 @@ export default function TemplatesCatalogClient({
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
-                  <Link
-                    href={`/templates/${tpl.slug}`}
-                    className="flex-1 inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-full border border-slate-200 text-slate-700 hover:border-rose-300 hover:text-rose-600 text-xs font-semibold transition-colors"
-                  >
-                    <Eye className="w-3.5 h-3.5" />
-                    <span>Xem Demo</span>
-                  </Link>
-                  <Link
-                    href={`/create?template=${tpl.slug}`}
-                    className="flex-1 inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-full bg-gradient-to-r from-[#ff6b61] to-[#fa416a] text-white text-xs font-semibold shadow-sm hover:opacity-95 transition-opacity"
-                  >
-                    <span>Tạo thiệp</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </Link>
-                </div>
+                {tpl.isLocked ? (
+                  <div className="pt-2 border-t border-slate-100">
+                    <button
+                      type="button"
+                      disabled
+                      aria-disabled="true"
+                      className="w-full inline-flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-full bg-slate-900 text-amber-200 border border-amber-300/40 text-xs font-bold cursor-not-allowed"
+                    >
+                      <Lock className="w-3.5 h-3.5" />
+                      <span>{tpl.launchDateLabel || "Ra mắt 24/11"}</span>
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
+                    <Link
+                      href={`/templates/${tpl.slug}`}
+                      className="flex-1 inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-full border border-slate-200 text-slate-700 hover:border-rose-300 hover:text-rose-600 text-xs font-semibold transition-colors"
+                    >
+                      <Eye className="w-3.5 h-3.5" />
+                      <span>Xem Demo</span>
+                    </Link>
+                    <button
+                      type="button"
+                      disabled={openingSlug !== null}
+                      onClick={() => handleOpenEditor(tpl.slug)}
+                      className="flex-1 inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-full bg-gradient-to-r from-[#ff6b61] to-[#fa416a] text-white text-xs font-semibold shadow-sm hover:opacity-95 disabled:opacity-65 transition-opacity cursor-pointer"
+                    >
+                      {openingSlug === tpl.slug ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <Pencil className="w-3.5 h-3.5" />
+                      )}
+                      <span>{openingSlug === tpl.slug ? "Đang mở..." : "Chỉnh sửa ngay"}</span>
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           ))}

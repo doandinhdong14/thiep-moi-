@@ -75,11 +75,12 @@ export default function ShopClientView({ shop }: { shop: Shop }) {
           </div>
 
           <button
-            onClick={() => handleOpenQuote()}
-            className="px-6 py-3 bg-rose-600 hover:bg-rose-700 text-white text-sm font-semibold rounded-xl shadow-md transition flex items-center justify-center gap-2 self-start md:self-center"
+            disabled
+            aria-disabled="true"
+            className="px-6 py-3 bg-slate-900 text-amber-200 border border-amber-300/40 text-sm font-semibold rounded-xl shadow-md flex items-center justify-center gap-2 self-start md:self-center cursor-not-allowed"
           >
             <MessageSquareQuote className="w-4 h-4" />
-            <span>Gửi Yêu Cầu Báo Giá</span>
+            <span>Ra mắt vào 1/12</span>
           </button>
         </div>
 

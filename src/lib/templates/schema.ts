@@ -76,6 +76,47 @@ export const InvitationContentSchema = z.object({
       options: z.array(z.string()),
     })
     .optional(),
+  card01: z
+    .object({
+      guideTextIdle: z.string().optional(),
+      guideTextReady: z.string().optional(),
+      introLinesText: z.string().optional(),
+      candleLinesText: z.string().optional(),
+      candleHintText: z.string().optional(),
+      giftHintText: z.string().optional(),
+      upliftLinesText: z.string().optional(),
+      endingLinesText: z.string().optional(),
+      portalCtaText: z.string().optional(),
+      photoCaptions: z.array(z.string()).optional(),
+    })
+    .optional(),
+  card02: z
+    .object({
+      roseMessageText: z.string().optional(),
+      roseButtonText: z.string().optional(),
+      introLinesText: z.string().optional(),
+      candleLinesText: z.string().optional(),
+      candleHintText: z.string().optional(),
+      giftHintText: z.string().optional(),
+      upliftLinesText: z.string().optional(),
+      endingLinesText: z.string().optional(),
+      portalCtaText: z.string().optional(),
+      lanternHintText: z.string().optional(),
+      photoCaptions: z.array(z.string()).optional(),
+    })
+    .optional(),
+  card03: z
+    .object({
+      page1Title: z.string().optional(),
+      foreverText: z.string().optional(),
+      subtitleText: z.string().optional(),
+      page53Title: z.string().optional(),
+      page53Subtitle: z.string().optional(),
+      page54CenterText: z.string().optional(),
+      customPageTexts: z.string().optional(),
+      photoCaptions: z.array(z.string()).optional(),
+    })
+    .optional(),
   blocks: z.array(BlockConfigSchema).default([]),
 });
 

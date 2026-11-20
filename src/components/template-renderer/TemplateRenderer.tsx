@@ -1,13 +1,56 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import dynamic from "next/dynamic";
 import { InvitationContent } from "@/lib/templates/schema";
 import { TemplateTheme } from "@/lib/templates/registry";
 import {
   INTERACTIVE_TEMPLATE_URLS,
   hydrateInteractiveHtml,
 } from "@/lib/templates/hydrateInteractiveHtml";
+import type { Card01Stage } from "@/components/cards/card-01-first-gift/Card01Player";
+import type { Card02Stage } from "@/components/cards/card-02-second-gift/Card02Player";
+import type { Card03Stage } from "@/components/cards/card-03-third-gift/Card03Player";
 import CoverBlock from "./blocks/CoverBlock";
+
+const Card01Player = dynamic(
+  () => import("@/components/cards/card-01-first-gift/Card01Player"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-full min-h-[600px] bg-[#080d1a] flex flex-col items-center justify-center text-white/80 text-xs gap-2">
+        <div className="w-7 h-7 rounded-full border-2 border-pink-400/40 border-t-pink-400 animate-spin" />
+        <span>Đang khởi tạo không gian 3D...</span>
+      </div>
+    ),
+  }
+);
+
+const Card02Player = dynamic(
+  () => import("@/components/cards/card-02-second-gift/Card02Player"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-full min-h-[600px] bg-[#190b17] flex flex-col items-center justify-center text-rose-100/80 text-xs gap-2">
+        <div className="w-7 h-7 rounded-full border-2 border-rose-400/40 border-t-rose-400 animate-spin" />
+        <span>Đang chuẩn bị đóa hồng 3D...</span>
+      </div>
+    ),
+  }
+);
+
+const Card03Player = dynamic(
+  () => import("@/components/cards/card-03-third-gift/Card03Player"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-full min-h-[600px] bg-[#fed1ea] flex flex-col items-center justify-center text-[#613b3b] text-xs gap-2">
+        <div className="w-7 h-7 rounded-full border-2 border-rose-400/40 border-t-rose-500 animate-spin" />
+        <span>Đang mở thiệp Flowtime 55 trang...</span>
+      </div>
+    ),
+  }
+);
 import EnvelopeRevealBlock from "./blocks/EnvelopeRevealBlock";
 import IntroMessageBlock from "./blocks/IntroMessageBlock";
 import EventDetailsBlock from "./blocks/EventDetailsBlock";
@@ -27,6 +70,10 @@ interface TemplateRendererProps {
   templateSlug?: string;
   interactiveHtml?: string;
   isPreview?: boolean;
+  autoDemo?: boolean;
+  card01Stage?: Card01Stage;
+  card02Stage?: Card02Stage;
+  card03Stage?: Card03Stage;
 }
 
 export default function TemplateRenderer({
@@ -36,7 +83,18 @@ export default function TemplateRenderer({
   templateSlug,
   interactiveHtml,
   isPreview = false,
+  autoDemo = false,
+  card01Stage,
+  card02Stage,
+  card03Stage,
 }: TemplateRendererProps) {
+  const isCard01 =
+    templateSlug === "card-01-first-gift" || slug === "card-01-first-gift";
+  const isCard02 =
+    templateSlug === "card-02-second-gift" || slug === "card-02-second-gift";
+  const isCard03 =
+    templateSlug === "card-03-third-gift" || slug === "card-03-third-gift";
+
   const effectiveTemplateSlug =
     (templateSlug && INTERACTIVE_TEMPLATE_URLS[templateSlug] ? templateSlug : undefined) ||
     (slug && INTERACTIVE_TEMPLATE_URLS[slug] ? slug : undefined);
@@ -88,11 +146,62 @@ export default function TemplateRenderer({
     });
   }, [interactiveHtml, rawTemplateHtml, resolvedInteractiveSlug, debouncedContent, slug, isPreview]);
 
+  if (isCard01) {
+    return (
+      <div
+        className={`w-full bg-[#020204] flex flex-col relative overflow-hidden ${
+          isPreview ? "h-full min-h-[600px]" : "min-h-[100dvh] h-[100dvh]"
+        }`}
+      >
+        <Card01Player
+          content={debouncedContent}
+          autoDemo={autoDemo}
+          isPreview={isPreview}
+          forcedStage={card01Stage}
+        />
+      </div>
+    );
+  }
+
+  if (isCard02) {
+    return (
+      <div
+        className={`w-full bg-[#040712] flex flex-col relative overflow-hidden ${
+          isPreview ? "h-full min-h-[600px]" : "min-h-[100dvh] h-[100dvh]"
+        }`}
+      >
+        <Card02Player
+          content={debouncedContent}
+          autoDemo={autoDemo}
+          isPreview={isPreview}
+          forcedStage={card02Stage}
+        />
+      </div>
+    );
+  }
+
+  if (isCard03) {
+    return (
+      <div
+        className={`w-full bg-[#fed1ea] flex flex-col relative overflow-hidden ${
+          isPreview ? "h-full min-h-[600px]" : "min-h-[100dvh] h-[100dvh]"
+        }`}
+      >
+        <Card03Player
+          content={debouncedContent}
+          autoDemo={autoDemo}
+          isPreview={isPreview}
+          forcedStage={card03Stage}
+        />
+      </div>
+    );
+  }
+
   if (interactiveUrl) {
     return (
       <div
         className={`w-full bg-black flex flex-col relative overflow-hidden ${
-          isPreview ? "h-full min-h-[720px]" : "min-h-[100dvh] h-[100dvh]"
+          isPreview ? "h-full min-h-[600px]" : "min-h-[100dvh] h-[100dvh]"
         }`}
       >
         {hydratedPreviewHtml ? (
@@ -100,14 +209,18 @@ export default function TemplateRenderer({
             key={(resolvedInteractiveSlug || slug || "card") + (isPreview ? "-preview" : "-live")}
             srcDoc={hydratedPreviewHtml}
             title={content.title || "Thiệp kỷ niệm"}
-            className="w-full h-full min-h-[720px] md:min-h-screen border-0 flex-1"
+            className={`w-full h-full border-0 flex-1 block ${
+              isPreview ? "min-h-[600px]" : "min-h-[100dvh]"
+            }`}
             allow="autoplay; accelerometer; gyroscope; clipboard-write; encrypted-media; fullscreen"
           />
         ) : (
           <iframe
             src={interactiveUrl}
             title={content.title || "Thiệp kỷ niệm"}
-            className="w-full h-full min-h-[720px] md:min-h-screen border-0 flex-1"
+            className={`w-full h-full border-0 flex-1 block ${
+              isPreview ? "min-h-[600px]" : "min-h-[100dvh]"
+            }`}
             allow="autoplay; accelerometer; gyroscope; clipboard-write; encrypted-media; fullscreen"
           />
         )}

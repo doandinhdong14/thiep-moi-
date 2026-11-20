@@ -42,17 +42,20 @@ export default function Footer() {
 
             <div className="space-y-1.5 pt-1 text-xs text-slate-400">
               <a
-                href="mailto:hotro@dingdonggift.vn"
-                className="flex items-center gap-2 hover:text-[#fa416a] transition-colors"
+                href="mailto:dingdongtech.official@gmail.com"
+                className="flex items-center gap-2 hover:text-[#fa416a] transition-colors break-all"
               >
                 <Mail className="w-3.5 h-3.5 text-[#ff6b61] shrink-0" />
-                <span>hotro@dingdonggift.vn</span>
+                <span>dingdongtech.official@gmail.com</span>
               </a>
 
-              <div className="flex items-center gap-2 text-slate-400">
+              <a
+                href="tel:0362213119"
+                className="flex items-center gap-2 text-slate-400 hover:text-[#fa416a] transition-colors"
+              >
                 <Phone className="w-3.5 h-3.5 text-[#ff6b61] shrink-0" />
-                <span>Hotline: 1900 8888</span>
-              </div>
+                <span>SĐT: 0362213119</span>
+              </a>
 
               <div className="flex items-center gap-2 text-slate-400">
                 <ShieldCheck className="w-3.5 h-3.5 text-[#ff6b61] shrink-0" />
@@ -69,7 +72,7 @@ export default function Footer() {
             <ul className="space-y-2 text-xs text-slate-400">
               <li>
                 <Link href="/products" className="hover:text-rose-400 transition-colors">
-                  Tất cả mẫu thiệp (#01 – #10)
+                  Tất cả mẫu thiệp (#01 – #12)
                 </Link>
               </li>
               <li>
@@ -83,8 +86,8 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/products?category=ky-niem" className="hover:text-rose-400 transition-colors">
-                  Kỷ niệm & Giáng sinh
+                <Link href="/qua-tang" className="hover:text-rose-400 transition-colors">
+                  Quà tặng vật lý (Ra mắt vào 1/12)
                 </Link>
               </li>
               <li>
@@ -102,28 +105,28 @@ export default function Footer() {
             </h4>
             <ul className="space-y-2 text-xs text-slate-400">
               <li>
+                <Link href="/templates/card-01-first-gift" className="hover:text-rose-400 transition-colors">
+                  #01 · Bó Hoa &amp; Vũ Trụ 3D
+                </Link>
+              </li>
+              <li>
+                <Link href="/templates/card-02-second-gift" className="hover:text-rose-400 transition-colors">
+                  #02 · Hoa Hồng &amp; Đèn Trời 3D
+                </Link>
+              </li>
+              <li>
+                <Link href="/templates/card-03-third-gift" className="hover:text-rose-400 transition-colors">
+                  #03 · Chuyện Tình 55 Trang
+                </Link>
+              </li>
+              <li>
                 <Link href="/templates/thiep-3" className="hover:text-rose-400 transition-colors">
-                  #01 · Một Tấm Vé Hẹn Hò
+                  #04 · Một Tấm Vé Hẹn Hò
                 </Link>
               </li>
               <li>
-                <Link href="/templates/thiep-5" className="hover:text-rose-400 transition-colors">
-                  #03 · Khu Vườn Khóa PIN 3D
-                </Link>
-              </li>
-              <li>
-                <Link href="/templates/thiep-8" className="hover:text-rose-400 transition-colors">
-                  #06 · Vũ Trụ Trái Tim 3D
-                </Link>
-              </li>
-              <li>
-                <Link href="/templates/thiep-10" className="hover:text-rose-400 transition-colors">
-                  #08 · Boarding Pass Hạnh Phúc
-                </Link>
-              </li>
-              <li>
-                <Link href="/templates/thiep-xmas" className="hover:text-rose-400 transition-colors">
-                  #10 · Hộp Quà Giáng Sinh
+                <Link href="/products" className="hover:text-rose-400 transition-colors text-amber-300/90">
+                  #05 – #13 · Ra mắt 24/11
                 </Link>
               </li>
             </ul>
@@ -205,9 +208,10 @@ export default function Footer() {
 
             <div className="flex items-center gap-3 mt-4 pt-2">
               <a
-                href="https://facebook.com"
+                href="https://www.facebook.com/profile.php?id=61591103040912"
                 target="_blank"
                 rel="noopener noreferrer"
+                aria-label="Facebook Ding Dong Gift"
                 className="w-7 h-7 rounded-full bg-slate-800 hover:bg-[#fa416a] flex items-center justify-center text-slate-300 hover:text-white transition-colors text-xs font-bold"
               >
                 f

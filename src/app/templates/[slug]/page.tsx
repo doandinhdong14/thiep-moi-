@@ -2,19 +2,22 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { notFound, useSearchParams } from "next/navigation";
-import { TEMPLATES_REGISTRY, getTemplateDemoContent } from "@/lib/templates/registry";
+import { notFound, useRouter, useSearchParams } from "next/navigation";
+import { TEMPLATES_REGISTRY, getTemplateDemoContent, isTemplateLocked } from "@/lib/templates/registry";
+import { createDraftEditorUrl } from "@/lib/templates/openEditor";
 import TemplateRenderer from "@/components/template-renderer/TemplateRenderer";
-import { Smartphone, Monitor, ArrowLeft, ArrowRight, Sparkles } from "lucide-react";
+import { Smartphone, Monitor, ArrowLeft, Pencil, Loader2, Lock } from "lucide-react";
 
 export default function TemplateDemoPage({
   params,
 }: {
   params: { slug: string };
 }) {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const [deviceView, setDeviceView] = useState<"mobile" | "desktop">("mobile");
   const [isIframe, setIsIframe] = useState(false);
+  const [openingEditor, setOpeningEditor] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -30,17 +33,53 @@ export default function TemplateDemoPage({
     notFound();
   }
 
+  if (isTemplateLocked(template.slug)) {
+    return (
+      <div className="flex-1 min-h-[70vh] bg-slate-950 text-white flex items-center justify-center px-4 py-12">
+        <div className="max-w-md w-full rounded-3xl bg-slate-900 border border-amber-300/35 p-8 text-center space-y-4 shadow-2xl">
+          <div className="w-14 h-14 mx-auto rounded-full bg-amber-400/15 border border-amber-300/40 text-amber-300 flex items-center justify-center">
+            <Lock className="w-7 h-7" />
+          </div>
+          <span className="inline-block px-3 py-1 rounded-full bg-amber-400/15 border border-amber-300/40 text-amber-200 text-xs font-bold">
+            {template.launchDateLabel || "Ra mắt 24/11"}
+          </span>
+          <h1 className="text-xl sm:text-2xl font-serif font-bold text-white">
+            {template.title}
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+            Mẫu thiệp này hiện đang được khóa và sẽ chính thức ra mắt vào ngày <strong>24/11</strong>. Hiện tại bạn có thể trải nghiệm và tạo ngay 4 mẫu thiệp đầu tiên (#01 – #04).
+          </p>
+          <div className="pt-2">
+            <Link
+              href="/products"
+              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-[#ff6b61] to-[#fa416a] text-white text-xs sm:text-sm font-semibold shadow-md hover:opacity-95 transition-opacity"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>Quay lại danh sách thiệp</span>
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const demoContent = getTemplateDemoContent(params.slug);
   const isEmbed = isIframe || searchParams.get("embed") === "true";
+  const isAutoDemoTemplate =
+    template.slug === "card-01-first-gift" ||
+    template.slug === "card-02-second-gift" ||
+    template.slug === "card-03-third-gift";
 
   if (isEmbed) {
     return (
-      <div className="w-full min-h-screen bg-transparent overflow-x-hidden">
+      <div className="w-full h-[100dvh] min-h-screen bg-transparent overflow-hidden">
         <TemplateRenderer
           content={demoContent}
           theme={template.theme}
           slug={template.slug}
+          templateSlug={template.slug}
           isPreview={true}
+          autoDemo={isAutoDemoTemplate}
         />
       </div>
     );
@@ -101,14 +140,32 @@ export default function TemplateDemoPage({
             >
               <span>Tặng kèm quà thật</span>
             </Link>
-            {/* CTA Dùng mẫu này */}
-            <Link
-              href={`/create?template=${template.slug}`}
-              className="px-4 py-2 rounded-full bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs sm:text-sm shadow-md transition-all hover:scale-105 flex items-center gap-1.5"
+            {/* CTA Chỉnh sửa ngay */}
+            <button
+              type="button"
+              disabled={openingEditor}
+              onClick={async () => {
+                if (openingEditor) return;
+                setOpeningEditor(true);
+                try {
+                  const editorUrl = await createDraftEditorUrl(template.slug);
+                  router.push(editorUrl);
+                } catch (err) {
+                  console.error(err);
+                  alert(err instanceof Error ? err.message : "Không thể mở trang chỉnh sửa. Vui lòng thử lại.");
+                } finally {
+                  setOpeningEditor(false);
+                }
+              }}
+              className="px-4 py-2 rounded-full bg-rose-600 hover:bg-rose-700 disabled:opacity-65 text-white font-bold text-xs sm:text-sm shadow-md transition-all hover:scale-105 flex items-center gap-1.5 cursor-pointer"
             >
-              <span>Dùng mẫu này</span>
-              <ArrowRight className="w-4 h-4" />
-            </Link>
+              {openingEditor ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Pencil className="w-3.5 h-3.5" />
+              )}
+              <span>{openingEditor ? "Đang mở..." : "Chỉnh sửa ngay"}</span>
+            </button>
           </div>
         </div>
       </div>
@@ -121,7 +178,9 @@ export default function TemplateDemoPage({
               content={demoContent}
               theme={template.theme}
               slug={template.slug}
+              templateSlug={template.slug}
               isPreview={true}
+              autoDemo={isAutoDemoTemplate}
             />
           </div>
         ) : (
@@ -130,7 +189,9 @@ export default function TemplateDemoPage({
               content={demoContent}
               theme={template.theme}
               slug={template.slug}
+              templateSlug={template.slug}
               isPreview={true}
+              autoDemo={isAutoDemoTemplate}
             />
           </div>
         )}

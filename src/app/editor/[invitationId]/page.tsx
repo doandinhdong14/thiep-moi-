@@ -4,6 +4,24 @@ import { useState, useEffect, useRef, useCallback, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import TemplateRenderer from "@/components/template-renderer/TemplateRenderer";
+import type { Card01Stage } from "@/components/cards/card-01-first-gift/Card01Player";
+import {
+  CARD01_DEFAULT_BGM_URL,
+  CARD01_DEFAULT_CAPTIONS,
+  CARD01_DEFAULT_TEXTS,
+} from "@/components/cards/card-01-first-gift/card01Mapper";
+import type { Card02Stage } from "@/components/cards/card-02-second-gift/Card02Player";
+import {
+  CARD02_DEFAULT_BGM_URL,
+  CARD02_DEFAULT_CAPTIONS,
+  CARD02_DEFAULT_TEXTS,
+} from "@/components/cards/card-02-second-gift/card02Mapper";
+import type { Card03Stage } from "@/components/cards/card-03-third-gift/Card03Player";
+import {
+  CARD03_DEFAULT_BGM_URL,
+  CARD03_DEFAULT_CAPTIONS,
+  CARD03_DEFAULT_TEXTS,
+} from "@/components/cards/card-03-third-gift/card03Mapper";
 import { TEMPLATES_REGISTRY, DEFAULT_TEMPLATE_SLUG } from "@/lib/templates/registry";
 import { InvitationContent } from "@/lib/templates/schema";
 import { findCatalogProductBySlug } from "@/data/catalogData";
@@ -74,6 +92,12 @@ function EditorContent({ invitationId }: { invitationId: string }) {
 
   // Active view tab for mobile: "form" vs "preview"
   const [activeTab, setActiveTab] = useState<"form" | "preview">("form");
+  const [card01PreviewStage, setCard01PreviewStage] = useState<Card01Stage>("bouquet");
+  const [card01AutoDemo, setCard01AutoDemo] = useState<boolean>(false);
+  const [card02PreviewStage, setCard02PreviewStage] = useState<Card02Stage>("rose");
+  const [card02AutoDemo, setCard02AutoDemo] = useState<boolean>(false);
+  const [card03PreviewStage, setCard03PreviewStage] = useState<Card03Stage>("cover");
+  const [card03AutoDemo, setCard03AutoDemo] = useState<boolean>(false);
 
   // Modals
   const [isSuggestionOpen, setIsSuggestionOpen] = useState(false);
@@ -297,47 +321,64 @@ function EditorContent({ invitationId }: { invitationId: string }) {
     }
   };
 
-  // Image Upload handler
+  // Image Upload handler (supports single or multi-select)
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, isCover = false) => {
-    const file = e.target.files?.[0];
-    if (!file || !content) return;
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0 || !content) return;
 
-    // Quota check: allow cover + up to 8 gallery images seamlessly
-    if (!isCover && creditBalance.imageUploads <= 0 && content.galleryUrls.length >= 8) {
+    const isCard01Tpl = invitationMeta?.templateSlug === "card-01-first-gift";
+    const isCard02Tpl = invitationMeta?.templateSlug === "card-02-second-gift";
+    const isCard03Tpl = invitationMeta?.templateSlug === "card-03-third-gift";
+    const isMultiStageTpl = isCard01Tpl || isCard02Tpl || isCard03Tpl;
+    const isCardUnlocked = invitationMeta?.status === "PUBLISHED";
+
+    // Quota check: allow cover + up to 8 gallery images seamlessly (or up to 12 synced photos for Card 01/02 or unlocked cards)
+    const freeGalleryLimit = isMultiStageTpl || isCardUnlocked ? 12 : 8;
+    if (!isCover && creditBalance.imageUploads <= 0 && content.galleryUrls.length >= freeGalleryLimit) {
       setBuyCreditsModal({ open: true, type: "image_credits" });
       return;
     }
 
     setUploadingImage(true);
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("invitationId", invitationId);
+      const uploadedUrls: string[] = [];
+      const toProcess = isCover ? files.slice(0, 1) : files.slice(0, Math.max(1, 12 - content.galleryUrls.length));
 
-      const res = await fetch("/api/v1/assets/upload", {
-        method: "POST",
-        body: formData,
-      });
+      for (const file of toProcess) {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("invitationId", invitationId);
 
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data?.error?.message || "Tải ảnh lên thất bại.");
+        const res = await fetch("/api/v1/assets/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data?.error?.message || "Tải ảnh lên thất bại.");
+        }
+        uploadedUrls.push(data.data.url);
       }
 
-      const imageUrl = data.data.url;
-
-      if (isCover) {
-        const updated = { ...content, coverImageUrl: imageUrl };
+      if (isCover && uploadedUrls[0]) {
+        const updated = { ...content, coverImageUrl: uploadedUrls[0] };
         triggerDirty(updated);
-      } else {
-        const updated = { ...content, galleryUrls: [...content.galleryUrls, imageUrl] };
+      } else if (uploadedUrls.length > 0) {
+        const nextGallery = [...content.galleryUrls, ...uploadedUrls].slice(0, isMultiStageTpl ? 12 : 50);
+        const updated = {
+          ...content,
+          coverImageUrl: content.coverImageUrl || uploadedUrls[0],
+          galleryUrls: nextGallery,
+        };
         triggerDirty(updated);
-        loadCredits(); // refresh credits
+        loadCredits();
       }
     } catch (err: any) {
       alert(err.message || "Đã xảy ra lỗi khi tải ảnh.");
     } finally {
       setUploadingImage(false);
+      e.target.value = "";
     }
   };
 
@@ -429,6 +470,10 @@ function EditorContent({ invitationId }: { invitationId: string }) {
   }
 
   const isUnlocked = invitationMeta.status === "PUBLISHED";
+  const isCard01 = invitationMeta.templateSlug === "card-01-first-gift";
+  const isCard02 = invitationMeta.templateSlug === "card-02-second-gift";
+  const isCard03 = invitationMeta.templateSlug === "card-03-third-gift";
+  const isMultiStage3D = isCard01 || isCard02 || isCard03;
   const catalogItem = findCatalogProductBySlug(invitationMeta.templateSlug);
   const isFreeProduct = !catalogItem || catalogItem.price === 0;
   const templateMeta = TEMPLATES_REGISTRY[invitationMeta.templateSlug] || TEMPLATES_REGISTRY[DEFAULT_TEMPLATE_SLUG];
@@ -773,6 +818,505 @@ function EditorContent({ invitationId }: { invitationId: string }) {
                   );
                 })()}
 
+                {/* Card 01 (Thiệp đầu tiên — 3 Chặng 3D) dedicated text fields — content only, effects locked */}
+                {isCard01 && (
+                  <div className="p-4 rounded-2xl bg-indigo-50/60 border border-indigo-200/80 space-y-3.5">
+                    <div className="flex items-start gap-2 text-xs text-indigo-950">
+                      <Sparkles className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
+                      <div>
+                        <p className="font-bold">Tùy chỉnh lời chữ 3 Chặng (Thiệp #01)</p>
+                        <p className="text-[11px] text-indigo-800/85 mt-0.5 leading-relaxed">
+                          Hiệu ứng 3D có sẵn (Bó hoa tung ảnh, Hành trình sao băng 8 màn, Vũ trụ yêu thương 360°) được giữ nguyên chuẩn hệ thống. Bạn chỉ cần chỉnh chữ, ảnh kỷ niệm và nhạc nền.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                          Lời nhắc Chặng 1 (chạm bó hoa)
+                        </label>
+                        <input
+                          type="text"
+                          value={content.card01?.guideTextIdle ?? CARD01_DEFAULT_TEXTS.guideTextIdle}
+                          onChange={(e) =>
+                            triggerDirty({
+                              ...content,
+                              card01: { ...content.card01, guideTextIdle: e.target.value },
+                            })
+                          }
+                          className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-rose-200"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                          Lời nhắc Chặng 1 (ấn giữ mở bí mật)
+                        </label>
+                        <input
+                          type="text"
+                          value={content.card01?.guideTextReady ?? CARD01_DEFAULT_TEXTS.guideTextReady}
+                          onChange={(e) =>
+                            triggerDirty({
+                              ...content,
+                              card01: { ...content.card01, guideTextReady: e.target.value },
+                            })
+                          }
+                          className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-rose-200"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                        Lời dẫn mở đầu Chặng 2 (ngăn cách từng dòng bằng dấu |)
+                      </label>
+                      <textarea
+                        rows={2}
+                        value={content.card01?.introLinesText ?? CARD01_DEFAULT_TEXTS.introLinesText}
+                        onChange={(e) =>
+                          triggerDirty({
+                            ...content,
+                            card01: { ...content.card01, introLinesText: e.target.value },
+                          })
+                        }
+                        className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-rose-200"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                          Lời nến ước nguyện (dấu | để xuống dòng)
+                        </label>
+                        <input
+                          type="text"
+                          value={content.card01?.candleLinesText ?? CARD01_DEFAULT_TEXTS.candleLinesText}
+                          onChange={(e) =>
+                            triggerDirty({
+                              ...content,
+                              card01: { ...content.card01, candleLinesText: e.target.value },
+                            })
+                          }
+                          className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-rose-200"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                          Gợi ý chạm ngọn nến
+                        </label>
+                        <input
+                          type="text"
+                          value={content.card01?.candleHintText ?? CARD01_DEFAULT_TEXTS.candleHintText}
+                          onChange={(e) =>
+                            triggerDirty({
+                              ...content,
+                              card01: { ...content.card01, candleHintText: e.target.value },
+                            })
+                          }
+                          className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-rose-200"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                          Lời chúc tương lai (dấu | để xuống dòng)
+                        </label>
+                        <input
+                          type="text"
+                          value={content.card01?.upliftLinesText ?? CARD01_DEFAULT_TEXTS.upliftLinesText}
+                          onChange={(e) =>
+                            triggerDirty({
+                              ...content,
+                              card01: { ...content.card01, upliftLinesText: e.target.value },
+                            })
+                          }
+                          className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-rose-200"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                          Lời kết trước tên người nhận (dấu |)
+                        </label>
+                        <input
+                          type="text"
+                          value={content.card01?.endingLinesText ?? CARD01_DEFAULT_TEXTS.endingLinesText}
+                          onChange={(e) =>
+                            triggerDirty({
+                              ...content,
+                              card01: { ...content.card01, endingLinesText: e.target.value },
+                            })
+                          }
+                          className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-rose-200"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                          Gợi ý mở hộp quà
+                        </label>
+                        <input
+                          type="text"
+                          value={content.card01?.giftHintText ?? CARD01_DEFAULT_TEXTS.giftHintText}
+                          onChange={(e) =>
+                            triggerDirty({
+                              ...content,
+                              card01: { ...content.card01, giftHintText: e.target.value },
+                            })
+                          }
+                          className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-rose-200"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                          Chữ trên nút mở Vũ trụ 3D
+                        </label>
+                        <input
+                          type="text"
+                          value={content.card01?.portalCtaText ?? CARD01_DEFAULT_TEXTS.portalCtaText}
+                          onChange={(e) =>
+                            triggerDirty({
+                              ...content,
+                              card01: { ...content.card01, portalCtaText: e.target.value },
+                            })
+                          }
+                          className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-rose-200"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Card 02 (Thiệp thứ 2 — 3 Chặng 3D) dedicated text fields — content only, effects locked */}
+                {isCard02 && (
+                  <div className="p-4 rounded-2xl bg-rose-50/60 border border-rose-200/80 space-y-3.5">
+                    <div className="flex items-start gap-2 text-xs text-rose-950">
+                      <Sparkles className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                      <div>
+                        <p className="font-bold">Tùy chỉnh lời chữ 3 Chặng (Thiệp #02)</p>
+                        <p className="text-[11px] text-rose-800/85 mt-0.5 leading-relaxed">
+                          Hiệu ứng 3D có sẵn (Hoa hồng nở & mưa cánh hoa, Hành trình sao băng 8 màn, Đèn trời & Pháo hoa 3D) được giữ nguyên chuẩn hệ thống. Bạn chỉ chỉnh chữ, ảnh kỷ niệm, lời ước đèn trời và nhạc nền.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                          Lời nhắn Chặng 1 (dưới đóa hồng)
+                        </label>
+                        <input
+                          type="text"
+                          value={content.card02?.roseMessageText ?? CARD02_DEFAULT_TEXTS.roseMessageText}
+                          onChange={(e) =>
+                            triggerDirty({
+                              ...content,
+                              card02: { ...content.card02, roseMessageText: e.target.value },
+                            })
+                          }
+                          className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-rose-200"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                          Chữ trên nút mở quà Chặng 1
+                        </label>
+                        <input
+                          type="text"
+                          value={content.card02?.roseButtonText ?? CARD02_DEFAULT_TEXTS.roseButtonText}
+                          onChange={(e) =>
+                            triggerDirty({
+                              ...content,
+                              card02: { ...content.card02, roseButtonText: e.target.value },
+                            })
+                          }
+                          className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-rose-200"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                        Lời dẫn mở đầu Chặng 2 (ngăn cách từng dòng bằng dấu |)
+                      </label>
+                      <textarea
+                        rows={2}
+                        value={content.card02?.introLinesText ?? CARD02_DEFAULT_TEXTS.introLinesText}
+                        onChange={(e) =>
+                          triggerDirty({
+                            ...content,
+                            card02: { ...content.card02, introLinesText: e.target.value },
+                          })
+                        }
+                        className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-rose-200"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                          Lời nến ước nguyện (dấu | để xuống dòng)
+                        </label>
+                        <input
+                          type="text"
+                          value={content.card02?.candleLinesText ?? CARD02_DEFAULT_TEXTS.candleLinesText}
+                          onChange={(e) =>
+                            triggerDirty({
+                              ...content,
+                              card02: { ...content.card02, candleLinesText: e.target.value },
+                            })
+                          }
+                          className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-rose-200"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                          Gợi ý chạm ngọn nến
+                        </label>
+                        <input
+                          type="text"
+                          value={content.card02?.candleHintText ?? CARD02_DEFAULT_TEXTS.candleHintText}
+                          onChange={(e) =>
+                            triggerDirty({
+                              ...content,
+                              card02: { ...content.card02, candleHintText: e.target.value },
+                            })
+                          }
+                          className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-rose-200"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                          Lời chúc tương lai (dấu | để xuống dòng)
+                        </label>
+                        <input
+                          type="text"
+                          value={content.card02?.upliftLinesText ?? CARD02_DEFAULT_TEXTS.upliftLinesText}
+                          onChange={(e) =>
+                            triggerDirty({
+                              ...content,
+                              card02: { ...content.card02, upliftLinesText: e.target.value },
+                            })
+                          }
+                          className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-rose-200"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                          Lời kết trước tên người nhận (dấu |)
+                        </label>
+                        <input
+                          type="text"
+                          value={content.card02?.endingLinesText ?? CARD02_DEFAULT_TEXTS.endingLinesText}
+                          onChange={(e) =>
+                            triggerDirty({
+                              ...content,
+                              card02: { ...content.card02, endingLinesText: e.target.value },
+                            })
+                          }
+                          className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-rose-200"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                          Gợi ý mở hộp quà
+                        </label>
+                        <input
+                          type="text"
+                          value={content.card02?.giftHintText ?? CARD02_DEFAULT_TEXTS.giftHintText}
+                          onChange={(e) =>
+                            triggerDirty({
+                              ...content,
+                              card02: { ...content.card02, giftHintText: e.target.value },
+                            })
+                          }
+                          className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-rose-200"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                          Chữ trên nút mở Đèn trời 3D
+                        </label>
+                        <input
+                          type="text"
+                          value={content.card02?.portalCtaText ?? CARD02_DEFAULT_TEXTS.portalCtaText}
+                          onChange={(e) =>
+                            triggerDirty({
+                              ...content,
+                              card02: { ...content.card02, portalCtaText: e.target.value },
+                            })
+                          }
+                          className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-rose-200"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                        Dòng gợi ý trên bầu trời Chặng 3 (Đèn trời 3D)
+                      </label>
+                      <input
+                        type="text"
+                        value={content.card02?.lanternHintText ?? CARD02_DEFAULT_TEXTS.lanternHintText}
+                        onChange={(e) =>
+                          triggerDirty({
+                            ...content,
+                            card02: { ...content.card02, lanternHintText: e.target.value },
+                          })
+                        }
+                        className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-rose-200"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Card 03 (Thiệp thứ 3 — Flowtime 55 trang & Toàn cảnh Trái Tim) dedicated text fields — content only, effects locked */}
+                {isCard03 && (
+                  <div className="p-4 rounded-2xl bg-pink-50/70 border border-pink-200/80 space-y-3.5">
+                    <div className="flex items-start gap-2 text-xs text-pink-950">
+                      <Sparkles className="w-4 h-4 text-pink-600 shrink-0 mt-0.5" />
+                      <div>
+                        <p className="font-bold">Tùy chỉnh lời chữ 55 Trang (Thiệp #03)</p>
+                        <p className="text-[11px] text-pink-800/85 mt-0.5 leading-relaxed">
+                          Hiệu ứng không gian 2D Flowtime 55 trang &amp; Toàn cảnh Trái Tim có sẵn được giữ nguyên chuẩn hệ thống. Bạn có thể sửa lời chữ, tên người gửi/nhận, thêm ảnh kỷ niệm và đổi nhạc nền.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                          Tiêu đề trang mở đầu (Trang 1)
+                        </label>
+                        <input
+                          type="text"
+                          value={content.card03?.page1Title ?? CARD03_DEFAULT_TEXTS.page1Title}
+                          onChange={(e) =>
+                            triggerDirty({
+                              ...content,
+                              card03: { ...content.card03, page1Title: e.target.value },
+                            })
+                          }
+                          className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-rose-200"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                          Dòng dẫn trang mở đầu
+                        </label>
+                        <input
+                          type="text"
+                          value={content.card03?.subtitleText ?? CARD03_DEFAULT_TEXTS.subtitleText}
+                          onChange={(e) =>
+                            triggerDirty({
+                              ...content,
+                              card03: { ...content.card03, subtitleText: e.target.value },
+                            })
+                          }
+                          className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-rose-200"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                          Lời tỏ tình chính (Trang 53)
+                        </label>
+                        <input
+                          type="text"
+                          value={content.card03?.page53Title ?? CARD03_DEFAULT_TEXTS.page53Title}
+                          onChange={(e) =>
+                            triggerDirty({
+                              ...content,
+                              card03: { ...content.card03, page53Title: e.target.value },
+                            })
+                          }
+                          className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-rose-200"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                          Dòng phụ trang 53
+                        </label>
+                        <input
+                          type="text"
+                          value={content.card03?.page53Subtitle ?? CARD03_DEFAULT_TEXTS.page53Subtitle}
+                          onChange={(e) =>
+                            triggerDirty({
+                              ...content,
+                              card03: { ...content.card03, page53Subtitle: e.target.value },
+                            })
+                          }
+                          className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-rose-200"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                          Dòng chữ giữa trái tim (Trang 54)
+                        </label>
+                        <input
+                          type="text"
+                          value={content.card03?.page54CenterText ?? CARD03_DEFAULT_TEXTS.page54CenterText}
+                          onChange={(e) =>
+                            triggerDirty({
+                              ...content,
+                              card03: { ...content.card03, page54CenterText: e.target.value },
+                            })
+                          }
+                          className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-rose-200"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                          Tiêu đề dự phòng trang 1 (nếu xóa ô trên)
+                        </label>
+                        <input
+                          type="text"
+                          value={content.card03?.foreverText ?? CARD03_DEFAULT_TEXTS.foreverText}
+                          onChange={(e) =>
+                            triggerDirty({
+                              ...content,
+                              card03: { ...content.card03, foreverText: e.target.value },
+                            })
+                          }
+                          className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-rose-200"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                        Ghi đè lời thoại từng trang (tùy chọn, VD: p2:Lời trang 2|p55:Lời kết riêng)
+                      </label>
+                      <textarea
+                        rows={2}
+                        value={content.card03?.customPageTexts ?? ""}
+                        onChange={(e) =>
+                          triggerDirty({
+                            ...content,
+                            card03: { ...content.card03, customPageTexts: e.target.value },
+                          })
+                        }
+                        placeholder="Ví dụ: p2:Ngày trước tớ luôn một mình...|p17:Cho đến ngày gặp được cậu|p55:Cậu mãi là điều tuyệt nhất"
+                        className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-rose-200"
+                      />
+                    </div>
+                  </div>
+                )}
+
                 {/* Lock PIN for PIN-protected interactive cards */}
                 {(invitationMeta.templateSlug === "thiep-5" ||
                   invitationMeta.templateSlug === "thiep-6") && (
@@ -926,15 +1470,22 @@ function EditorContent({ invitationId }: { invitationId: string }) {
               </div>
 
               {/* Box 2: Danh sách "Lời yêu thương" (Mưa chữ/Mưa lời chúc) */}
-              <div className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/80 shadow-xs space-y-4">
+              {!isCard03 && (
+                <div className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/80 shadow-xs space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
                       <Heart className="w-4 h-4 text-rose-500 fill-current" />
-                      <span>Lời yêu thương (Mưa chữ)</span>
+                      <span>
+                        {isCard02
+                          ? "Lời ước viết lên Đèn trời 3D (Chặng 3)"
+                          : "Lời yêu thương (Mưa chữ)"}
+                      </span>
                     </h3>
                     <p className="text-[11px] text-slate-400 mt-0.5">
-                      Những câu chúc này sẽ bay bổng và rơi xuống màn hình như mưa sao băng!
+                      {isCard02
+                        ? "Mỗi lần chạm bầu trời sẽ thả 1 chiếc đèn lồng mang lần lượt từng lời chúc này bay lên!"
+                        : "Những câu chúc này sẽ bay bổng và rơi xuống màn hình như mưa sao băng!"}
                     </p>
                   </div>
                   <button
@@ -1009,7 +1560,8 @@ function EditorContent({ invitationId }: { invitationId: string }) {
                   <Plus className="w-3.5 h-3.5" />
                   <span>+ Thêm lời yêu thương</span>
                 </button>
-              </div>
+                </div>
+              )}
 
               {/* Navigation CTA */}
               <div className="flex justify-between items-center pt-2">
@@ -1095,11 +1647,26 @@ function EditorContent({ invitationId }: { invitationId: string }) {
                 </div>
 
                 {/* Album Gallery Grid */}
-                <div className="space-y-2 pt-2 border-t border-slate-100">
+                <div className="space-y-3 pt-2 border-t border-slate-100">
                   <div className="flex items-center justify-between">
-                    <label className="text-xs font-semibold text-slate-700">Album ảnh kỷ niệm:</label>
-                    <span className="text-[11px] font-mono text-slate-400">
-                      {content.galleryUrls.length} / 50 ảnh
+                    <div>
+                      <label className="text-xs font-semibold text-slate-700">
+                        {isCard01
+                          ? "Album ảnh đồng bộ cả 3 Chặng (Bó hoa • Thẻ ảnh • Vũ trụ 3D):"
+                          : isCard02
+                          ? "Album ảnh đồng bộ Hành trình kỷ niệm (Thẻ ảnh xòe • Hộp quà):"
+                          : isCard03
+                          ? "Album ảnh kỷ niệm lồng ghép vào 55 trang truyện:"
+                          : "Album ảnh kỷ niệm:"}
+                      </label>
+                      {isMultiStage3D && (
+                        <p className="text-[11px] text-slate-400 mt-0.5">
+                          Tải ảnh 1 lần sẽ tự động đồng bộ xuyên suốt thiệp. Bạn có thể sửa chú thích dưới mỗi ảnh.
+                        </p>
+                      )}
+                    </div>
+                    <span className="text-[11px] font-mono text-slate-400 shrink-0">
+                      {content.galleryUrls.length} / {isMultiStage3D ? 12 : 50} ảnh
                     </span>
                   </div>
 
@@ -1111,6 +1678,7 @@ function EditorContent({ invitationId }: { invitationId: string }) {
                       <input
                         type="file"
                         accept="image/jpeg,image/png,image/webp"
+                        multiple={isMultiStage3D}
                         className="hidden"
                         onChange={(e) => handleImageUpload(e, false)}
                       />
@@ -1122,8 +1690,21 @@ function EditorContent({ invitationId }: { invitationId: string }) {
                         <button
                           type="button"
                           onClick={() => {
-                            const updated = content.galleryUrls.filter((_, idx) => idx !== i);
-                            triggerDirty({ ...content, galleryUrls: updated });
+                            const updatedGallery = content.galleryUrls.filter((_, idx) => idx !== i);
+                            const updatedCaptions01 = (content.card01?.photoCaptions || []).filter((_, idx) => idx !== i);
+                            const updatedCaptions02 = (content.card02?.photoCaptions || []).filter((_, idx) => idx !== i);
+                            const updatedCaptions03 = (content.card03?.photoCaptions || []).filter((_, idx) => idx !== i);
+                            triggerDirty({
+                              ...content,
+                              galleryUrls: updatedGallery,
+                              ...(isCard01
+                                ? { card01: { ...content.card01, photoCaptions: updatedCaptions01 } }
+                                : isCard02
+                                ? { card02: { ...content.card02, photoCaptions: updatedCaptions02 } }
+                                : isCard03
+                                ? { card03: { ...content.card03, photoCaptions: updatedCaptions03 } }
+                                : {}),
+                            });
                           }}
                           className="absolute inset-0 bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                         >
@@ -1132,6 +1713,63 @@ function EditorContent({ invitationId }: { invitationId: string }) {
                       </div>
                     ))}
                   </div>
+
+                  {/* Per-photo caption inputs for Card 01, Card 02 & Card 03 */}
+                  {isMultiStage3D && content.galleryUrls.length > 0 && (
+                    <div className="space-y-2 pt-2">
+                      <p className="text-[11px] font-semibold text-slate-600">
+                        {isCard03
+                          ? "Chú thích dưới khung ảnh Polaroid:"
+                          : "Chú thích hiển thị trên thẻ ảnh (Chặng 2):"}
+                      </p>
+                      <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+                        {content.galleryUrls.slice(0, isCard03 ? 12 : 8).map((url, idx) => {
+                          const defaultCaps = isCard03
+                            ? CARD03_DEFAULT_CAPTIONS
+                            : isCard02
+                            ? CARD02_DEFAULT_CAPTIONS
+                            : CARD01_DEFAULT_CAPTIONS;
+                          const captions =
+                            (isCard03
+                              ? content.card03?.photoCaptions
+                              : isCard02
+                              ? content.card02?.photoCaptions
+                              : content.card01?.photoCaptions) || [];
+                          const capVal = captions[idx] ?? defaultCaps[idx % defaultCaps.length];
+                          return (
+                            <div key={`cap-${idx}`} className="flex items-center gap-2">
+                              <img
+                                src={url}
+                                alt={`Ảnh ${idx + 1}`}
+                                className="w-8 h-8 rounded-lg object-cover border shrink-0"
+                              />
+                              <input
+                                type="text"
+                                value={capVal}
+                                onChange={(e) => {
+                                  const maxCapCount = isCard03 ? 12 : 8;
+                                  const nextCaps = content.galleryUrls.slice(0, maxCapCount).map((_, cIdx) =>
+                                    cIdx === idx
+                                      ? e.target.value
+                                      : captions[cIdx] ?? defaultCaps[cIdx % defaultCaps.length]
+                                  );
+                                  triggerDirty(
+                                    isCard03
+                                      ? { ...content, card03: { ...content.card03, photoCaptions: nextCaps } }
+                                      : isCard02
+                                      ? { ...content, card02: { ...content.card02, photoCaptions: nextCaps } }
+                                      : { ...content, card01: { ...content.card01, photoCaptions: nextCaps } }
+                                  );
+                                }}
+                                placeholder={`Chú thích cho ảnh #${idx + 1}...`}
+                                className="flex-1 px-3 py-1.5 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-rose-200"
+                              />
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
 
                   <p className="text-[11px] text-slate-400">
                     Giới hạn mỗi ảnh &lt; 20MB. Hỗ trợ định dạng JPG, PNG, WebP.
@@ -1171,16 +1809,34 @@ function EditorContent({ invitationId }: { invitationId: string }) {
                   </p>
                 </div>
 
-                {/* Notice for templates without default music */}
-                <div className="p-4 bg-rose-50/70 rounded-2xl border border-rose-200 text-xs text-rose-950 flex items-start gap-2.5">
-                  <Volume2 className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
-                  <div className="space-y-1">
-                    <p className="font-bold">Mẫu này không có nhạc mặc định:</p>
-                    <p className="text-rose-800 leading-relaxed text-[11px]">
-                      Muốn có nhạc nền ngọt ngào, hãy tải bài hát yêu thích của bạn lên (hỗ trợ MP3, WAV hoặc video tách âm tối đa 8 phút).
-                    </p>
+                {/* Notice for default music */}
+                {isMultiStage3D ? (
+                  <div className="p-4 bg-emerald-50/80 rounded-2xl border border-emerald-200 text-xs text-emerald-950 flex items-start gap-2.5">
+                    <Volume2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                    <div className="space-y-1">
+                      <p className="font-bold">
+                        {isCard03
+                          ? "Thiệp #03 đã có sẵn nhạc nền mặc định:"
+                          : isCard02
+                          ? "Thiệp #02 đã có sẵn nhạc nền mặc định:"
+                          : "Thiệp #01 đã có sẵn nhạc nền mặc định:"}
+                      </p>
+                      <p className="text-emerald-800 leading-relaxed text-[11px]">
+                        Bản &ldquo;{isCard03 ? "Giai điệu Thiệp #03" : isCard02 ? "Giai điệu Thiệp #01 & #02" : "Giai điệu Thiệp đầu tiên"}&rdquo; sẽ phát xuyên suốt thiệp. Bạn có thể đổi sang nhạc có sẵn khác hoặc tải lên bài hát riêng (MP3, WAV hoặc video tách âm tối đa 8 phút).
+                      </p>
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  <div className="p-4 bg-rose-50/70 rounded-2xl border border-rose-200 text-xs text-rose-950 flex items-start gap-2.5">
+                    <Volume2 className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                    <div className="space-y-1">
+                      <p className="font-bold">Mẫu này không có nhạc mặc định:</p>
+                      <p className="text-rose-800 leading-relaxed text-[11px]">
+                        Muốn có nhạc nền ngọt ngào, hãy tải bài hát yêu thích của bạn lên (hỗ trợ MP3, WAV hoặc video tách âm tối đa 8 phút).
+                      </p>
+                    </div>
+                  </div>
+                )}
 
                 {/* Quota Card */}
                 <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 flex items-center justify-between gap-3">
@@ -1213,8 +1869,20 @@ function EditorContent({ invitationId }: { invitationId: string }) {
                 {/* Built-in Ready-to-use Music Presets & Direct URL */}
                 <div className="space-y-2.5">
                   <p className="text-xs font-semibold text-slate-700">Chọn nhanh nhạc nền có sẵn:</p>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     {[
+                      {
+                        label: isCard03
+                          ? "Giai điệu Thiệp #03 (Gốc)"
+                          : isCard02
+                          ? "Giai điệu Thiệp #02 (Gốc)"
+                          : "Giai điệu Thiệp đầu tiên",
+                        url: isCard03
+                          ? CARD03_DEFAULT_BGM_URL
+                          : isCard02
+                          ? CARD02_DEFAULT_BGM_URL
+                          : CARD01_DEFAULT_BGM_URL,
+                      },
                       {
                         label: "Hộp nhạc Lãng mạn",
                         url: "/audio/romantic-musicbox.wav",
@@ -1535,18 +2203,159 @@ function EditorContent({ invitationId }: { invitationId: string }) {
             activeTab === "preview" ? "flex" : "hidden md:flex"
           }`}
         >
+          {/* Card 01 Stage Preview Switcher */}
+          {isCard01 && (
+            <div className="mb-3 flex flex-wrap items-center justify-center gap-1.5 w-full max-w-[375px]">
+              {(
+                [
+                  { id: "bouquet", label: "1. Bó hoa" },
+                  { id: "journey", label: "2. Hành trình" },
+                  { id: "universe", label: "3. Vũ trụ 3D" },
+                ] as { id: Card01Stage; label: string }[]
+              ).map((s) => (
+                <button
+                  key={s.id}
+                  type="button"
+                  onClick={() => {
+                    setCard01AutoDemo(false);
+                    setCard01PreviewStage(s.id);
+                  }}
+                  className={`px-2.5 py-1 rounded-full text-[11px] font-semibold transition ${
+                    card01PreviewStage === s.id && !card01AutoDemo
+                      ? "bg-rose-600 text-white shadow-sm"
+                      : "bg-slate-800 text-slate-300 hover:bg-slate-700"
+                  }`}
+                >
+                  {s.label}
+                </button>
+              ))}
+              <button
+                type="button"
+                onClick={() => {
+                  setCard01PreviewStage("bouquet");
+                  setCard01AutoDemo((v) => !v);
+                }}
+                className={`px-2.5 py-1 rounded-full text-[11px] font-semibold transition ${
+                  card01AutoDemo
+                    ? "bg-emerald-600 text-white shadow-sm"
+                    : "bg-slate-800 text-emerald-300 border border-emerald-500/40 hover:bg-slate-700"
+                }`}
+              >
+                {card01AutoDemo ? "⏹ Dừng tự chạy" : "▶ Tự chạy"}
+              </button>
+            </div>
+          )}
+
+          {/* Card 02 Stage Preview Switcher */}
+          {isCard02 && (
+            <div className="mb-3 flex flex-wrap items-center justify-center gap-1.5 w-full max-w-[375px]">
+              {(
+                [
+                  { id: "rose", label: "1. Bông hồng" },
+                  { id: "journey", label: "2. Hành trình" },
+                  { id: "lantern", label: "3. Đèn trời 3D" },
+                ] as { id: Card02Stage; label: string }[]
+              ).map((s) => (
+                <button
+                  key={s.id}
+                  type="button"
+                  onClick={() => {
+                    setCard02AutoDemo(false);
+                    setCard02PreviewStage(s.id);
+                  }}
+                  className={`px-2.5 py-1 rounded-full text-[11px] font-semibold transition ${
+                    card02PreviewStage === s.id && !card02AutoDemo
+                      ? "bg-rose-600 text-white shadow-sm"
+                      : "bg-slate-800 text-slate-300 hover:bg-slate-700"
+                  }`}
+                >
+                  {s.label}
+                </button>
+              ))}
+              <button
+                type="button"
+                onClick={() => {
+                  setCard02PreviewStage("rose");
+                  setCard02AutoDemo((v) => !v);
+                }}
+                className={`px-2.5 py-1 rounded-full text-[11px] font-semibold transition ${
+                  card02AutoDemo
+                    ? "bg-emerald-600 text-white shadow-sm"
+                    : "bg-slate-800 text-emerald-300 border border-emerald-500/40 hover:bg-slate-700"
+                }`}
+              >
+                {card02AutoDemo ? "⏹ Dừng tự chạy" : "▶ Tự chạy"}
+              </button>
+            </div>
+          )}
+
+          {/* Card 03 Stage Preview Switcher */}
+          {isCard03 && (
+            <div className="mb-3 flex flex-wrap items-center justify-center gap-1.5 w-full max-w-[375px]">
+              {(
+                [
+                  { id: "cover", label: "1. Mở đầu" },
+                  { id: "story", label: "2. Kể chuyện" },
+                  { id: "confession", label: "3. Tỏ tình" },
+                  { id: "heart", label: "❤ Trái tim" },
+                ] as { id: Card03Stage; label: string }[]
+              ).map((s) => (
+                <button
+                  key={s.id}
+                  type="button"
+                  onClick={() => {
+                    setCard03AutoDemo(false);
+                    setCard03PreviewStage(s.id);
+                  }}
+                  className={`px-2.5 py-1 rounded-full text-[11px] font-semibold transition ${
+                    card03PreviewStage === s.id && !card03AutoDemo
+                      ? "bg-rose-600 text-white shadow-sm"
+                      : "bg-slate-800 text-slate-300 hover:bg-slate-700"
+                  }`}
+                >
+                  {s.label}
+                </button>
+              ))}
+              <button
+                type="button"
+                onClick={() => {
+                  setCard03PreviewStage("cover");
+                  setCard03AutoDemo((v) => !v);
+                }}
+                className={`px-2.5 py-1 rounded-full text-[11px] font-semibold transition ${
+                  card03AutoDemo
+                    ? "bg-emerald-600 text-white shadow-sm"
+                    : "bg-slate-800 text-emerald-300 border border-emerald-500/40 hover:bg-slate-700"
+                }`}
+              >
+                {card03AutoDemo ? "⏹ Dừng tự chạy" : "▶ Tự chạy"}
+              </button>
+            </div>
+          )}
+
           {/* Card preview wrapper */}
-          <div className="w-full max-w-[375px] bg-white rounded-[40px] shadow-2xl border-[8px] border-slate-800 overflow-hidden flex flex-col relative">
-            <div className="h-6 bg-slate-900 flex items-center justify-center">
+          <div className="w-full max-w-[375px] shrink-0 bg-white rounded-[40px] shadow-2xl border-[8px] border-slate-800 overflow-hidden flex flex-col relative">
+            <div className="h-6 shrink-0 bg-slate-900 flex items-center justify-center">
               <div className="w-20 h-3.5 bg-black rounded-full" />
             </div>
 
-            <div className="flex-1 max-h-[780px] overflow-y-auto scrollbar-thin">
+            <div
+              className={`w-full h-[680px] shrink-0 relative ${
+                isMultiStage3D || templateMeta.interactiveUrl
+                  ? "overflow-hidden bg-[#020204]"
+                  : "overflow-y-auto scrollbar-thin"
+              }`}
+            >
               <TemplateRenderer
                 content={content}
                 theme={templateMeta.theme}
                 slug={invitationMeta.templateSlug}
+                templateSlug={invitationMeta.templateSlug}
                 isPreview={true}
+                autoDemo={(isCard01 && card01AutoDemo) || (isCard02 && card02AutoDemo) || (isCard03 && card03AutoDemo)}
+                card01Stage={isCard01 ? card01PreviewStage : undefined}
+                card02Stage={isCard02 ? card02PreviewStage : undefined}
+                card03Stage={isCard03 ? card03PreviewStage : undefined}
               />
             </div>
           </div>

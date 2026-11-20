@@ -185,9 +185,9 @@ export const DEFAULT_SHOP_SETTINGS: ShopSettings = {
     href: "/qua-tang/tat-ca",
   },
   support: {
-    hotline: "",
-    zaloUrl: "",
-    email: "",
+    hotline: "0362213119",
+    zaloUrl: "https://zalo.me/0362213119",
+    email: "dingdongtech.official@gmail.com",
     workingHours: "09:00 – 21:00 hằng ngày",
   },
   policies: {

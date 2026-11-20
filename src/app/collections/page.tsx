@@ -41,7 +41,7 @@ export default async function CollectionsPage() {
               href="/qua-tang"
               className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-[#FFF9F5] border border-[#F2DCE2] text-xs font-semibold text-[#D94575] hover:bg-[#FDECF0] transition-colors"
             >
-              Muốn gửi thêm món quà thật kèm thiệp QR? → Cửa hàng quà
+              Quà tặng vật lý kèm thiệp QR (Ra mắt vào 1/12) → Cửa hàng quà
             </Link>
           </div>
         </div>

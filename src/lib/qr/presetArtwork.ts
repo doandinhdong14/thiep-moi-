@@ -431,17 +431,17 @@ function drawTraiTimHoaHong(ctx: CanvasRenderingContext2D) {
   ctx.save();
   ctx.textAlign = "center";
   ctx.fillStyle = "#b91c3a";
-  ctx.font = "italic 600 42px Georgia, 'Times New Roman', serif";
+  ctx.font = "italic 600 42px 'Lora', 'Times New Roman', serif";
   ctx.fillText("♡ Mừng ngày ♡", 500, 86);
 
-  ctx.font = "italic 700 80px Georgia, 'Times New Roman', serif";
+  ctx.font = "italic 700 80px 'Lora', 'Times New Roman', serif";
   ctx.lineWidth = 6;
   ctx.strokeStyle = "rgba(255,255,255,0.85)";
   ctx.strokeText("Phụ nữ Việt Nam", 500, 165);
   ctx.fillStyle = "#c81e3d";
   ctx.fillText("Phụ nữ Việt Nam", 500, 165);
 
-  ctx.font = "italic 700 54px Georgia, 'Times New Roman', serif";
+  ctx.font = "italic 700 54px 'Lora', 'Times New Roman', serif";
   ctx.fillText("♡ 20/10 ♡", 500, 228);
   ctx.restore();
 }
@@ -581,17 +581,17 @@ function drawTraiTim2010(ctx: CanvasRenderingContext2D) {
   ctx.save();
   ctx.textAlign = "center";
   ctx.fillStyle = "#2d5a2e";
-  ctx.font = "italic 700 44px Georgia, 'Times New Roman', serif";
+  ctx.font = "italic 700 44px 'Lora', 'Times New Roman', serif";
   ctx.fillText("Mừng ngày", 500, 82);
 
   ctx.lineWidth = 8;
   ctx.strokeStyle = "#ffffff";
-  ctx.font = "italic 800 76px Georgia, 'Times New Roman', serif";
+  ctx.font = "italic 800 76px 'Lora', 'Times New Roman', serif";
   ctx.strokeText("Phụ Nữ Việt Nam", 500, 160);
   ctx.fillStyle = "#e04f62";
   ctx.fillText("Phụ Nữ Việt Nam", 500, 160);
 
-  ctx.font = "italic 800 52px Georgia, 'Times New Roman', serif";
+  ctx.font = "italic 800 52px 'Lora', 'Times New Roman', serif";
   ctx.strokeText("♥  20/10  ♥", 500, 224);
   ctx.fillText("♥  20/10  ♥", 500, 224);
   ctx.restore();
@@ -672,9 +672,9 @@ function drawGiftForYou(ctx: CanvasRenderingContext2D) {
   // Script "Gift for you" in bottom-left
   ctx.save();
   ctx.fillStyle = "#f9dfb0";
-  ctx.font = "italic 600 94px Georgia, 'Times New Roman', serif";
+  ctx.font = "italic 600 94px 'Lora', 'Times New Roman', serif";
   ctx.fillText("Gift", 130, 845);
-  ctx.font = "italic 500 50px Georgia, 'Times New Roman', serif";
+  ctx.font = "italic 500 50px 'Lora', 'Times New Roman', serif";
   ctx.fillText("for you", 230, 902);
 
   // Flourish line below script
@@ -1176,7 +1176,7 @@ function drawSinhNhat(ctx: CanvasRenderingContext2D) {
   // Curved "Happy Birthday!" typography
   ctx.save();
   ctx.fillStyle = "#2b375b";
-  ctx.font = "italic 700 72px Georgia, 'Times New Roman', serif";
+  ctx.font = "italic 700 72px 'Lora', 'Times New Roman', serif";
   ctx.textAlign = "center";
   ctx.save();
   ctx.translate(280, 212);
@@ -1359,7 +1359,7 @@ function drawSinhNhat2(ctx: CanvasRenderingContext2D) {
 
   // "Birthday" cream lettering on dachshund
   ctx.fillStyle = "#fff7ed";
-  ctx.font = "italic 700 54px Georgia, 'Times New Roman', serif";
+  ctx.font = "italic 700 54px 'Lora', 'Times New Roman', serif";
   ctx.textAlign = "center";
   ctx.fillText("Birthday", 520, 805);
   ctx.restore();
@@ -1717,7 +1717,7 @@ function drawTrungThu2(ctx: CanvasRenderingContext2D, preset: QrPreset) {
   }
 
   ctx.fillStyle = "#fde68a";
-  ctx.font = "italic 700 44px Georgia, 'Times New Roman', serif";
+  ctx.font = "italic 700 44px 'Lora', 'Times New Roman', serif";
   ctx.textAlign = "center";
   ctx.fillText("Trung Thu Đoàn Viên", 500, 910);
 }
@@ -1824,7 +1824,7 @@ function drawNoel(ctx: CanvasRenderingContext2D, preset: QrPreset) {
   // Headline "Merry Christmas"
   ctx.save();
   ctx.fillStyle = "#d3122a";
-  ctx.font = "italic 700 66px Georgia, 'Comic Sans MS', serif";
+  ctx.font = "italic 700 66px 'Lora', 'Times New Roman', serif";
   ctx.textAlign = "center";
   ctx.fillText("Merry Christmas", 500, 126);
   ctx.restore();
@@ -1856,7 +1856,7 @@ function drawNoel(ctx: CanvasRenderingContext2D, preset: QrPreset) {
 
   ctx.save();
   ctx.fillStyle = "#146c2e";
-  ctx.font = "italic 700 44px Georgia, 'Comic Sans MS', serif";
+  ctx.font = "italic 700 44px 'Lora', 'Times New Roman', serif";
   ctx.textAlign = "center";
   ctx.fillText("Giáng Sinh An Lành", 500, 892);
   ctx.restore();

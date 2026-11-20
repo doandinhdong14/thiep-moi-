@@ -16,6 +16,7 @@ export interface VerticalScrollPreviewProps {
   renderTemplateFallback?: () => React.ReactNode;
   hasTemplateFallback?: boolean;
   topOverlay?: React.ReactNode;
+  centerOverlay?: React.ReactNode;
   bottomOverlay: React.ReactNode;
   eagerThreshold?: number;
 }
@@ -35,6 +36,7 @@ export default function VerticalScrollPreview({
   renderTemplateFallback,
   hasTemplateFallback = false,
   topOverlay,
+  centerOverlay,
   bottomOverlay,
   eagerThreshold = 8,
 }: VerticalScrollPreviewProps) {
@@ -416,6 +418,8 @@ export default function VerticalScrollPreview({
       {topOverlay}
 
       <div className={styles.gradientScrim} aria-hidden="true" />
+
+      {centerOverlay}
 
       {bottomOverlay}
     </article>

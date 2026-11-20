@@ -14,6 +14,8 @@ export interface CatalogProduct {
   numberCode?: string;
   displayOrder?: number;
   defaultHidden?: boolean;
+  isLocked?: boolean;
+  launchDateLabel?: string;
   price: number;
   compareAtPrice?: number;
   category: string;
@@ -86,6 +88,9 @@ export const CATALOG_CATEGORIES: CatalogCategory[] = [
 ];
 
 export const TEMPLATE_PREVIEW_SLUGS = new Set([
+  "card-01-first-gift",
+  "card-02-second-gift",
+  "card-03-third-gift",
   "wedding-classic",
   "wedding-floral",
   "love-letter",
@@ -118,7 +123,73 @@ export function resolveTemplatePreviewImage(slug?: string, demoUrl?: string): st
 }
 
 const RAW_CATALOG_PRODUCTS: CatalogProduct[] = [
-  // 10 Mẫu Thiệp Tương Tác Độc Bản
+  // 12 Mẫu Thiệp Tương Tác Độc Bản
+  {
+    id: "prod-card-01-first-gift",
+    slug: "card-01-first-gift",
+    title: "Thiệp Đầu Tiên – Bó Hoa & Vũ Trụ 3D ✨",
+    coverImage: "/cards/card-01-first-gift/photos/photo-1-75b52d22.jpg",
+    price: 49000,
+    compareAtPrice: 99000,
+    category: "Kỷ niệm",
+    categorySlug: "ky-niem",
+    demoUrl: "/templates/card-01-first-gift",
+    guideUrl: "/occasions/love-confession",
+    videoGuideUrl: "https://youtube.com",
+    available: true,
+    description:
+      "Thiệp 3 chặng tương tác 3D đỉnh cao: ấn giữ bó hoa tung ảnh kỷ niệm, lướt qua hành trình sao băng 8 màn (xòe thẻ ảnh, thổi nến ước nguyện, mở hộp quà, đọc tâm thư) và khám phá Vũ trụ yêu thương 3D xoay 360°.",
+    specs: {
+      design: "Ghép liền mạch 3 chặng: Bó hoa 3D, Hành trình sao băng & Vũ trụ trái tim 360°",
+      interaction: "Chỉnh chữ, tên người nhận, đồng bộ 1 lần tới 12 ảnh kỷ niệm & nhạc nền riêng",
+      sharing: "Link mở thiệp riêng tư sạch 100% không quảng cáo kèm mã QR trang trí cao cấp",
+      compatibility: "Mượt mà 60fps trên mọi điện thoại iOS, Android và máy tính",
+    },
+  },
+  {
+    id: "prod-card-02-second-gift",
+    slug: "card-02-second-gift",
+    title: "Thiệp Thứ Hai – Hoa Hồng, Sao Băng & Đèn Trời 3D 🌹",
+    coverImage: "/cards/card-02-second-gift/photos/photo-1-b83de51b.jpg",
+    price: 49000,
+    compareAtPrice: 99000,
+    category: "Kỷ niệm",
+    categorySlug: "ky-niem",
+    demoUrl: "/templates/card-02-second-gift",
+    guideUrl: "/occasions/love-confession",
+    videoGuideUrl: "https://youtube.com",
+    available: true,
+    description:
+      "Thiệp ghép 3 chặng siêu lãng mạn: mở đầu bằng đóa hồng 3D nở từng lớp cánh cùng mưa cánh hoa bay, tiếp nối hành trình sao băng 8 màn đầy cảm xúc và kết màn bằng bầu trời đêm 3D thả đèn lồng viết lời chúc cùng pháo hoa rực rỡ.",
+    specs: {
+      design: "Ghép mượt mà 3 chặng: Hoa Hồng Nở 3D, Hành trình sao băng 8 màn & Đèn Trời Pháo Hoa 3D",
+      interaction: "Chỉnh chữ, tên người nhận, đồng bộ 1 lần tới 12 ảnh kỷ niệm, lời ước đèn trời & nhạc nền",
+      sharing: "Link mở thiệp riêng tư sạch 100% không quảng cáo kèm mã QR trang trí cao cấp",
+      compatibility: "Mượt mà 60fps trên mọi điện thoại iOS, Android và máy tính",
+    },
+  },
+  {
+    id: "prod-card-03-third-gift",
+    slug: "card-03-third-gift",
+    title: "Thiệp Thứ Ba – Chuyện Tình 55 Trang & Trái Tim Flowtime 💌",
+    coverImage: "/cards/card-03-third-gift/img/iali53.jpg",
+    price: 49000,
+    compareAtPrice: 99000,
+    category: "Kỷ niệm",
+    categorySlug: "ky-niem",
+    demoUrl: "/templates/card-03-third-gift",
+    guideUrl: "/occasions/love-confession",
+    videoGuideUrl: "https://youtube.com",
+    available: true,
+    description:
+      "Thiệp trình chiếu không gian 2D Flowtime 55 trang (9 chương) kể chuyện tình yêu minh họa ngọt ngào, kết màn mở khóa Toàn cảnh Trái Tim ghép từ 55 trang. Hỗ trợ sửa chữ, tên đôi lứa, thêm tối đa 12 ảnh kỷ niệm & nhạc nền riêng.",
+    specs: {
+      design: "Không gian 2D Flowtime 55 trang (9 chương) & Toàn cảnh Trái Tim bất ngờ ở trang cuối",
+      interaction: "Chỉnh lời thoại, tên người gửi/nhận, thêm tới 12 ảnh kỷ niệm & nhạc nền tùy chọn",
+      sharing: "Link mở thiệp riêng tư sạch 100% không quảng cáo kèm mã QR trang trí cao cấp",
+      compatibility: "Vuốt mượt mà trên mọi điện thoại iOS, Android và điều khiển phím trên máy tính",
+    },
+  },
   {
     id: "prod-thiep-3",
     slug: "thiep-3",
@@ -733,6 +804,8 @@ export const ALL_CATALOG_PRODUCTS: CatalogProduct[] = RAW_CATALOG_PRODUCTS.map((
     numberCode: tpl?.numberCode,
     displayOrder: tpl?.displayOrder,
     defaultHidden: !isDefaultVisible,
+    isLocked: Boolean(tpl?.isLocked),
+    launchDateLabel: tpl?.launchDateLabel,
     badge: tpl?.badge || (item.slug.startsWith("thiep-") ? "Tương tác 3D" : item.badge),
   };
 }).sort((a, b) => (a.displayOrder ?? 999) - (b.displayOrder ?? 999));
@@ -837,9 +910,9 @@ export const COLLECTIONS_LIST: CollectionItem[] = [
     title: "Kỷ Niệm Ngày Yêu",
     subtitle: "Dòng thời gian tình yêu, thư tay ảo và những cột mốc ngọt ngào",
     image: "https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=800&q=80",
-    previewImage: "/previews/thiep-5.webp",
+    previewImage: "/previews/card-01-first-gift.webp",
     iconName: "Sparkles",
-    productCount: 2,
+    productCount: 3,
     categorySlug: "ky-niem",
   },
   {

@@ -7,6 +7,8 @@ import {
   ChevronUp,
   Clock,
   Copy,
+  ExternalLink,
+  Facebook,
   Headphones,
   Mail,
   MessageCircleHeart,
@@ -18,8 +20,9 @@ import {
 } from "lucide-react";
 import { useOptionalShopCart } from "@/components/shop/ShopCartContext";
 
-const SUPPORT_EMAIL = "hotro@dingdonggift.vn";
-const SUPPORT_HOTLINE = "1900 8888";
+const SUPPORT_EMAIL = "dingdongtech.official@gmail.com";
+const SUPPORT_HOTLINE = "0362213119";
+const SUPPORT_FACEBOOK_URL = "https://www.facebook.com/profile.php?id=61591103040912";
 const SUPPORT_HOURS = "08:30 – 22:00 (T2 – CN)";
 
 const QUICK_TOPICS = [
@@ -266,6 +269,34 @@ export default function FloatingWidgets() {
                     </>
                   )}
                 </button>
+              </div>
+
+              <div className="flex items-center justify-between gap-2 rounded-xl border border-rose-100 bg-[#FFF9FA] px-3 py-2.5">
+                <a
+                  href={SUPPORT_FACEBOOK_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2.5 min-w-0 flex-1 group"
+                >
+                  <span className="w-8 h-8 rounded-full bg-rose-100 text-[#fa416a] flex items-center justify-center shrink-0">
+                    <Facebook className="w-4 h-4" />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-[11px] text-slate-500 font-medium">Fanpage Facebook</p>
+                    <p className="text-xs font-bold text-slate-900 truncate group-hover:text-[#fa416a] transition-colors">
+                      Ding Dong Gift
+                    </p>
+                  </div>
+                </a>
+                <a
+                  href={SUPPORT_FACEBOOK_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-2.5 py-1.5 rounded-lg bg-white border border-rose-100 text-[11px] font-semibold text-slate-600 hover:text-[#fa416a] inline-flex items-center gap-1 shrink-0"
+                >
+                  <ExternalLink className="w-3 h-3" />
+                  <span>Mở</span>
+                </a>
               </div>
 
               <div className="flex items-center gap-2 text-[11px] text-slate-500 px-1">

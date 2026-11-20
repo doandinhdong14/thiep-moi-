@@ -1,0 +1,369 @@
+/* Scoped responsive styles for Card 02 (card-02-second-gift) */
+
+.sc2-player-root {
+  position: relative;
+  flex: 1 1 0%;
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  overflow: hidden;
+  background: #040712;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.sc2-player-root img {
+  -webkit-touch-callout: none;
+  -webkit-user-drag: none;
+}
+
+.sc2-stage-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  will-change: opacity, transform, filter;
+  transition:
+    opacity 0.95s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 1.05s cubic-bezier(0.22, 1, 0.36, 1),
+    filter 0.95s ease;
+}
+
+.sc2-stage-layer.entering {
+  opacity: 0;
+  transform: scale(0.96);
+  filter: blur(6px);
+}
+
+.sc2-stage-layer.active {
+  opacity: 1;
+  transform: scale(1);
+  filter: blur(0px);
+}
+
+.sc2-stage-layer.exiting-to-journey {
+  opacity: 0;
+  transform: scale(1.07);
+  filter: blur(6px);
+  pointer-events: none;
+}
+
+.sc2-stage-layer.exiting-to-lantern {
+  opacity: 0;
+  transform: translateY(-24px) scale(1.06);
+  filter: blur(8px);
+  pointer-events: none;
+}
+
+/* Stage 1: Card 3 Custom Glass Overlay */
+.sc2-rose-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 0 18px max(34px, calc(env(safe-area-inset-bottom, 0px) + 26px));
+  z-index: 10;
+  transition: opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1), transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sc2-rose-overlay.fade-out {
+  opacity: 0;
+  transform: translateY(16px) scale(0.96);
+}
+
+.sc2-rose-bottom-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  text-align: center;
+  max-width: min(92%, 440px);
+  pointer-events: auto;
+}
+
+.sc2-rose-overlay.fade-out .sc2-rose-bottom-content {
+  pointer-events: none;
+}
+
+.sc2-rose-message {
+  color: #ffe4e8;
+  font-size: clamp(0.95rem, 3.6vw, 1.12rem);
+  font-weight: 400;
+  letter-spacing: 0.03em;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.65), 0 0 20px rgba(244, 143, 177, 0.32);
+  margin: 0;
+  font-style: italic;
+}
+
+.sc2-rose-open-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 12px 26px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1.5px solid rgba(255, 228, 235, 0.48);
+  color: #ffffff;
+  font-size: clamp(0.88rem, 3.4vw, 0.98rem);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 4px 24px rgba(244, 143, 177, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  touch-action: manipulation;
+}
+
+.sc2-rose-open-btn:hover {
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 228, 235, 0.85);
+  box-shadow: 0 6px 30px rgba(244, 143, 177, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  transform: translateY(-2px) scale(1.02);
+}
+
+.sc2-rose-btn-pulse {
+  position: absolute;
+  inset: -4px;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 228, 235, 0.42);
+  animation: sc2RosePulse 2.8s infinite ease-out;
+  pointer-events: none;
+}
+
+@keyframes sc2RosePulse {
+  0% {
+    transform: scale(0.96);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.08);
+    opacity: 0.2;
+  }
+  100% {
+    transform: scale(1.15);
+    opacity: 0;
+  }
+}
+
+/* Stage 3 (Lanterns): ensure sky hint sits cleanly below top HUD & bottom HUD respects safe-area */
+.sc2-lantern-layer .sl3d-sky-hint {
+  top: max(54px, calc(env(safe-area-inset-top, 0px) + 50px));
+}
+
+.sc2-lantern-layer .sl3d-sky-hud {
+  bottom: max(14px, calc(env(safe-area-inset-bottom, 0px) + 12px));
+}
+
+.sc2-transition-veil {
+  position: absolute;
+  inset: 0;
+  z-index: 95;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+.sc2-transition-veil.rose-to-cosmic {
+  background: radial-gradient(
+    circle at 50% 44%,
+    rgba(244, 114, 182, 0.34) 0%,
+    rgba(160, 140, 255, 0.2) 38%,
+    rgba(8, 13, 26, 0.88) 85%
+  );
+  opacity: 1;
+}
+
+.sc2-transition-veil.cosmic-to-lantern {
+  background: radial-gradient(
+    circle at 50% 56%,
+    rgba(255, 178, 72, 0.34) 0%,
+    rgba(160, 140, 255, 0.18) 38%,
+    rgba(4, 7, 18, 0.9) 84%
+  );
+  opacity: 1;
+}
+
+@keyframes sc2PortalGlowPulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 22px rgba(255, 178, 72, 0.3),
+      0 0 42px rgba(160, 140, 255, 0.24),
+      inset 0 1px 0 rgba(255, 255, 255, 0.32);
+    transform: translateY(0px);
+  }
+  50% {
+    box-shadow:
+      0 0 34px rgba(255, 178, 72, 0.52),
+      0 0 56px rgba(160, 140, 255, 0.38),
+      inset 0 1px 0 rgba(255, 255, 255, 0.45);
+    transform: translateY(-2px);
+  }
+}
+
+@keyframes sc2PortalFadeUp {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 16px);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+.sc2-portal-cta-wrap {
+  position: absolute;
+  bottom: max(20px, calc(env(safe-area-inset-bottom, 0px) + 14px));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 70;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  width: max-content;
+  max-width: calc(100% - 28px);
+  animation: sc2PortalFadeUp 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.sc2-portal-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 11px 22px;
+  max-width: 100%;
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(255, 168, 56, 0.34) 0%, rgba(160, 140, 255, 0.28) 100%);
+  border: 1px solid rgba(255, 224, 150, 0.6);
+  backdrop-filter: blur(12px);
+  color: #fffdf0;
+  font-size: clamp(0.82rem, 3.2vw, 0.94rem);
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  animation: sc2PortalGlowPulse 2.8s ease-in-out infinite;
+  transition: transform 0.2s ease, background 0.2s ease;
+  text-align: center;
+  touch-action: manipulation;
+}
+
+.sc2-portal-cta-btn:hover {
+  background: linear-gradient(135deg, rgba(255, 168, 56, 0.48) 0%, rgba(160, 140, 255, 0.4) 100%);
+  transform: scale(1.04);
+}
+
+.sc2-portal-cta-sub {
+  font-size: clamp(0.66rem, 2.5vw, 0.72rem);
+  letter-spacing: 0.04em;
+  color: rgba(255, 253, 240, 0.68);
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.85);
+  text-align: center;
+}
+
+.sc2-player-hud-top {
+  position: absolute;
+  top: max(12px, calc(env(safe-area-inset-top, 0px) + 8px));
+  left: max(12px, env(safe-area-inset-left, 0px));
+  right: max(12px, env(safe-area-inset-right, 0px));
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.sc2-hud-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  pointer-events: none;
+}
+
+.sc2-hud-pill {
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 6px 11px;
+  border-radius: 999px;
+  background: rgba(8, 13, 26, 0.62);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(10px);
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  touch-action: manipulation;
+  white-space: nowrap;
+}
+
+.sc2-hud-pill:hover {
+  background: rgba(15, 23, 42, 0.84);
+  border-color: rgba(255, 255, 255, 0.34);
+  color: #ffffff;
+}
+
+.sc2-hud-compact {
+  min-height: 28px;
+  padding: 4px 9px;
+  font-size: 0.68rem;
+}
+
+.sc2-preview-stage-pills {
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px;
+  border-radius: 999px;
+  background: rgba(8, 13, 26, 0.62);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(10px);
+}
+
+.sc2-hud-stage-dot {
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.72);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.16s ease;
+}
+
+.sc2-hud-stage-dot:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.sc2-hud-stage-dot.active {
+  background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(236, 72, 153, 0.45);
+}
+
+@media (max-width: 480px) {
+  .sc2-hud-text-optional {
+    display: none;
+  }
+}

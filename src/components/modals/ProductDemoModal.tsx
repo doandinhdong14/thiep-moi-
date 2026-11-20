@@ -3,11 +3,12 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { X, Eye, Pencil, Loader2 } from "lucide-react";
+import { X, Eye, Pencil, Loader2, Lock } from "lucide-react";
 import { BrandMark } from "@/components/common/BrandLogo";
 import ModalShell from "./ModalShell";
 import { CatalogProduct } from "@/data/catalogData";
 import { generateQrDataUrl } from "@/lib/qr";
+import { createDraftEditorUrl } from "@/lib/templates/openEditor";
 
 interface ProductDemoModalProps {
   product: CatalogProduct | null;
@@ -26,28 +27,18 @@ export default function ProductDemoModal({
   const [customizing, setCustomizing] = useState(false);
 
   const handleCustomize = async () => {
-    if (customizing || !product) return;
+    if (customizing || !product || product.isLocked) return;
     setCustomizing(true);
     try {
-      const res = await fetch("/api/v1/invitations/draft", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ templateSlug: product.slug }),
-      });
-      const data = await res.json();
-      if (res.ok && data.data?.editorUrl) {
-        onClose();
-        router.push(data.data.editorUrl);
-        return;
-      }
+      const editorUrl = await createDraftEditorUrl(product.slug);
+      onClose();
+      router.push(editorUrl);
     } catch (err) {
       console.error("Customize draft error:", err);
+      alert(err instanceof Error ? err.message : "Không thể mở trang chỉnh sửa. Vui lòng thử lại.");
     } finally {
       setCustomizing(false);
     }
-    // Fallback
-    onClose();
-    router.push(`/create?template=${product.slug}`);
   };
 
   const formatVnd = (amount: number) => {
@@ -136,6 +127,7 @@ export default function ProductDemoModal({
                     title={`Xem mẫu ${product.title}`}
                     loading="lazy"
                     sandbox="allow-scripts allow-same-origin"
+                    allow="autoplay; accelerometer; gyroscope; fullscreen"
                     onLoad={() => setIframeLoading(false)}
                     className="w-full h-full border-0 select-none overflow-y-auto block"
                   />
@@ -218,31 +210,44 @@ export default function ProductDemoModal({
             </div>
 
             {/* Action Buttons: Secondary (38%) & Primary (62%) */}
-            <div className="mt-4 md:mt-5 flex items-center gap-2 w-full">
-              <a
-                href={product.demoUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-[38%] shrink-0 h-11 md:h-[36px] px-2 rounded-[9px] border border-rose-300 hover:border-rose-400 bg-white hover:bg-rose-50/50 text-[#e93459] text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
-              >
-                <Eye className="w-3.5 h-3.5 md:w-4 md:h-4 text-[#e93459]" />
-                <span className="truncate">Xem trực tiếp</span>
-              </a>
+            {product.isLocked ? (
+              <div className="mt-4 md:mt-5">
+                <button
+                  type="button"
+                  disabled
+                  className="w-full h-11 rounded-[9px] bg-slate-900 text-amber-200 border border-amber-300/40 text-xs font-bold flex items-center justify-center gap-2 cursor-not-allowed"
+                >
+                  <Lock className="w-4 h-4" />
+                  <span>{product.launchDateLabel || "Ra mắt 24/11"}</span>
+                </button>
+              </div>
+            ) : (
+              <div className="mt-4 md:mt-5 flex items-center gap-2 w-full">
+                <a
+                  href={product.demoUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-[38%] shrink-0 h-11 md:h-[36px] px-2 rounded-[9px] border border-rose-300 hover:border-rose-400 bg-white hover:bg-rose-50/50 text-[#e93459] text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
+                >
+                  <Eye className="w-3.5 h-3.5 md:w-4 md:h-4 text-[#e93459]" />
+                  <span className="truncate">Xem trực tiếp</span>
+                </a>
 
-              <button
-                type="button"
-                onClick={handleCustomize}
-                disabled={customizing}
-                className="flex-1 h-11 md:h-[36px] px-3 rounded-[9px] bg-gradient-to-r from-[#ff4d68] to-[#e93459] hover:opacity-95 text-white text-xs font-semibold flex items-center justify-center gap-1.5 shadow-md shadow-rose-200 transition-all disabled:opacity-60"
-              >
-                {customizing ? (
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                ) : (
-                  <Pencil className="w-3.5 h-3.5 md:w-4 md:h-4" />
-                )}
-                <span className="truncate">{customizing ? "Đang chuẩn bị..." : "Tùy chỉnh ngay"}</span>
-              </button>
-            </div>
+                <button
+                  type="button"
+                  onClick={handleCustomize}
+                  disabled={customizing}
+                  className="flex-1 h-11 md:h-[36px] px-3 rounded-[9px] bg-gradient-to-r from-[#ff4d68] to-[#e93459] hover:opacity-95 text-white text-xs font-semibold flex items-center justify-center gap-1.5 shadow-md shadow-rose-200 transition-all disabled:opacity-60"
+                >
+                  {customizing ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <Pencil className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                  )}
+                  <span className="truncate">{customizing ? "Đang mở..." : "Chỉnh sửa ngay"}</span>
+                </button>
+              </div>
+            )}
 
             {/* QR Section: Centered vertical container */}
             <div className="mt-5 md:mt-6 flex flex-col items-center w-full pb-8 md:pb-0">

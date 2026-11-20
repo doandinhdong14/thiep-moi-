@@ -60,7 +60,7 @@ export default function TrustSection() {
             {/* CTA Button */}
             <div>
               <Link
-                href="/create"
+                href="/products"
                 className="inline-flex items-center gap-2 px-8 py-3.5 bg-gradient-to-r from-[#ff6b61] to-[#fa416a] hover:opacity-95 text-white font-bold text-sm rounded-full shadow-[0_10px_25px_rgba(250,65,106,0.25)] transition-all hover:scale-105 active:scale-95 group"
               >
                 <span>Bắt đầu tạo ngay</span>

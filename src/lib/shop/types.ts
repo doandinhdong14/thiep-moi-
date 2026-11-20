@@ -268,6 +268,9 @@ export function isShopApiSuccess(payload: unknown): boolean {
   return obj.success === true || obj.ok === true;
 }
 
+export const PHYSICAL_SHOP_LOCKED = true;
+export const PHYSICAL_SHOP_LAUNCH_LABEL = "Ra mắt vào 1/12";
+
 export const ORDER_STATUS_LABELS: Record<string, string> = {
   DRAFT: "Bản nháp",
   PENDING_PAYMENT: "Chờ thanh toán",

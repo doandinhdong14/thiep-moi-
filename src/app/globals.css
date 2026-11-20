@@ -24,8 +24,8 @@
 
   --background: #ffffff;
   --foreground: #19191f;
-  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --font-serif: "Merriweather", "Georgia", "Cambria", serif;
+  --font-sans: var(--font-be-vietnam-pro), "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-serif: var(--font-lora), "Times New Roman", "Noto Serif", serif;
 }
 
 body {

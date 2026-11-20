@@ -28,6 +28,12 @@ export interface ShopMusicTrack {
 export const SHOP_MUSIC_TRACKS: ShopMusicTrack[] = [
   { id: "", label: "Không phát nhạc nền", url: "", mood: "Tĩnh lặng" },
   {
+    id: "first-gift-bgm",
+    label: "Giai điệu Thiệp #01 & #02",
+    url: "/cards/card-01-first-gift/audio/gift-bgm.mp3",
+    mood: "Lãng mạn • Dịu dàng",
+  },
+  {
     id: "romantic-musicbox",
     label: "Hộp nhạc lãng mạn",
     url: "/audio/romantic-musicbox.wav",

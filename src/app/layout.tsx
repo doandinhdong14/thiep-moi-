@@ -1,7 +1,22 @@
 import type { Metadata } from "next";
+import { Be_Vietnam_Pro, Lora } from "next/font/google";
 import "./globals.css";
 import "@/styles/shop.css";
 import SiteChrome from "@/components/layout/SiteChrome";
+
+const beVietnamPro = Be_Vietnam_Pro({
+  subsets: ["latin", "vietnamese"],
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-be-vietnam-pro",
+  display: "swap",
+});
+
+const lora = Lora({
+  subsets: ["latin", "vietnamese"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-lora",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "Ding Dong Gift — Nền tảng tạo thiệp / Mini Website / QR Card tinh tế",
@@ -24,7 +39,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="vi">
+    <html lang="vi" className={`${beVietnamPro.variable} ${lora.variable}`}>
       <head>
         <script
           dangerouslySetInnerHTML={{

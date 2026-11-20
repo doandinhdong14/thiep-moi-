@@ -46,6 +46,8 @@ export interface ProductItem {
   badge?: string;
   numberCode?: string;
   displayOrder?: number;
+  isLocked?: boolean;
+  launchDateLabel?: string;
 }
 
 export interface TestimonialItem {
@@ -82,11 +84,11 @@ export interface FaqItem {
 export const siteConfig: SiteConfig = {
   brandName: "Ding Dong Gift",
   tagline: "Nền tảng thiệp mời tương tác & Mini Website tinh tế",
-  supportEmail: "hotro@dingdonggift.vn",
-  hotline: "1900 8888",
+  supportEmail: "dingdongtech.official@gmail.com",
+  hotline: "0362213119",
   ownerLegalName: "Ding Dong Gift Interactive Media Ltd.",
   socialLinks: {
-    facebook: "https://facebook.com",
+    facebook: "https://www.facebook.com/profile.php?id=61591103040912",
     tiktok: "https://tiktok.com",
     youtube: "https://youtube.com",
   },
@@ -101,7 +103,7 @@ export const heroSlides: HeroSlide[] = [
     tagline: "Cho Mọi Khoảnh Khắc Hạnh Phúc & Ý Nghĩa",
     description: "Tạo thiệp cưới, sinh nhật, kỷ niệm và tỏ tình với hiệu ứng mở phong bì tương tác, bản đồ chỉ đường, đếm ngược và RSVP trực tuyến.",
     ctaLabel: "TẠO NGAY",
-    ctaHref: "/create",
+    ctaHref: "/products",
   },
   {
     id: "slide-2",
@@ -152,6 +154,8 @@ export function catalogProductToProductItem(item: CatalogProduct): ProductItem {
     badge: item.badge,
     numberCode: item.numberCode,
     displayOrder: item.displayOrder,
+    isLocked: item.isLocked,
+    launchDateLabel: item.launchDateLabel,
   };
 }
 
@@ -168,6 +172,8 @@ export function templateMetaToProductItem(tpl: TemplateMeta): ProductItem {
     badge: tpl.isPremium ? "PREMIUM" : tpl.badge,
     numberCode: tpl.numberCode,
     displayOrder: tpl.displayOrder,
+    isLocked: tpl.isLocked,
+    launchDateLabel: tpl.launchDateLabel,
   };
 }
 
@@ -284,34 +290,31 @@ export const productList: ProductItem[] = CATALOG_PRODUCTS.map((item) => ({
 }));
 
 export const topicChips: { label: string; href: string }[] = [
-  { label: "#01 Vé hẹn hò", href: "/templates/thiep-3" },
-  { label: "#02 Gửi em vũ trụ", href: "/templates/thiep-4" },
-  { label: "#03 Khu vườn khóa PIN", href: "/templates/thiep-5" },
-  { label: "#05 Đại dương tình yêu", href: "/templates/thiep-7" },
-  { label: "#06 Trái tim 3D", href: "/templates/thiep-8" },
-  { label: "#07 Cực quang pha lê", href: "/templates/thiep-9" },
-  { label: "#08 Vé máy bay", href: "/templates/thiep-10" },
-  { label: "#09 & #10 Giáng sinh", href: "/templates/thiep-xmas" },
+  { label: "#01 Thiệp đầu tiên 3D", href: "/templates/card-01-first-gift" },
+  { label: "#02 Hoa hồng & Đèn trời 3D", href: "/templates/card-02-second-gift" },
+  { label: "#03 Chuyện tình 55 trang", href: "/templates/card-03-third-gift" },
+  { label: "#04 Vé hẹn hò", href: "/templates/thiep-3" },
+  { label: "#05 – #13 (Ra mắt 24/11)", href: "/products" },
 ];
 
 export const testimonialsList: TestimonialItem[] = [
   {
     id: "test-1",
-    quote: "Mẫu vé hẹn hò #01 và trái tim 3D #06 giúp mình tạo món quà kỷ niệm cực ấn tượng — người nhận mở link quét QR bất ngờ vô cùng!",
+    quote: "Mẫu #01 & #02 hiệu ứng 3 chặng (Bó hoa / Hoa hồng 3D → Hành trình sao băng → Vũ trụ & Đèn trời) quá xuất sắc — chỉnh chữ, thêm ảnh và nhạc cực dễ, người nhận mở link bất ngờ vô cùng!",
     author: "Hoàng Long & Minh Thư",
     role: "Cặp đôi kỷ niệm 1 năm",
     rating: 5,
     avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80",
-    tag: "#01 · Một Tấm Vé Hẹn Hò",
+    tag: "#01 & #02 · Thiệp 3 Chặng 3D",
   },
   {
     id: "test-2",
-    quote: "Mình dùng mẫu #03 Khu Vườn Kỷ Niệm có khóa PIN bí mật để gửi lời chúc, thêm ảnh và nhạc nền rất cảm xúc!",
+    quote: "Mình dùng mẫu #05 Khu Vườn Kỷ Niệm có khóa PIN bí mật để gửi lời chúc, thêm ảnh và nhạc nền rất cảm xúc!",
     author: "Quốc Bảo & Thu Hà",
     role: "Cặp đôi kỷ niệm 100 ngày",
     rating: 5,
     avatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80",
-    tag: "#03 · Khu Vườn Khóa PIN",
+    tag: "#05 · Khu Vườn Khóa PIN",
   },
   {
     id: "test-3",
@@ -320,16 +323,16 @@ export const testimonialsList: TestimonialItem[] = [
     role: "Khách hàng thân thiết",
     rating: 5,
     avatarUrl: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=200&q=80",
-    tag: "#06 · Vũ Trụ Trái Tim 3D",
+    tag: "#07 · Vũ Trụ Trái Tim 3D",
   },
   {
     id: "test-4",
-    quote: "Mẫu Boarding Pass #08 ghi tên hai đứa và chặng bay kỷ niệm nhìn cực kỳ xịn, thao tác chỉ 3 phút là xong!",
+    quote: "Mẫu Boarding Pass #09 ghi tên hai đứa và chặng bay kỷ niệm nhìn cực kỳ xịn, thao tác chỉ 3 phút là xong!",
     author: "Thanh Tùng",
     role: "Tạo thiệp tặng bạn gái",
     rating: 5,
     avatarUrl: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80",
-    tag: "#08 · Boarding Pass Hạnh Phúc",
+    tag: "#09 · Boarding Pass Hạnh Phúc",
   },
 ];
 

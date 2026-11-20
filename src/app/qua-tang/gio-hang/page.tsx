@@ -22,7 +22,11 @@ import ShopOrdersPanel from "@/components/shop/ShopOrdersPanel";
 import GiftPersonalizationWizard, {
   type WizardSavedResult,
 } from "@/components/shop/GiftPersonalizationWizard";
-import { formatVnd } from "@/lib/shop/types";
+import {
+  formatVnd,
+  PHYSICAL_SHOP_LAUNCH_LABEL,
+  PHYSICAL_SHOP_LOCKED,
+} from "@/lib/shop/types";
 import type { CartItemView, CartUnitView } from "@/lib/shop/cart";
 
 export default function ShopCartPage() {
@@ -512,7 +516,15 @@ export default function ShopCartPage() {
                   </div>
                 </dl>
 
-                {settings && !settings.storeOpen ? (
+                {PHYSICAL_SHOP_LOCKED ? (
+                  <button
+                    type="button"
+                    disabled
+                    className="mt-5 w-full py-3.5 rounded-xl bg-slate-900 text-amber-200 border border-amber-300/40 font-semibold text-sm cursor-not-allowed"
+                  >
+                    {PHYSICAL_SHOP_LAUNCH_LABEL}
+                  </button>
+                ) : settings && !settings.storeOpen ? (
                   <div className="mt-5 p-3 rounded-2xl bg-amber-50 text-amber-900 text-xs">
                     {settings.pauseMessage}
                   </div>

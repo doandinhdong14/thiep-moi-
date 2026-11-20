@@ -12,9 +12,9 @@ export default async function ProductsPage() {
   return (
     <>
       <div className="bg-[#FFF9F5] border-b border-[#F2DCE2] px-4 py-2.5 text-center text-xs text-[#3E2A2D]">
-        <span>Muốn gửi thêm món quà thật (Khăn len, Găng tay, Móc khóa) kèm thiệp QR? </span>
+        <span>Quà tặng vật lý (Khăn len, Găng tay, Móc khóa) kèm thiệp QR — <strong>Ra mắt vào 1/12</strong>. </span>
         <Link href="/qua-tang" className="font-bold text-[#FF5C8D] hover:underline">
-          Ghé Cửa hàng quà DingDong →
+          Xem trước Cửa hàng quà DingDong →
         </Link>
       </div>
       <Suspense

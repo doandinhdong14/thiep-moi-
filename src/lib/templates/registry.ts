@@ -26,6 +26,8 @@ export interface TemplateMeta {
   displayOrder?: number;
   numberCode?: string;
   defaultHidden?: boolean;
+  isLocked?: boolean;
+  launchDateLabel?: string;
   sourceFile?: string;
 }
 
@@ -181,6 +183,72 @@ export const TEMPLATES_REGISTRY: Record<string, TemplateMeta> = {
       fontFamily: "serif",
     },
     blocks: ["cover", "intro_message", "gallery", "music_control", "response_question", "footer_cta"],
+  },
+  "card-01-first-gift": {
+    slug: "card-01-first-gift",
+    title: "Thiệp 01: Thiệp Đầu Tiên – Bó Hoa, Hành Trình Sao Băng & Vũ Trụ 3D ✨",
+    occasionKey: "love",
+    occasionTitle: "Tình yêu & Kỷ niệm",
+    description:
+      "Thiệp tương tác 3 chặng liền mạch độc quyền: mở đầu với bó hoa kỷ niệm tung ảnh 3D, lướt qua hành trình sao băng 8 màn (xòe thẻ ảnh, thổi nến ước nguyện, mở hộp quà, đọc tâm thư) và bước vào Vũ trụ yêu thương 3D xoay 360°.",
+    isPremium: false,
+    badge: "3 Chặng 3D",
+    icon: "💐",
+    theme: {
+      name: "First Gift 3-Stage",
+      style: "Bó Hoa 3D · Hành Trình Sao Băng · Vũ Trụ 360°",
+      background: "#080d1a",
+      foreground: "#ffffff",
+      accent: "#f472b6",
+      muted: "#a08cff",
+      cardBg: "#11192e",
+      fontFamily: "sans",
+    },
+    blocks: ["cover", "intro_message", "gallery", "music_control", "footer_cta"],
+  },
+  "card-02-second-gift": {
+    slug: "card-02-second-gift",
+    title: "Thiệp 02: Bông Hồng Nở Rộ, Hành Trình Sao Băng & Đèn Trời 3D 🌹",
+    occasionKey: "love",
+    occasionTitle: "Tình yêu & Kỷ niệm",
+    description:
+      "Thiệp 3 chặng tương tác 3D: mở đầu với đóa hồng nở từng lớp cánh cùng mưa cánh hoa bay 3D, lướt qua hành trình sao băng 8 màn (xòe thẻ ảnh, thổi nến, mở hộp quà, tâm thư) và chạm bầu trời đêm thả đèn lồng viết lời chúc cùng pháo hoa 3D.",
+    isPremium: false,
+    badge: "3 Chặng · Đèn Trời 3D",
+    icon: "🌹",
+    theme: {
+      name: "Second Gift 3-Stage",
+      style: "Hoa Hồng 3D · Sao Băng · Đèn Trời & Pháo Hoa",
+      background: "#190b17",
+      foreground: "#ffffff",
+      accent: "#f48fb1",
+      muted: "#ff9c38",
+      cardBg: "#120918",
+      fontFamily: "sans",
+    },
+    blocks: ["cover", "intro_message", "gallery", "music_control", "footer_cta"],
+  },
+  "card-03-third-gift": {
+    slug: "card-03-third-gift",
+    title: "Thiệp 03: Chuyện Tình 55 Trang & Toàn Cảnh Trái Tim Flowtime 💌",
+    occasionKey: "love",
+    occasionTitle: "Tình yêu & Tỏ tình",
+    description:
+      "Thiệp trình chiếu không gian 2D Flowtime 55 trang (9 chương) phong cách truyện tranh minh họa ngọt ngào, kết màn mở khóa Toàn cảnh Trái Tim ghép từ 55 trang kỷ niệm. Tùy chỉnh lời thoại, tên đôi lứa, thêm ảnh kỷ niệm & nhạc nền riêng.",
+    isPremium: false,
+    badge: "55 Trang Flowtime",
+    icon: "💌",
+    theme: {
+      name: "Third Gift Flowtime",
+      style: "55 Trang Flowtime 2D · Toàn Cảnh Trái Tim",
+      background: "#fed1ea",
+      foreground: "#613b3b",
+      accent: "#FA4A4A",
+      muted: "#a54479",
+      cardBg: "#fff2fb",
+      fontFamily: "sans",
+    },
+    blocks: ["cover", "intro_message", "gallery", "music_control", "footer_cta"],
   },
   "thiep-3": {
     slug: "thiep-3",
@@ -414,92 +482,119 @@ export interface UserTemplateSequenceEntry {
 }
 
 /**
- * Canonical 1..10 sequential numbering for the user-provided interactive templates.
- * Note: filenames start at thiep-3.html (thiep-1/2 were not provided), followed by
- * thiep-4..thiep-10, thiep-giang-sinh, and thiep-xmas.
+ * Canonical 1..13 sequential numbering for the user-provided interactive templates.
+ * #01 is card-01-first-gift, #02 is card-02-second-gift, #03 is card-03-third-gift,
+ * followed by thiep-3..thiep-10, thiep-giang-sinh, and thiep-xmas.
  */
 export const USER_TEMPLATE_SEQUENCE: readonly UserTemplateSequenceEntry[] = [
   {
-    slug: "thiep-3",
+    slug: "card-01-first-gift",
     number: 1,
     code: "#01",
+    cleanTitle: "Thiệp Đầu Tiên – Bó Hoa & Vũ Trụ 3D ✨",
+    badge: "Mẫu #01 · 3 Chặng 3D",
+    sourceFile: "src/components/cards/card-01-first-gift/Card01Player.tsx",
+  },
+  {
+    slug: "card-02-second-gift",
+    number: 2,
+    code: "#02",
+    cleanTitle: "Thiệp Thứ Hai – Hoa Hồng, Sao Băng & Đèn Trời 3D 🌹",
+    badge: "Mẫu #02 · Hoa Hồng & Đèn Trời 3D",
+    sourceFile: "src/components/cards/card-02-second-gift/Card02Player.tsx",
+  },
+  {
+    slug: "card-03-third-gift",
+    number: 3,
+    code: "#03",
+    cleanTitle: "Thiệp Thứ Ba – Chuyện Tình 55 Trang & Trái Tim Flowtime 💌",
+    badge: "Mẫu #03 · 55 Trang Flowtime",
+    sourceFile: "src/components/cards/card-03-third-gift/Card03Player.tsx",
+  },
+  {
+    slug: "thiep-3",
+    number: 4,
+    code: "#04",
     cleanTitle: "Một Tấm Vé Hẹn Hò ♡",
-    badge: "Mẫu #01 · Vé Hẹn Hò",
+    badge: "Mẫu #04 · Vé Hẹn Hò",
     sourceFile: "public/templates/thiep-3.html",
   },
   {
     slug: "thiep-4",
-    number: 2,
-    code: "#02",
+    number: 5,
+    code: "#05",
     cleanTitle: "Gửi Em Một Vũ Trụ ✨",
-    badge: "Mẫu #02 · Vũ Trụ 7 Cảnh",
+    badge: "Mẫu #05 · Vũ Trụ 7 Cảnh",
     sourceFile: "public/templates/thiep-4.html",
   },
   {
     slug: "thiep-5",
-    number: 3,
-    code: "#03",
+    number: 6,
+    code: "#06",
     cleanTitle: "Khu Vườn Kỷ Niệm – Phong Thư Tình Yêu 🌸",
-    badge: "Mẫu #03 · Khóa PIN & 3D",
+    badge: "Mẫu #06 · Khóa PIN & 3D",
     sourceFile: "public/templates/thiep-5.html",
   },
   {
     slug: "thiep-6",
-    number: 4,
-    code: "#04",
+    number: 7,
+    code: "#07",
     cleanTitle: "Mùa Thu Kỷ Niệm – Bức Thư Giữa Mùa Lá Rụng 🍁",
-    badge: "Mẫu #04 · Mùa Thu Lá Phong",
+    badge: "Mẫu #07 · Mùa Thu Lá Phong",
     sourceFile: "public/templates/thiep-6.html",
   },
   {
     slug: "thiep-7",
-    number: 5,
-    code: "#05",
+    number: 8,
+    code: "#08",
     cleanTitle: "Đại Dương Tình Yêu & Ánh Sáng Biển Sâu 🌊",
-    badge: "Mẫu #05 · Thư Trong Chai",
+    badge: "Mẫu #08 · Thư Trong Chai",
     sourceFile: "public/templates/thiep-7.html",
   },
   {
     slug: "thiep-8",
-    number: 6,
-    code: "#06",
+    number: 9,
+    code: "#09",
     cleanTitle: "Vũ Trụ Trái Tim & Bì Thư 3D 💖",
-    badge: "Mẫu #06 · Tim Particle 3D",
+    badge: "Mẫu #09 · Tim Particle 3D",
     sourceFile: "public/templates/thiep-8.html",
   },
   {
     slug: "thiep-9",
-    number: 7,
-    code: "#07",
+    number: 10,
+    code: "#10",
     cleanTitle: "Vũ Điệu Cực Quang & Trái Tim Pha Lê 3D 🌌",
-    badge: "Mẫu #07 · Cực Quang 3D",
+    badge: "Mẫu #10 · Cực Quang 3D",
     sourceFile: "public/templates/thiep-9.html",
   },
   {
     slug: "thiep-10",
-    number: 8,
-    code: "#08",
+    number: 11,
+    code: "#11",
     cleanTitle: "Boarding Pass – Chuyến Bay Hạnh Phúc ✈️",
-    badge: "Mẫu #08 · Boarding Pass",
+    badge: "Mẫu #11 · Boarding Pass",
     sourceFile: "public/templates/thiep-10.html",
   },
   {
     slug: "thiep-giang-sinh",
-    number: 9,
-    code: "#09",
+    number: 12,
+    code: "#12",
     cleanTitle: "Thiệp Giáng Sinh – Đêm Noel Diệu Kỳ 🎄",
-    badge: "Mẫu #09 · Noel Lung Linh",
+    badge: "Mẫu #12 · Noel Lung Linh",
     sourceFile: "public/templates/thiep-giang-sinh.html",
   },
   {
     slug: "thiep-xmas",
-    number: 10,
-    code: "#10",
+    number: 13,
+    code: "#13",
     cleanTitle: "Christmas Special – Hộp Quà Giáng Sinh Lung Linh 🎅",
-    badge: "Mẫu #10 · Christmas 3D",
+    badge: "Mẫu #13 · Christmas 3D",
     sourceFile: "public/templates/thiep-xmas.html",
   },
 ];
+
+export const LAUNCHING_SOON_CARD_LABEL = "Ra mắt 24/11";
+export const OPEN_TEMPLATE_COUNT = 4;
 
 const USER_SEQUENCE_BY_SLUG = new Map(
   USER_TEMPLATE_SEQUENCE.map((item) => [item.slug, item])
@@ -512,16 +607,24 @@ for (const [slug, meta] of Object.entries(TEMPLATES_REGISTRY)) {
     meta.displayOrder = userEntry.number;
     meta.numberCode = userEntry.code;
     meta.defaultHidden = false;
+    meta.isLocked = userEntry.number > OPEN_TEMPLATE_COUNT;
+    meta.launchDateLabel = meta.isLocked ? LAUNCHING_SOON_CARD_LABEL : undefined;
     meta.sourceFile = userEntry.sourceFile;
     meta.title = `${userEntry.code} · ${userEntry.cleanTitle}`;
     meta.badge = userEntry.badge;
   } else {
     meta.defaultHidden = true;
+    meta.isLocked = false;
     meta.sourceFile = "React Built-in Component";
   }
 }
 
-export const DEFAULT_TEMPLATE_SLUG = "thiep-8";
+export const DEFAULT_TEMPLATE_SLUG = "card-01-first-gift";
+
+export function isTemplateLocked(slug?: string | null): boolean {
+  if (!slug) return false;
+  return Boolean(TEMPLATES_REGISTRY[slug]?.isLocked);
+}
 
 export function isTemplateVisible(
   tpl: TemplateMeta,
@@ -774,6 +877,166 @@ export function getTemplateDemoContent(slug: string): InvitationContent {
         responseQuestion: {
           question: "Năm sau vẫn nắm tay anh đi khắp thế gian chứ?",
           options: ["Mãi mãi bên anh! 💖", "Tất nhiên rồi chàng trai ngốc!"],
+        },
+        blocks: meta.blocks.map((type, i) => ({ id: `blk_${i}`, type: type as any, enabled: true })),
+      };
+
+    case "card-01-first-gift":
+      return {
+        schemaVersion: 1,
+        occasionKey: "love",
+        locale: "vi-VN",
+        title: "Thiệp Đầu Tiên – Bó Hoa & Vũ Trụ 3D ✨",
+        subtitle: "BÍ MẬT DÀNH RIÊNG CHO",
+        people: [
+          { role: "sender", displayName: "Tớ" },
+          { role: "recipient", displayName: "Minh Anh" },
+        ],
+        message:
+          "Cảm ơn cậu vì đã xuất hiện thật dịu dàng trong những ngày qua của tớ\n\nCó những người giống như những vì sao\nLặng lẽ tỏa sáng ở đó thôi cũng đủ làm cả bầu trời của tớ rực rỡ hơn rồi\n\nThực ra tớ đã thích cậu từ lâu lắm rồi\nGiờ mới dám mượn mấy dòng này để nói ra\n\nMong rằng những ngày sắp tới\nCậu sẽ luôn bình an\nGiữ trọn nụ cười rạng rỡ như thế\nVà cho phép tớ được ở cạnh thương cậu thật nhiều nhé\n\nThích cậu rất nhiều ✨",
+        loveMessages: [
+          "Thích cậu, từ ngày đầu tiên đến tận sau này.",
+          "Mong là năm nào tụi mình cũng có nhau.",
+          "Ở cạnh tớ thật lâu nhé.",
+          "Thương cậu nhiều lắm.",
+          "Có cậu là đủ.",
+          "love u",
+        ],
+        coverImageUrl: "/cards/card-01-first-gift/photos/photo-1-75b52d22.jpg",
+        galleryUrls: [
+          "/cards/card-01-first-gift/photos/photo-1-75b52d22.jpg",
+          "/cards/card-01-first-gift/photos/photo-2-96aa14c6.jpg",
+          "/cards/card-01-first-gift/photos/photo-3-80636ad2.png",
+          "/cards/card-01-first-gift/photos/photo-4-29823f8d.jpg",
+          "/cards/card-01-first-gift/photos/photo-5-8377f8c7.jpg",
+          "/cards/card-01-first-gift/photos/photo-6-4d2ee2d2.jpg",
+        ],
+        privacy: { mode: "UNLISTED", allowIndexing: false },
+        features: {
+          rsvp: false,
+          guestbook: false,
+          backgroundMusicUrl: "/cards/card-01-first-gift/audio/gift-bgm.mp3",
+        },
+        card01: {
+          guideTextIdle: "Chạm nhẹ vào bó hoa tớ lén chuẩn bị cho cậu nha",
+          guideTextReady: "Giữ tay ở bó hoa để mở bí mật của tớ nhé",
+          introLinesText:
+            "Hôm nay|Giữa bầu trời đầy sao này|Tớ có một điều giấu kín bấy lâu|Chỉ muốn nói cho mình cậu nghe thôi",
+          candleLinesText:
+            "Cậu nhắm mắt lại một chút nhé|Nghĩ về điều cậu mong ước nhất lúc này|Và rồi...",
+          candleHintText: "Chạm nhẹ vào ngọn nến để tớ gửi nó lên trời sao",
+          giftHintText: "Chạm để mở hộp quà nhỏ của tớ",
+          upliftLinesText:
+            "Phía trước|Vẫn còn thật nhiều điều đẹp đẽ|Tớ mong mình có thể cùng cậu đi qua",
+          endingLinesText: "Thế giới nhỏ này|Tớ làm riêng cho cậu",
+          portalCtaText: "Bước vào Vũ trụ yêu thương ✨",
+          photoCaptions: [
+            "Yêu cậu, từ những ngày đầu đến tận sau này",
+            "Nụ cười làm tớ đứng hình mất mấy giây",
+            "Mùa hè năm ấy dịu dàng vì có cậu",
+            "Mong là năm nào mình cũng có nhau",
+            "Với tớ, có cậu là đủ",
+            "Mãi bên nhau nhé, thương cậu nhiều lắm ✨",
+          ],
+        },
+        blocks: meta.blocks.map((type, i) => ({ id: `blk_${i}`, type: type as any, enabled: true })),
+      };
+
+    case "card-02-second-gift":
+      return {
+        schemaVersion: 1,
+        occasionKey: "love",
+        locale: "vi-VN",
+        title: "Thiệp Thứ Hai – Hoa Hồng, Sao Băng & Đèn Trời 3D 🌹",
+        subtitle: "BÍ MẬT DÀNH RIÊNG CHO",
+        people: [
+          { role: "sender", displayName: "Tớ" },
+          { role: "recipient", displayName: "Minh Anh" },
+        ],
+        message:
+          "Cảm ơn cậu vì đã xuất hiện thật dịu dàng trong những ngày qua của tớ\n\nCó những người giống như những vì sao\nLặng lẽ tỏa sáng ở đó thôi cũng đủ làm cả bầu trời của tớ rực rỡ hơn rồi\n\nThực ra tớ đã thích cậu từ lâu lắm rồi\nGiờ mới dám mượn mấy dòng này để nói ra\n\nMong rằng những ngày sắp tới\nCậu sẽ luôn bình an\nGiữ trọn nụ cười rạng rỡ như thế\nVà cho phép tớ được ở cạnh thương cậu thật nhiều nhé\n\nThích cậu rất nhiều ✨",
+        loveMessages: [
+          "Mong cậu lúc nào cũng bình an, vui vẻ",
+          "Mỗi ngày trôi qua đều rạng rỡ như nụ cười của cậu",
+          "Mọi điều ước của cậu đều sớm thành hiện thực",
+          "Mong năm nào tụi mình cũng có nhau",
+          "Và điều ước lớn nhất của tớ chính là cậu ✨",
+        ],
+        coverImageUrl: "/cards/card-02-second-gift/photos/photo-1-b83de51b.jpg",
+        galleryUrls: [
+          "/cards/card-02-second-gift/photos/photo-1-b83de51b.jpg",
+          "/cards/card-02-second-gift/photos/photo-2-bbe4be38.jpg",
+          "/cards/card-02-second-gift/photos/photo-3-d366c1fd.jpg",
+          "/cards/card-02-second-gift/photos/photo-4-b95b64fd.jpg",
+          "/cards/card-02-second-gift/photos/photo-5-bcf7eb58.jpg",
+          "/cards/card-02-second-gift/photos/photo-6-ba62211a.jpg",
+        ],
+        privacy: { mode: "UNLISTED", allowIndexing: false },
+        features: {
+          rsvp: false,
+          guestbook: false,
+          backgroundMusicUrl: "/cards/card-02-second-gift/audio/gift-bgm.mp3",
+        },
+        card02: {
+          roseMessageText: "Có một bí mật nhỏ tớ giấu riêng cho cậu",
+          roseButtonText: "Chạm nhẹ để mở quà nha ♡",
+          introLinesText:
+            "Hôm nay|Giữa bầu trời đầy sao này|Tớ có một điều giấu kín bấy lâu|Chỉ muốn nói cho mình cậu nghe thôi",
+          candleLinesText:
+            "Cậu nhắm mắt lại một chút nhé|Nghĩ về điều cậu mong ước nhất lúc này|Và rồi...",
+          candleHintText: "Chạm nhẹ vào ngọn nến để tớ gửi nó lên trời sao",
+          giftHintText: "Chạm để mở hộp quà nhỏ của tớ",
+          upliftLinesText:
+            "Phía trước|Vẫn còn thật nhiều điều đẹp đẽ|Tớ mong mình có thể cùng cậu đi qua",
+          endingLinesText: "Thế giới nhỏ này|Tớ làm riêng cho cậu",
+          portalCtaText: "Cùng tớ thả đèn trời ước nguyện nhé ✨",
+          lanternHintText: "✦ Chạm vào bầu trời đêm để thả một chiếc đèn lồng ✦",
+          photoCaptions: [
+            "Khoảnh khắc tớ nhận ra mình thích cậu mất rồi",
+            "Nụ cười làm tớ đứng hình mất mấy giây",
+            "Mùa hè năm ấy dịu dàng vì có cậu",
+            "Những lần tớ lén nhìn cậu mà cậu chẳng hay",
+            "Cứ ở cạnh cậu là thấy bình yên lạ",
+            "Giữ trọn khoảnh khắc này cho riêng tụi mình ✨",
+          ],
+        },
+        blocks: meta.blocks.map((type, i) => ({ id: `blk_${i}`, type: type as any, enabled: true })),
+      };
+
+    case "card-03-third-gift":
+      return {
+        schemaVersion: 1,
+        occasionKey: "love",
+        locale: "vi-VN",
+        title: "Thiệp Thứ Ba – Chuyện Tình 55 Trang & Trái Tim Flowtime 💌",
+        subtitle: "Bắt đầu lắng nghe những điều tớ giấu kín bấy lâu nhé",
+        people: [
+          { role: "sender", displayName: "Tớ" },
+          { role: "recipient", displayName: "Minh Anh" },
+        ],
+        message: "Từ những ngày đầu tiên cho đến tận sau này...",
+        loveMessages: [
+          "Tớ thích cậu, thích nhiều lắm!",
+          "Cậu đi đến đâu, thế giới của tớ lớn đến đó.",
+          "Mong được cùng cậu đi qua những tháng ngày thật bình yên.",
+        ],
+        coverImageUrl: "/cards/card-03-third-gift/img/iali53.jpg",
+        galleryUrls: [],
+        privacy: { mode: "UNLISTED", allowIndexing: false },
+        features: {
+          rsvp: false,
+          guestbook: false,
+          backgroundMusicUrl: "/cards/card-03-third-gift/audio/gift-bgm.mp3",
+        },
+        card03: {
+          page1Title: "Một Bí Mật Nhỏ Dành Cho Cậu",
+          foreverText: "Một Đời Bên Nhau",
+          subtitleText: "Bắt đầu lắng nghe những điều tớ giấu kín bấy lâu nhé",
+          page53Title: "Tớ Thích Cậu",
+          page53Subtitle: "Từ những ngày đầu tiên cho đến tận sau này...",
+          page54CenterText: "Tớ thương cậu nhiều lắm ✨",
+          customPageTexts: "",
+          photoCaptions: [],
         },
         blocks: meta.blocks.map((type, i) => ({ id: `blk_${i}`, type: type as any, enabled: true })),
       };

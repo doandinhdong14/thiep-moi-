@@ -179,6 +179,42 @@ async function main() {
       },
     },
     {
+      slug: "card-01-first-gift",
+      title: "Thiệp 01: Thiệp Đầu Tiên – Bó Hoa & Vũ Trụ 3D ✨",
+      occasionSlug: "love-anniversary",
+      isPremium: false,
+      definition: {
+        name: "First Gift 3-Stage",
+        style: "Bó Hoa 3D · Hành Trình Sao Băng · Vũ Trụ 360°",
+        palette: { background: "#080d1a", foreground: "#ffffff", accent: "#f472b6", muted: "#a08cff" },
+        blocks: ["cover", "intro_message", "gallery", "music_control", "footer_cta"],
+      },
+    },
+    {
+      slug: "card-02-second-gift",
+      title: "Thiệp 02: Thiệp Thứ Hai – Hoa Hồng, Sao Băng & Đèn Trời 3D 🌹",
+      occasionSlug: "love-anniversary",
+      isPremium: false,
+      definition: {
+        name: "Second Gift 3-Stage",
+        style: "Hoa Hồng 3D · Hành Trình Sao Băng · Đèn Trời & Pháo Hoa",
+        palette: { background: "#190b17", foreground: "#ffffff", accent: "#f48fb1", muted: "#ff9c38" },
+        blocks: ["cover", "intro_message", "gallery", "music_control", "footer_cta"],
+      },
+    },
+    {
+      slug: "card-03-third-gift",
+      title: "Thiệp 03: Chuyện Tình 55 Trang & Toàn Cảnh Trái Tim Flowtime 💌",
+      occasionSlug: "love-confession",
+      isPremium: false,
+      definition: {
+        name: "Third Gift Flowtime",
+        style: "55 Trang Flowtime 2D · Toàn Cảnh Trái Tim",
+        palette: { background: "#fed1ea", foreground: "#613b3b", accent: "#FA4A4A", muted: "#a54479" },
+        blocks: ["cover", "intro_message", "gallery", "music_control", "footer_cta"],
+      },
+    },
+    {
       slug: "thiep-3",
       title: "Thiệp 03: Một Tấm Vé Hẹn Hò ♡",
       occasionSlug: "date-invitation",

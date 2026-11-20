@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { createDraftEditorUrl } from "@/lib/templates/openEditor";
 import {
   Sparkles,
   Eye,
@@ -181,7 +182,7 @@ export default function AdminTemplatesPage() {
     try {
       await sendPatch(
         { action: "reset_defaults" },
-        "Đã khôi phục mặc định: chỉ hiện 10 mẫu đã đưa vào (#01–#10) & ẩn toàn bộ mẫu gốc."
+        "Đã khôi phục mặc định: chỉ hiện 12 mẫu đã đưa vào (#01–#12) & ẩn toàn bộ mẫu gốc."
       );
     } catch (err: any) {
       showToast(err.message, "error");
@@ -232,7 +233,7 @@ export default function AdminTemplatesPage() {
             <span>Quản lý Mẫu Thiệp & Sổ Tay Ghi Chú Admin</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-serif font-bold">
-            Kho Mẫu Đánh Số (#01 – #10) & Trạng thái Ẩn / Hiện
+            Kho Mẫu Đánh Số (#01 – #{String(data?.stats.userProvidedCount ?? 12).padStart(2, "0")}) & Trạng thái Ẩn / Hiện
           </h1>
           <p className="text-xs sm:text-sm text-slate-300 max-w-2xl">
             Chỉ những mẫu được đánh dấu <strong>Đang hiện</strong> mới xuất hiện trên Trang chủ, Sản phẩm, Bộ sưu tập và Trang tạo thiệp.
@@ -284,7 +285,7 @@ export default function AdminTemplatesPage() {
               className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-semibold cursor-pointer disabled:opacity-50"
             >
               <RotateCcw className="w-3.5 h-3.5" />
-              <span>Khôi phục mặc định (#01–#10)</span>
+              <span>Khôi phục mặc định (#01–#{String(data?.stats.userProvidedCount ?? 12).padStart(2, "0")})</span>
             </button>
             <button
               type="button"
@@ -454,14 +455,21 @@ export default function AdminTemplatesPage() {
                         <span>Demo</span>
                         <ExternalLink className="w-3 h-3" />
                       </Link>
-                      <Link
-                        href={`/create?template=${tpl.slug}`}
-                        target="_blank"
-                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-rose-50 text-rose-700 hover:bg-rose-100 text-xs font-semibold"
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          try {
+                            const editorUrl = await createDraftEditorUrl(tpl.slug);
+                            window.open(editorUrl, "_blank", "noopener,noreferrer");
+                          } catch (err) {
+                            alert(err instanceof Error ? err.message : "Không thể mở Editor.");
+                          }
+                        }}
+                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-rose-50 text-rose-700 hover:bg-rose-100 text-xs font-semibold cursor-pointer"
                       >
-                        <span>Tạo thử</span>
+                        <span>Mở Editor</span>
                         <ExternalLink className="w-3 h-3" />
-                      </Link>
+                      </button>
                     </div>
                   </div>
                 </div>

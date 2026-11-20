@@ -90,14 +90,14 @@ function createPosterSvg(params: {
     </text>
 
     <!-- Main Title -->
-    <text x="${width / 2}" y="200" font-family="'Segoe UI', Roboto, Georgia, serif" font-size="44" font-weight="700" fill="#1E293B" text-anchor="middle">
+    <text x="${width / 2}" y="200" font-family="'Segoe UI', Roboto, 'Times New Roman', serif" font-size="44" font-weight="700" fill="#1E293B" text-anchor="middle">
       ${safeTitle}
     </text>
 
     <!-- Celebrants / Subtitle -->
     ${
       safeCelebrants
-        ? `<text x="${width / 2}" y="270" font-family="'Segoe UI', Roboto, Georgia, serif" font-size="34" font-weight="600" fill="#B45309" font-style="italic" text-anchor="middle">
+        ? `<text x="${width / 2}" y="270" font-family="'Segoe UI', Roboto, 'Times New Roman', serif" font-size="34" font-weight="600" fill="#B45309" font-style="italic" text-anchor="middle">
             ${safeCelebrants}
           </text>`
         : ""

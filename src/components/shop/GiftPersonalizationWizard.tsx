@@ -102,7 +102,7 @@ export default function GiftPersonalizationWizard({
   productName,
   boxLabel,
   eligibleSlugs,
-  defaultTemplateSlug = "thiep-8",
+  defaultTemplateSlug = "card-01-first-gift",
   cardPlans,
   giftWrapOptions,
   initialData,

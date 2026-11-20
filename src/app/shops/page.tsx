@@ -40,7 +40,7 @@ export default async function ShopsDirectoryPage({ searchParams }: ShopsPageProp
         <div className="text-center max-w-2xl mx-auto space-y-3">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-100 text-rose-700 text-xs font-semibold">
             <Sparkles className="w-3.5 h-3.5" />
-            Đối tác Hoa & Quà tặng
+            Đối tác Hoa & Quà tặng • Ra mắt vào 1/12
           </div>
           <h1 className="text-3xl md:text-4xl font-serif font-bold text-neutral-900">
             Gửi Trao Yêu Thương Cùng Quà Tặng & Thiệp QR

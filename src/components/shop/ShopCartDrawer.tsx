@@ -16,7 +16,11 @@ import {
   RotateCcw,
   PackageCheck,
 } from "lucide-react";
-import { formatVnd } from "@/lib/shop/types";
+import {
+  formatVnd,
+  PHYSICAL_SHOP_LAUNCH_LABEL,
+  PHYSICAL_SHOP_LOCKED,
+} from "@/lib/shop/types";
 import { useShopCart } from "./ShopCartContext";
 import ShopOrdersPanel from "./ShopOrdersPanel";
 
@@ -426,14 +430,24 @@ export default function ShopCartDrawer() {
               >
                 Xem giỏ chi tiết
               </Link>
-              <Link
-                href="/qua-tang/thanh-toan"
-                onClick={closeDrawer}
-                className="ddg-shop-btn-primary py-3 px-4 text-center text-xs font-semibold flex items-center justify-center gap-1.5"
-              >
-                Đặt quà ngay
-                <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
+              {PHYSICAL_SHOP_LOCKED ? (
+                <button
+                  type="button"
+                  disabled
+                  className="py-3 px-4 rounded-full bg-slate-900 text-amber-200 border border-amber-300/40 text-center text-xs font-semibold flex items-center justify-center gap-1.5 cursor-not-allowed"
+                >
+                  <span>{PHYSICAL_SHOP_LAUNCH_LABEL}</span>
+                </button>
+              ) : (
+                <Link
+                  href="/qua-tang/thanh-toan"
+                  onClick={closeDrawer}
+                  className="ddg-shop-btn-primary py-3 px-4 text-center text-xs font-semibold flex items-center justify-center gap-1.5"
+                >
+                  Đặt quà ngay
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+              )}
             </div>
           </div>
         )}

@@ -50,8 +50,8 @@ const config: Config = {
         content: "1440px",
       },
       fontFamily: {
-        sans: ["var(--font-sans)", "ui-sans-serif", "system-ui", "sans-serif"],
-        serif: ["var(--font-serif)", "ui-serif", "Georgia", "Cambria", "Times New Roman", "serif"],
+        sans: ["var(--font-sans)", "Segoe UI", "ui-sans-serif", "system-ui", "sans-serif"],
+        serif: ["var(--font-serif)", "Times New Roman", "ui-serif", "serif"],
       },
     },
   },

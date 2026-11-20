@@ -63,7 +63,7 @@ export default function CommunityIdeas() {
 
               <div className="pt-4 text-center">
                 <Link
-                  href="/create"
+                  href="/products"
                   className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-gradient-to-r from-[#ff6b61] to-[#fa416a] text-white text-xs font-semibold shadow-xs hover:opacity-95"
                 >
                   <MessageSquare className="w-4 h-4" />

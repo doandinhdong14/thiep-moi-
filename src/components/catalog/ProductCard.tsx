@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CatalogProduct } from "@/data/catalogData";
 import { catalogProductToProductItem } from "@/data/landingData";
+import { createDraftEditorUrl } from "@/lib/templates/openEditor";
 import ProductShowcaseCard from "@/components/landing/ProductShowcaseCard";
 
 interface ProductCardProps {
@@ -19,32 +20,24 @@ export default function ProductCard({ product, index = 0, onOpenDemo }: ProductC
   const showcaseItem = useMemo(() => catalogProductToProductItem(product), [product]);
 
   const handleCustomize = async () => {
-    if (loadingDraft) return;
+    if (loadingDraft || product.isLocked) return;
     setLoadingDraft(true);
     try {
-      const res = await fetch("/api/v1/invitations/draft", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ templateSlug: product.slug }),
-      });
-      const data = await res.json();
-      if (res.ok && data.data?.editorUrl) {
-        router.push(data.data.editorUrl);
-        return;
-      }
+      const editorUrl = await createDraftEditorUrl(product.slug);
+      router.push(editorUrl);
     } catch (err) {
       console.error(err);
+      alert(err instanceof Error ? err.message : "Không thể mở trang chỉnh sửa. Vui lòng thử lại.");
     } finally {
       setLoadingDraft(false);
     }
-    router.push(`/create?template=${product.slug}`);
   };
 
   return (
     <ProductShowcaseCard
       product={showcaseItem}
       index={index}
-      primaryLabel="Tùy chỉnh ngay"
+      primaryLabel="Chỉnh sửa ngay"
       isCreating={loadingDraft}
       onPrimaryAction={handleCustomize}
       onOpenDemo={() => onOpenDemo(product)}

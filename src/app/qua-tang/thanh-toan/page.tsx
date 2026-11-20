@@ -20,7 +20,12 @@ import {
 import ShopShell from "@/components/shop/ShopShell";
 import { useShopCart } from "@/components/shop/ShopCartContext";
 import { VIETNAM_PROVINCES } from "@/lib/shop/shipping";
-import { formatVnd, isShopApiSuccess } from "@/lib/shop/types";
+import {
+  formatVnd,
+  isShopApiSuccess,
+  PHYSICAL_SHOP_LAUNCH_LABEL,
+  PHYSICAL_SHOP_LOCKED,
+} from "@/lib/shop/types";
 
 type PaymentMethodType = "bank_transfer" | "payos" | "cod";
 
@@ -118,7 +123,7 @@ export default function ShopCheckoutPage() {
           setShippingQuote(json.data);
         }
       })
-      .catch(() => {})
+      .catch(() => { })
       .finally(() => {
         if (active) setQuoteLoading(false);
       });
@@ -137,8 +142,8 @@ export default function ShopCheckoutPage() {
 
   const codExceedsLimit = Boolean(
     paymentMethod === "cod" &&
-      settings?.paymentCapabilities.codMaxOrderTotalVnd &&
-      estimatedTotalVnd > settings.paymentCapabilities.codMaxOrderTotalVnd,
+    settings?.paymentCapabilities.codMaxOrderTotalVnd &&
+    estimatedTotalVnd > settings.paymentCapabilities.codMaxOrderTotalVnd,
   );
 
   const handleApplyPromo = async (e: React.FormEvent) => {
@@ -150,6 +155,11 @@ export default function ShopCheckoutPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg(null);
+
+    if (PHYSICAL_SHOP_LOCKED) {
+      setErrorMsg(`Các mặt hàng quà tặng vật lý sẽ chính thức ${PHYSICAL_SHOP_LAUNCH_LABEL.toLowerCase()}.`);
+      return;
+    }
 
     if (!paymentMethod) {
       setErrorMsg("Hiện chưa có phương thức thanh toán khả dụng được cấu hình.");
@@ -521,11 +531,10 @@ export default function ShopCheckoutPage() {
                 <div className="space-y-3">
                   {settings?.paymentCapabilities.bankTransferAvailable && (
                     <label
-                      className={`block rounded-2xl border p-4 cursor-pointer transition-all ${
-                        paymentMethod === "bank_transfer"
+                      className={`block rounded-2xl border p-4 cursor-pointer transition-all ${paymentMethod === "bank_transfer"
                           ? "border-[#C85A77] bg-[#FFF7F9] ring-1 ring-[#C85A77]"
                           : "border-[#EED5DC] hover:border-[#D46C88]"
-                      }`}
+                        }`}
                     >
                       <div className="flex items-start gap-3">
                         <input
@@ -552,11 +561,10 @@ export default function ShopCheckoutPage() {
 
                   {settings?.paymentCapabilities.payosAvailable && (
                     <label
-                      className={`block rounded-2xl border p-4 cursor-pointer transition-all ${
-                        paymentMethod === "payos"
+                      className={`block rounded-2xl border p-4 cursor-pointer transition-all ${paymentMethod === "payos"
                           ? "border-[#C85A77] bg-[#FFF7F9] ring-1 ring-[#C85A77]"
                           : "border-[#EED5DC] hover:border-[#D46C88]"
-                      }`}
+                        }`}
                     >
                       <div className="flex items-start gap-3">
                         <input
@@ -582,11 +590,10 @@ export default function ShopCheckoutPage() {
 
                   {settings?.paymentCapabilities.codAvailable && (
                     <label
-                      className={`block rounded-2xl border p-4 cursor-pointer transition-all ${
-                        paymentMethod === "cod"
+                      className={`block rounded-2xl border p-4 cursor-pointer transition-all ${paymentMethod === "cod"
                           ? "border-[#C85A77] bg-[#FFF7F9] ring-1 ring-[#C85A77]"
                           : "border-[#EED5DC] hover:border-[#D46C88]"
-                      }`}
+                        }`}
                     >
                       <div className="flex items-start gap-3">
                         <input
@@ -746,6 +753,7 @@ export default function ShopCheckoutPage() {
               <button
                 type="submit"
                 disabled={
+                  PHYSICAL_SHOP_LOCKED ||
                   submitting ||
                   !paymentMethod ||
                   codExceedsLimit ||
@@ -756,11 +764,13 @@ export default function ShopCheckoutPage() {
               >
                 <Lock className="w-4 h-4" />
                 <span>
-                  {submitting
-                    ? "Đang giữ hàng & tạo đơn..."
-                    : paymentMethod === "cod"
-                      ? "Xác nhận đặt quà (COD)"
-                      : "Tạo đơn & Chuyển tới bước thanh toán"}
+                  {PHYSICAL_SHOP_LOCKED
+                    ? PHYSICAL_SHOP_LAUNCH_LABEL
+                    : submitting
+                      ? "Đang giữ hàng & tạo đơn..."
+                      : paymentMethod === "cod"
+                        ? "Xác nhận đặt quà (COD)"
+                        : "Tạo đơn & Chuyển tới bước thanh toán"}
                 </span>
               </button>
 

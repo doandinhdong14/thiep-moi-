@@ -112,7 +112,7 @@ export default async function DashboardPage() {
             <LogoutButton />
 
             <Link
-              href="/create"
+              href="/products"
               className="inline-flex items-center gap-2 px-5 py-2 bg-rose-600 hover:bg-rose-700 text-white font-medium text-xs rounded-xl shadow-md shadow-rose-200 transition-all hover:scale-[1.02]"
             >
               <PlusCircle className="w-4 h-4" />
@@ -168,7 +168,7 @@ export default async function DashboardPage() {
                 Bạn chưa tạo thiệp nào. Hãy chọn một dịp đặc biệt để bắt đầu tạo mini website tinh tế!
               </p>
               <Link
-                href="/create"
+                href="/products"
                 className="inline-flex items-center gap-2 px-5 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-medium rounded-full shadow-sm transition-all"
               >
                 <PlusCircle className="w-4 h-4" />

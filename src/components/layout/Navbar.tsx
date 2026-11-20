@@ -168,7 +168,7 @@ export default function Navbar() {
               {user ? (
                 <div className="flex items-center gap-1 2xl:gap-1.5">
                   <Link
-                    href="/create"
+                    href="/products"
                     className="flex items-center gap-1.5 px-2.5 2xl:px-3 py-1.5 bg-gradient-to-r from-[#ff6b61] to-[#fa416a] hover:opacity-95 text-white text-xs font-semibold rounded-md shadow-sm shadow-rose-200 transition-all whitespace-nowrap"
                   >
                     <PlusCircle className="w-3.5 h-3.5" />
@@ -401,7 +401,7 @@ export default function Navbar() {
                     </Link>
                   )}
                   <Link
-                    href="/create"
+                    href="/products"
                     onClick={() => setMobileMenuOpen(false)}
                     className="block w-full text-center px-4 py-2 bg-gradient-to-r from-[#ff6b61] to-[#fa416a] text-white font-medium text-sm rounded-lg"
                   >

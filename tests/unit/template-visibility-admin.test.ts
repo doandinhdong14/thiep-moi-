@@ -5,6 +5,7 @@ import {
   getVisibleTemplates,
   getAllTemplatesOrdered,
   isTemplateVisible,
+  isTemplateLocked,
 } from "@/lib/templates/registry";
 import {
   ALL_CATALOG_PRODUCTS,
@@ -21,8 +22,11 @@ import {
   createDefaultAdminTemplatesConfig,
 } from "@/lib/templates/adminConfig";
 
-describe("User Template Visibility, Sequential Numbering (#01-#10) & Admin Notes", () => {
+describe("User Template Visibility, Sequential Numbering (#01-#13) & Admin Notes", () => {
   const expectedSlugs = [
+    "card-01-first-gift",
+    "card-02-second-gift",
+    "card-03-third-gift",
     "thiep-3",
     "thiep-4",
     "thiep-5",
@@ -46,9 +50,9 @@ describe("User Template Visibility, Sequential Numbering (#01-#10) & Admin Notes
     "love-galaxy",
   ];
 
-  it("should expose ONLY the 10 user-provided templates by default in exact #01-#10 order", () => {
+  it("should expose ONLY the 13 user-provided templates by default in exact #01-#13 order", () => {
     const visible = getVisibleTemplates();
-    expect(visible).toHaveLength(10);
+    expect(visible).toHaveLength(13);
     expect(visible.map((t) => t.slug)).toEqual(expectedSlugs);
     expect(visible.map((t) => t.numberCode)).toEqual([
       "#01",
@@ -61,12 +65,23 @@ describe("User Template Visibility, Sequential Numbering (#01-#10) & Admin Notes
       "#08",
       "#09",
       "#10",
+      "#11",
+      "#12",
+      "#13",
     ]);
 
     for (let i = 0; i < visible.length; i++) {
       expect(visible[i].displayOrder).toBe(i + 1);
       expect(visible[i].title.startsWith(`#${String(i + 1).padStart(2, "0")} · `)).toBe(true);
     }
+
+    // #01-#04 open, #05 ("thiep-4" Gửi Em Một Vũ Trụ) and #06-#13 locked
+    expect(isTemplateLocked("card-01-first-gift")).toBe(false);
+    expect(isTemplateLocked("card-02-second-gift")).toBe(false);
+    expect(isTemplateLocked("card-03-third-gift")).toBe(false);
+    expect(isTemplateLocked("thiep-3")).toBe(false);
+    expect(isTemplateLocked("thiep-4")).toBe(true);
+    expect(isTemplateLocked("thiep-5")).toBe(true);
   });
 
   it("should hide all 8 legacy platform templates by default while keeping them in TEMPLATES_REGISTRY", () => {
@@ -106,7 +121,7 @@ describe("User Template Visibility, Sequential Numbering (#01-#10) & Admin Notes
     const collections = getVisibleCollections(CATALOG_PRODUCTS);
     expect(collections.map((c) => c.slug)).toEqual(["hen-ho", "ky-niem", "valentine"]);
     const sumCounts = collections.reduce((acc, c) => acc + c.productCount, 0);
-    expect(sumCounts).toBe(10);
+    expect(sumCounts).toBe(13);
   });
 
   it("should respect Admin visibility overrides consistently across templates and catalog", () => {
@@ -127,11 +142,14 @@ describe("User Template Visibility, Sequential Numbering (#01-#10) & Admin Notes
 
   it("should provide complete pre-seeded Admin notes & ordered inventory metadata", () => {
     const allOrdered = getAllTemplatesOrdered();
-    expect(allOrdered.slice(0, 10).map((t) => t.slug)).toEqual(expectedSlugs);
+    expect(allOrdered.slice(0, 13).map((t) => t.slug)).toEqual(expectedSlugs);
 
     const defaultCfg = createDefaultAdminTemplatesConfig();
     expect(DEFAULT_GENERAL_NOTES).toContain("#01");
-    expect(DEFAULT_GENERAL_NOTES).toContain("#10");
+    expect(DEFAULT_GENERAL_NOTES).toContain("#13");
+    expect(DEFAULT_GENERAL_NOTES).toContain("card-01-first-gift");
+    expect(DEFAULT_GENERAL_NOTES).toContain("card-02-second-gift");
+    expect(DEFAULT_GENERAL_NOTES).toContain("card-03-third-gift");
     expect(DEFAULT_GENERAL_NOTES).toContain("thiep-3.html");
     expect(DEFAULT_GENERAL_NOTES).toContain("thiep-xmas.html");
 

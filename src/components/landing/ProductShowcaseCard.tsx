@@ -2,9 +2,11 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { BookOpen, Eye, PlayCircle, ShoppingCart } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { BookOpen, Eye, Loader2, Lock, Pencil, PlayCircle } from "lucide-react";
 import type { ProductItem } from "@/data/landingData";
 import { getTemplateDemoContent, TEMPLATES_REGISTRY } from "@/lib/templates/registry";
+import { createDraftEditorUrl } from "@/lib/templates/openEditor";
 import VerticalScrollPreview from "./VerticalScrollPreview";
 import styles from "./ProductShowcase.module.css";
 
@@ -114,7 +116,7 @@ export default function ProductShowcaseCard({
   index,
   onOpenDemo,
   formatVnd = DEFAULT_FORMAT_VND,
-  primaryLabel = "Mua ngay",
+  primaryLabel = "Chỉnh sửa ngay",
   primaryHref,
   onPrimaryAction,
   isCreating = false,
@@ -122,8 +124,27 @@ export default function ProductShowcaseCard({
   showPrice = true,
   subtitleText,
 }: ProductShowcaseCardProps) {
+  const router = useRouter();
+  const [openingEditor, setOpeningEditor] = useState(false);
+  const busy = isCreating || openingEditor;
+  const isLocked = Boolean(product.isLocked);
+  const lockLabel = product.launchDateLabel || "Ra mắt 24/11";
   const hasTemplateFallback = Boolean(TEMPLATES_REGISTRY[product.slug]);
   const fallbackBg = TEMPLATES_REGISTRY[product.slug]?.theme.background || "#18181b";
+
+  const handleDefaultEdit = async () => {
+    if (busy || isLocked) return;
+    setOpeningEditor(true);
+    try {
+      const editorUrl = await createDraftEditorUrl(product.slug);
+      router.push(editorUrl);
+    } catch (err) {
+      console.error("Open editor error:", err);
+      alert(err instanceof Error ? err.message : "Không thể mở trang chỉnh sửa. Vui lòng thử lại.");
+    } finally {
+      setOpeningEditor(false);
+    }
+  };
 
   const hasDiscount = Boolean(
     showPrice && product.compareAtPriceVnd && product.compareAtPriceVnd > product.priceVnd
@@ -133,7 +154,7 @@ export default function ProductShowcaseCard({
     : null;
 
   const topOverlay =
-    product.numberCode || product.category || product.badge || hasDiscount ? (
+    product.numberCode || product.category || product.badge || hasDiscount || isLocked ? (
       <div className="absolute top-0 inset-x-0 z-20 p-2 sm:p-2.5 lg:p-3 flex items-start justify-between gap-1.5 pointer-events-none">
         <div className="flex items-center gap-1 min-w-0 max-w-[70%]">
           {product.numberCode && (
@@ -148,24 +169,47 @@ export default function ProductShowcaseCard({
           )}
         </div>
 
-        {(product.badge || hasDiscount) && (
-          <div className="flex flex-col-reverse items-end sm:flex-row sm:items-center gap-1 shrink-0">
-            {product.badge && (
-              <span className="px-2 py-1 rounded-full bg-amber-400/95 text-slate-950 text-[9px] sm:text-[10.5px] font-bold leading-none shadow-xs">
-                {product.numberCode
-                  ? product.badge.replace(/^Mẫu\s*#\d+\s*·\s*/i, "")
-                  : product.badge}
-              </span>
-            )}
-            {hasDiscount && (
-              <span className="px-2 py-1 sm:px-2.5 rounded-full bg-gradient-to-r from-[#ff6b61] to-[#fa416a] text-white text-[9.5px] sm:text-[10.5px] font-bold leading-none shadow-sm">
-                -{discountPercent}%
-              </span>
-            )}
-          </div>
+        {isLocked ? (
+          <span className="inline-flex items-center gap-1 px-2 py-1 sm:px-2.5 rounded-full bg-slate-950/90 backdrop-blur-xs text-amber-300 text-[9.5px] sm:text-[10.5px] font-bold leading-none shadow-md border border-amber-300/40 shrink-0">
+            <Lock className="w-2.5 h-2.5 sm:w-3 sm:h-3 shrink-0" aria-hidden="true" />
+            <span>{lockLabel}</span>
+          </span>
+        ) : (
+          (product.badge || hasDiscount) && (
+            <div className="flex flex-col-reverse items-end sm:flex-row sm:items-center gap-1 shrink-0">
+              {product.badge && (
+                <span className="px-2 py-1 rounded-full bg-amber-400/95 text-slate-950 text-[9px] sm:text-[10.5px] font-bold leading-none shadow-xs">
+                  {product.numberCode
+                    ? product.badge.replace(/^Mẫu\s*#\d+\s*·\s*/i, "")
+                    : product.badge}
+                </span>
+              )}
+              {hasDiscount && (
+                <span className="px-2 py-1 sm:px-2.5 rounded-full bg-gradient-to-r from-[#ff6b61] to-[#fa416a] text-white text-[9.5px] sm:text-[10.5px] font-bold leading-none shadow-sm">
+                  -{discountPercent}%
+                </span>
+              )}
+            </div>
+          )
         )}
       </div>
     ) : null;
+
+  const lockCenterOverlay = isLocked ? (
+    <div
+      className="absolute inset-0 z-[15] bg-slate-950/45 backdrop-blur-[1.5px] flex items-center justify-center p-3 pointer-events-none"
+      aria-hidden="true"
+    >
+      <div className="inline-flex flex-col items-center gap-1.5 px-3.5 py-2.5 rounded-2xl bg-slate-950/85 border border-amber-300/45 text-center shadow-xl">
+        <span className="w-8 h-8 rounded-full bg-amber-400/15 border border-amber-300/40 text-amber-300 flex items-center justify-center">
+          <Lock className="w-4 h-4" />
+        </span>
+        <span className="text-[11px] sm:text-xs font-bold text-amber-200 tracking-wide">
+          {lockLabel}
+        </span>
+      </div>
+    </div>
+  ) : null;
 
   const bottomOverlay = (
     <div className="absolute inset-x-0 bottom-0 z-20 p-2 max-[359px]:p-1.5 sm:p-3 lg:p-4 flex flex-col items-center text-center">
@@ -192,52 +236,70 @@ export default function ProductShowcaseCard({
         </div>
       )}
 
-      <div className="mt-1.5 max-[359px]:mt-1 sm:mt-2.5 w-full flex flex-col items-center justify-center gap-[5px] sm:gap-[6px] md:flex-row md:gap-2">
-        {onOpenDemo ? (
+      {isLocked ? (
+        <div className="mt-1.5 max-[359px]:mt-1 sm:mt-2.5 w-full flex items-center justify-center">
           <button
             type="button"
-            onClick={() => onOpenDemo(product)}
-            aria-label={`Xem demo ${product.title}`}
-            className={`${styles.cardActionFocus} inline-flex items-center justify-center gap-1 sm:gap-1.5 h-[29px] max-[359px]:h-[26px] sm:h-[31px] lg:h-[33px] w-full max-w-[144px] md:w-auto md:max-w-none md:flex-1 px-2.5 lg:px-3 rounded-full bg-black/45 hover:bg-black/65 backdrop-blur-xs border border-white/60 text-white text-[11px] max-[359px]:text-[10px] lg:text-[12px] font-semibold whitespace-nowrap transition-colors cursor-pointer`}
+            disabled
+            aria-disabled="true"
+            className="inline-flex items-center justify-center gap-1.5 h-[30px] max-[359px]:h-[27px] sm:h-[32px] lg:h-[34px] w-full max-w-[190px] px-3 rounded-full bg-slate-950/80 backdrop-blur-xs border border-amber-300/50 text-amber-200 text-[11px] max-[359px]:text-[10px] lg:text-[12px] font-bold whitespace-nowrap shadow-md cursor-not-allowed"
           >
-            <Eye className="w-3 h-3 lg:w-3.5 lg:h-3.5 shrink-0" aria-hidden="true" />
-            <span>Xem demo</span>
+            <Lock className="w-3 h-3 lg:w-3.5 lg:h-3.5 shrink-0" aria-hidden="true" />
+            <span>{lockLabel}</span>
           </button>
-        ) : (
-          <Link
-            href={product.demoUrl || `/templates/${product.slug}`}
-            aria-label={`Xem demo ${product.title}`}
-            className={`${styles.cardActionFocus} inline-flex items-center justify-center gap-1 sm:gap-1.5 h-[29px] max-[359px]:h-[26px] sm:h-[31px] lg:h-[33px] w-full max-w-[144px] md:w-auto md:max-w-none md:flex-1 px-2.5 lg:px-3 rounded-full bg-black/45 hover:bg-black/65 backdrop-blur-xs border border-white/60 text-white text-[11px] max-[359px]:text-[10px] lg:text-[12px] font-semibold whitespace-nowrap transition-colors`}
-          >
-            <Eye className="w-3 h-3 lg:w-3.5 lg:h-3.5 shrink-0" aria-hidden="true" />
-            <span>Xem demo</span>
-          </Link>
-        )}
+        </div>
+      ) : (
+        <div className="mt-1.5 max-[359px]:mt-1 sm:mt-2.5 w-full flex flex-col items-center justify-center gap-[5px] sm:gap-[6px] md:flex-row md:gap-2">
+          {onOpenDemo ? (
+            <button
+              type="button"
+              onClick={() => onOpenDemo(product)}
+              aria-label={`Xem demo ${product.title}`}
+              className={`${styles.cardActionFocus} inline-flex items-center justify-center gap-1 sm:gap-1.5 h-[29px] max-[359px]:h-[26px] sm:h-[31px] lg:h-[33px] w-full max-w-[144px] md:w-auto md:max-w-none md:flex-1 px-2.5 lg:px-3 rounded-full bg-black/45 hover:bg-black/65 backdrop-blur-xs border border-white/60 text-white text-[11px] max-[359px]:text-[10px] lg:text-[12px] font-semibold whitespace-nowrap transition-colors cursor-pointer`}
+            >
+              <Eye className="w-3 h-3 lg:w-3.5 lg:h-3.5 shrink-0" aria-hidden="true" />
+              <span>Xem demo</span>
+            </button>
+          ) : (
+            <Link
+              href={product.demoUrl || `/templates/${product.slug}`}
+              aria-label={`Xem demo ${product.title}`}
+              className={`${styles.cardActionFocus} inline-flex items-center justify-center gap-1 sm:gap-1.5 h-[29px] max-[359px]:h-[26px] sm:h-[31px] lg:h-[33px] w-full max-w-[144px] md:w-auto md:max-w-none md:flex-1 px-2.5 lg:px-3 rounded-full bg-black/45 hover:bg-black/65 backdrop-blur-xs border border-white/60 text-white text-[11px] max-[359px]:text-[10px] lg:text-[12px] font-semibold whitespace-nowrap transition-colors`}
+            >
+              <Eye className="w-3 h-3 lg:w-3.5 lg:h-3.5 shrink-0" aria-hidden="true" />
+              <span>Xem demo</span>
+            </Link>
+          )}
 
-        {onPrimaryAction ? (
-          <button
-            type="button"
-            disabled={isCreating}
-            onClick={() => onPrimaryAction(product)}
-            aria-label={`${primaryLabel} ${product.title}`}
-            className={`${styles.cardActionFocus} inline-flex items-center justify-center gap-1 sm:gap-1.5 h-[29px] max-[359px]:h-[26px] sm:h-[31px] lg:h-[33px] w-full max-w-[144px] md:w-auto md:max-w-none md:flex-1 px-2.5 lg:px-3 rounded-full bg-gradient-to-r from-[#ff6b61] to-[#fa416a] hover:opacity-95 disabled:opacity-65 text-white text-[11px] max-[359px]:text-[10px] lg:text-[12px] font-semibold whitespace-nowrap shadow-[0_4px_12px_rgba(250,65,106,0.38)] transition-opacity cursor-pointer`}
-          >
-            <ShoppingCart className="w-3 h-3 lg:w-3.5 lg:h-3.5 shrink-0" aria-hidden="true" />
-            <span>{isCreating ? "Đang tạo..." : primaryLabel}</span>
-          </button>
-        ) : (
-          <Link
-            href={primaryHref || `/create?template=${product.slug}`}
-            aria-label={`${primaryLabel} ${product.title}`}
-            className={`${styles.cardActionFocus} inline-flex items-center justify-center gap-1 sm:gap-1.5 h-[29px] max-[359px]:h-[26px] sm:h-[31px] lg:h-[33px] w-full max-w-[144px] md:w-auto md:max-w-none md:flex-1 px-2.5 lg:px-3 rounded-full bg-gradient-to-r from-[#ff6b61] to-[#fa416a] hover:opacity-95 text-white text-[11px] max-[359px]:text-[10px] lg:text-[12px] font-semibold whitespace-nowrap shadow-[0_4px_12px_rgba(250,65,106,0.38)] transition-opacity`}
-          >
-            <ShoppingCart className="w-3 h-3 lg:w-3.5 lg:h-3.5 shrink-0" aria-hidden="true" />
-            <span>{primaryLabel}</span>
-          </Link>
-        )}
-      </div>
+          {primaryHref && !onPrimaryAction ? (
+            <Link
+              href={primaryHref}
+              aria-label={`${primaryLabel} ${product.title}`}
+              className={`${styles.cardActionFocus} inline-flex items-center justify-center gap-1 sm:gap-1.5 h-[29px] max-[359px]:h-[26px] sm:h-[31px] lg:h-[33px] w-full max-w-[144px] md:w-auto md:max-w-none md:flex-1 px-2.5 lg:px-3 rounded-full bg-gradient-to-r from-[#ff6b61] to-[#fa416a] hover:opacity-95 text-white text-[11px] max-[359px]:text-[10px] lg:text-[12px] font-semibold whitespace-nowrap shadow-[0_4px_12px_rgba(250,65,106,0.38)] transition-opacity`}
+            >
+              <Pencil className="w-3 h-3 lg:w-3.5 lg:h-3.5 shrink-0" aria-hidden="true" />
+              <span>{primaryLabel}</span>
+            </Link>
+          ) : (
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => (onPrimaryAction ? onPrimaryAction(product) : handleDefaultEdit())}
+              aria-label={`${primaryLabel} ${product.title}`}
+              className={`${styles.cardActionFocus} inline-flex items-center justify-center gap-1 sm:gap-1.5 h-[29px] max-[359px]:h-[26px] sm:h-[31px] lg:h-[33px] w-full max-w-[144px] md:w-auto md:max-w-none md:flex-1 px-2.5 lg:px-3 rounded-full bg-gradient-to-r from-[#ff6b61] to-[#fa416a] hover:opacity-95 disabled:opacity-65 text-white text-[11px] max-[359px]:text-[10px] lg:text-[12px] font-semibold whitespace-nowrap shadow-[0_4px_12px_rgba(250,65,106,0.38)] transition-opacity cursor-pointer`}
+            >
+              {busy ? (
+                <Loader2 className="w-3 h-3 lg:w-3.5 lg:h-3.5 shrink-0 animate-spin" aria-hidden="true" />
+              ) : (
+                <Pencil className="w-3 h-3 lg:w-3.5 lg:h-3.5 shrink-0" aria-hidden="true" />
+              )}
+              <span>{busy ? "Đang mở..." : primaryLabel}</span>
+            </button>
+          )}
+        </div>
+      )}
 
-      {showGuideLinks && (
+      {showGuideLinks && !isLocked && (
         <div className="mt-1 sm:mt-2 flex items-center justify-center gap-2 max-[359px]:gap-1.5 sm:gap-3 text-[10px] max-[359px]:text-[9.5px] sm:text-[11px] text-white/85">
           <Link
             href={product.guideUrl || "/occasions"}
@@ -281,6 +343,7 @@ export default function ProductShowcaseCard({
         <IsolatedTemplateFallback slug={product.slug} fallbackCoverUrl={product.coverUrl} />
       )}
       topOverlay={topOverlay}
+      centerOverlay={lockCenterOverlay}
       bottomOverlay={bottomOverlay}
     />
   );
