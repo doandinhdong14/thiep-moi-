@@ -3,8 +3,9 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback, Suspense } from "react";
 import { Canvas, useThree } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
-import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import { RotateCcw, Volume2, VolumeX, Sparkles, Compass, Play, Pause } from "lucide-react";
+
+type OrbitControlsImpl = React.ElementRef<typeof OrbitControls>;
 import type { InvitationContent } from "@/lib/templates/schema";
 import { BouquetScene } from "./bouquet/Scene";
 import { BouquetOverlay } from "./bouquet/Overlay";
