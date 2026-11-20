@@ -21,7 +21,7 @@ const lora = Lora({
 export const metadata: Metadata = {
   title: "Ding Dong Gift — Nền tảng tạo thiệp / Mini Website / QR Card tinh tế",
   description:
-    "Tạo mini website thiệp mời đám cưới, sinh nhật, tốt nghiệp, tỏ tình tương tác và kết hợp thẻ QR vật lý, hoa quà tặng trong vài phút.",
+    "Tạo mini website thiệp mời kỷ niệm, sinh nhật, tốt nghiệp, tỏ tình tương tác và kết hợp thẻ QR vật lý, hoa quà tặng trong vài phút.",
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any" },

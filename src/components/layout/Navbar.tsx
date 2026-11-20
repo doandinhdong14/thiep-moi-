@@ -96,7 +96,7 @@ export default function Navbar() {
   const navLinks = [
     { label: "Trang chủ", href: "/", icon: Home, active: pathname === "/" },
     { label: "Sản phẩm", href: "/products", icon: LayoutGrid, active: pathname === "/products" },
-    { label: "Bộ sưu tập", href: "/collections", icon: Sparkles, active: pathname.startsWith("/collections") || pathname.startsWith("/templates") },
+    { label: "Bộ sưu tập", href: "/collections", icon: Sparkles, active: pathname.startsWith("/collections") },
     { label: "Cửa hàng quà", href: "/qua-tang", icon: ShoppingBag, active: pathname.startsWith("/qua-tang") },
     { label: "Đối tác", href: "/partners", icon: Handshake, active: pathname.startsWith("/partners") || pathname.startsWith("/affiliate") },
   ];

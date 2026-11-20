@@ -1016,7 +1016,7 @@ export const VOUCHER_CAMPAIGN: VoucherCampaign = {
     ],
   },
   videoCaption: "Thiệp mời online siêu xịn sò cho ngày trọng đại! Mở phong bì tương tác cực mượt tại Ding Dong Gift ✨",
-  hashtags: ["#DingDongGift", "#ThiepMoiOnline", "#ThiepCuoi2026", "#MiniWebsite", "#QRCodeThiep"],
+  hashtags: ["#DingDongGift", "#ThiepMoiOnline", "#Thiep3D", "#MiniWebsite", "#QRCodeThiep"],
   redemptionSteps: [
     "Bước 1: Hoàn thành nhiệm vụ video hoặc đơn hàng đầu tiên.",
     "Bước 2: Gửi link bài viết hoặc hình ảnh chụp màn hình qua kênh hỗ trợ Zalo/Fanpage.",

@@ -92,11 +92,11 @@ export default function TemplateDemoPage({
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <Link
-              href="/templates"
+              href="/products"
               className="text-xs font-semibold text-slate-300 hover:text-white flex items-center gap-1 transition-colors"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Tất cả mẫu</span>
+              <span>Tất cả sản phẩm</span>
             </Link>
             <div className="h-4 w-px bg-slate-700" />
             <div className="flex items-center gap-2">

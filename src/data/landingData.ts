@@ -102,19 +102,9 @@ export const heroSlides: HeroSlide[] = [
     posterUrl: "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&w=1920&q=80",
     title: "TẠO THIỆP MỜI & MINI WEBSITE",
     tagline: "Cho Mọi Khoảnh Khắc Hạnh Phúc & Ý Nghĩa",
-    description: "Tạo thiệp cưới, sinh nhật, kỷ niệm và tỏ tình với hiệu ứng mở phong bì tương tác, bản đồ chỉ đường, đếm ngược và RSVP trực tuyến.",
+    description: "Tạo thiệp kỷ niệm, sinh nhật, hẹn hò và tỏ tình với hiệu ứng 3D tương tác, bản đồ chỉ đường, đếm ngược và RSVP trực tuyến.",
     ctaLabel: "TẠO NGAY",
     ctaHref: "/products",
-  },
-  {
-    id: "slide-2",
-    imageUrl: "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1920&q=80",
-    posterUrl: "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1920&q=80",
-    title: "BỘ SƯU TẬP THIỆP CƯỚI 2026",
-    tagline: "Trang Trọng - Tinh Tế - Hiện Đại",
-    description: "Lưu giữ câu chuyện tình yêu, nhận lời chúc phúc và theo dõi khách mời thông minh ngay trên điện thoại.",
-    ctaLabel: "XEM MẪU THIỆP",
-    ctaHref: "/templates",
   },
   {
     id: "slide-3",
@@ -356,18 +346,18 @@ export const trustBenefits: TrustBenefitItem[] = [
 
 export const trustCollageImages = [
   {
-    url: "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80",
-    alt: "Cặp đôi hạnh phúc trong ngày cưới",
+    url: "https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=800&q=80",
+    alt: "Khoảnh khắc gửi trao thiệp chúc mừng ý nghĩa",
     className: "w-[260px] h-[340px] sm:w-[280px] sm:h-[370px] rounded-[16px] shadow-2xl object-cover -rotate-3 border-4 border-white transition-transform hover:rotate-0 duration-300",
   },
   {
     url: "https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&w=800&q=80",
-    alt: "Lời hẹn ước chân thành",
+    alt: "Kỷ niệm ngọt ngào bên nhau",
     className: "w-[240px] h-[300px] sm:w-[260px] sm:h-[330px] rounded-[16px] shadow-2xl object-cover rotate-4 border-4 border-white -mt-16 sm:-mt-20 ml-auto transition-transform hover:rotate-0 duration-300",
   },
   {
-    url: "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=800&q=80",
-    alt: "Khoảnh khắc trao nhẫn ngọt ngào",
+    url: "https://images.unsplash.com/photo-1513151233558-d860c5398176?auto=format&fit=crop&w=800&q=80",
+    alt: "Tiệc kỷ niệm và lời chúc ấm áp",
     className: "w-[220px] h-[220px] sm:w-[240px] sm:h-[240px] rounded-[16px] shadow-2xl object-cover -rotate-6 border-4 border-white -mt-24 sm:-mt-28 ml-10 transition-transform hover:rotate-0 duration-300",
   },
 ];
@@ -391,10 +381,10 @@ export const communityIdeasSample: CommunityIdeaItem[] = [
   },
   {
     id: "idea-3",
-    title: "Mã QR mừng cưới thông minh hiển thị số tiền gợi ý và lời chúc tự động",
+    title: "Mã QR thiệp chúc mừng thông minh kèm ảnh kỷ niệm và nhạc nền tự chọn",
     author: "thanhnga***@gmail.com",
     votes: 215,
-    category: "Thanh toán",
+    category: "Tương tác",
     createdAt: "3 ngày trước",
   },
   {
@@ -411,12 +401,12 @@ export const faqList: FaqItem[] = [
   {
     id: "faq-1",
     question: "Ding Dong Gift là gì?",
-    answer: "Ding Dong Gift là nền tảng trực tuyến giúp bạn tự tay thiết kế và xuất bản thiệp mời thông minh, mini website tương tác cho các dịp như đám cưới, sinh nhật, thôi nôi, lễ tốt nghiệp hoặc tỏ tình lãng mạn. Bạn có thể gửi thiệp qua đường dẫn cá nhân hóa, mã QR in thiệp, hoặc xuất ảnh/PDF chất lượng cao.",
+    answer: "Ding Dong Gift là nền tảng trực tuyến giúp bạn tự tay thiết kế và xuất bản thiệp mời thông minh, mini website tương tác cho các dịp như kỷ niệm, hẹn hò, sinh nhật, lễ tốt nghiệp hoặc tỏ tình lãng mạn. Bạn có thể gửi thiệp qua đường dẫn cá nhân hóa, mã QR in thiệp, hoặc xuất ảnh/PDF chất lượng cao.",
   },
   {
     id: "faq-2",
     question: "Tôi phải trả bao nhiêu tiền để tạo một món quà / thiệp?",
-    answer: "Bạn có thể bắt đầu tạo và trải nghiệm hoàn toàn miễn phí. Với các mẫu thiệp cơ bản, bạn có thể xuất bản với chi phí chỉ từ 39.000 – 49.000 VNĐ cho thời hạn lưu trữ lâu dài, không giới hạn lượt xem và lượt gửi.",
+    answer: "Hiện 4 mẫu thiệp đầu tiên (#01 – #04) được giảm giá 100% từ 50.000đ xuống Miễn phí để bạn tạo và chia sẻ ngay. Các mẫu mở rộng khác có chi phí chỉ từ 30.000 – 50.000 VNĐ cho thời hạn lưu trữ lâu dài, không giới hạn lượt xem.",
   },
   {
     id: "faq-3",
