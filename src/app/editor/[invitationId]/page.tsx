@@ -106,6 +106,7 @@ function EditorContent({ invitationId }: { invitationId: string }) {
     type: "image_credits" | "audio_credits";
   }>({ open: false, type: "image_credits" });
   const [isFreeUnlockOpen, setIsFreeUnlockOpen] = useState(false);
+  const [freeUnlocking, setFreeUnlocking] = useState(false);
   const [isRenewalOpen, setIsRenewalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isBannerDismissed, setIsBannerDismissed] = useState(false);
@@ -331,10 +332,12 @@ function EditorContent({ invitationId }: { invitationId: string }) {
     const isCard03Tpl = invitationMeta?.templateSlug === "card-03-third-gift";
     const isMultiStageTpl = isCard01Tpl || isCard02Tpl || isCard03Tpl;
     const isCardUnlocked = invitationMeta?.status === "PUBLISHED";
+    const activeCatalog = findCatalogProductBySlug(invitationMeta?.templateSlug);
+    const isFreeTemplate = !activeCatalog || activeCatalog.price === 0;
 
-    // Quota check: allow cover + up to 8 gallery images seamlessly (or up to 12 synced photos for Card 01/02 or unlocked cards)
-    const freeGalleryLimit = isMultiStageTpl || isCardUnlocked ? 12 : 8;
-    if (!isCover && creditBalance.imageUploads <= 0 && content.galleryUrls.length >= freeGalleryLimit) {
+    // Quota check: free templates allow uploading directly without credit payment prompts
+    const freeGalleryLimit = isMultiStageTpl || isCardUnlocked || isFreeTemplate ? 12 : 8;
+    if (!isCover && !isFreeTemplate && creditBalance.imageUploads <= 0 && content.galleryUrls.length >= freeGalleryLimit) {
       setBuyCreditsModal({ open: true, type: "image_credits" });
       return;
     }
@@ -438,6 +441,42 @@ function EditorContent({ invitationId }: { invitationId: string }) {
     navigator.clipboard.writeText(canonicalUrl);
     setCopiedLink(true);
     setTimeout(() => setCopiedLink(false), 2000);
+  };
+
+  // Direct 1-click free unlock for free templates (no payment/checkout flow)
+  const handleDirectFreeUnlock = async () => {
+    if (!content || freeUnlocking) return;
+    setFreeUnlocking(true);
+    try {
+      if (autosaveTimerRef.current) {
+        clearTimeout(autosaveTimerRef.current);
+        autosaveTimerRef.current = null;
+      }
+      await saveDraft(content);
+      const res = await fetch(`/api/v1/invitations/${invitationId}/unlock`, {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data?.error?.message || "Không thể mở khóa thiệp.");
+      }
+      setInvitationMeta((prev) =>
+        prev
+          ? {
+              ...prev,
+              status: "PUBLISHED",
+              expiresAt: data.data?.expiresAt || prev.expiresAt,
+              shareLink: data.data?.shortCode || prev.shareLink,
+            }
+          : null
+      );
+      setToastNotification("Mở khóa thành công! Món quà đã sẵn sàng.");
+      handleStepChange("finish");
+    } catch (err: any) {
+      alert(err?.message || "Đã xảy ra lỗi khi mở khóa.");
+    } finally {
+      setFreeUnlocking(false);
+    }
   };
 
   // Create new draft
@@ -584,14 +623,16 @@ function EditorContent({ invitationId }: { invitationId: string }) {
         <div className="flex items-center gap-2 shrink-0">
           {isUnlocked ? (
             <>
-              <button
-                type="button"
-                onClick={() => setIsRenewalOpen(true)}
-                className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-semibold transition"
-              >
-                <Clock className="w-3.5 h-3.5 text-indigo-600" />
-                <span>Gia hạn / Nâng cấp</span>
-              </button>
+              {!isFreeProduct && (
+                <button
+                  type="button"
+                  onClick={() => setIsRenewalOpen(true)}
+                  className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-semibold transition"
+                >
+                  <Clock className="w-3.5 h-3.5 text-indigo-600" />
+                  <span>Gia hạn / Nâng cấp</span>
+                </button>
+              )}
 
               <button
                 type="button"
@@ -615,17 +656,28 @@ function EditorContent({ invitationId }: { invitationId: string }) {
           ) : (
             <button
               type="button"
+              disabled={freeUnlocking}
               onClick={() => {
                 if (isFreeProduct) {
-                  setIsFreeUnlockOpen(true);
+                  handleDirectFreeUnlock();
                 } else {
                   handleStepChange("finish");
                 }
               }}
-              className="px-4 py-1.5 rounded-xl bg-gradient-to-r from-rose-600 to-[#e93459] hover:opacity-95 text-white font-bold text-xs shadow-md shadow-rose-200 transition flex items-center gap-1.5"
+              className="px-4 py-1.5 rounded-xl bg-gradient-to-r from-rose-600 to-[#e93459] hover:opacity-95 disabled:opacity-65 text-white font-bold text-xs shadow-md shadow-rose-200 transition flex items-center gap-1.5"
             >
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>{isFreeProduct ? "Mở khóa miễn phí" : "Hoàn tất & Mua"}</span>
+              {freeUnlocking ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <Sparkles className="w-3.5 h-3.5" />
+              )}
+              <span>
+                {isFreeProduct
+                  ? freeUnlocking
+                    ? "Đang mở khóa..."
+                    : "Mở khóa miễn phí"
+                  : "Hoàn tất & Mua"}
+              </span>
             </button>
           )}
         </div>
@@ -1594,33 +1646,35 @@ function EditorContent({ invitationId }: { invitationId: string }) {
                   </p>
                 </div>
 
-                {/* Quota Card */}
-                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2.5 rounded-2xl bg-rose-100 text-rose-600">
-                      <Upload className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <div className="text-xs font-bold text-slate-900 flex items-center gap-2">
-                        <span>Lượt tải ảnh:</span>
-                        <span className="px-2 py-0.5 rounded-full bg-rose-50 text-rose-600 border border-rose-200 font-mono">
-                          {creditBalance.imageUploads} lượt
-                        </span>
+                {/* Quota Card (hidden for free products so users have zero payment friction) */}
+                {!isFreeProduct && (
+                  <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2.5 rounded-2xl bg-rose-100 text-rose-600">
+                        <Upload className="w-5 h-5" />
                       </div>
-                      <p className="text-[11px] text-slate-400 mt-0.5">
-                        Mỗi ảnh tải lên thành công sử dụng 1 lượt
-                      </p>
+                      <div>
+                        <div className="text-xs font-bold text-slate-900 flex items-center gap-2">
+                          <span>Lượt tải ảnh:</span>
+                          <span className="px-2 py-0.5 rounded-full bg-rose-50 text-rose-600 border border-rose-200 font-mono">
+                            {creditBalance.imageUploads} lượt
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-slate-400 mt-0.5">
+                          Mỗi ảnh tải lên thành công sử dụng 1 lượt
+                        </p>
+                      </div>
                     </div>
-                  </div>
 
-                  <button
-                    type="button"
-                    onClick={() => setBuyCreditsModal({ open: true, type: "image_credits" })}
-                    className="px-3.5 py-2 rounded-xl bg-white border border-rose-300 hover:bg-rose-50 text-rose-600 font-bold text-xs shadow-xs transition"
-                  >
-                    Mua lượt tải ảnh
-                  </button>
-                </div>
+                    <button
+                      type="button"
+                      onClick={() => setBuyCreditsModal({ open: true, type: "image_credits" })}
+                      className="px-3.5 py-2 rounded-xl bg-white border border-rose-300 hover:bg-rose-50 text-rose-600 font-bold text-xs shadow-xs transition"
+                    >
+                      Mua lượt tải ảnh
+                    </button>
+                  </div>
+                )}
 
                 {/* Cover Image */}
                 <div className="space-y-2">
@@ -1838,33 +1892,35 @@ function EditorContent({ invitationId }: { invitationId: string }) {
                   </div>
                 )}
 
-                {/* Quota Card */}
-                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2.5 rounded-2xl bg-indigo-100 text-indigo-600">
-                      <Music className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <div className="text-xs font-bold text-slate-900 flex items-center gap-2">
-                        <span>Lượt tải nhạc:</span>
-                        <span className="px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 font-mono">
-                          {creditBalance.audioUploads} lượt
-                        </span>
+                {/* Quota Card (hidden for free products) */}
+                {!isFreeProduct && (
+                  <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2.5 rounded-2xl bg-indigo-100 text-indigo-600">
+                        <Music className="w-5 h-5" />
                       </div>
-                      <p className="text-[11px] text-slate-400 mt-0.5">
-                        Tải lên bài hát riêng cho món quà
-                      </p>
+                      <div>
+                        <div className="text-xs font-bold text-slate-900 flex items-center gap-2">
+                          <span>Lượt tải nhạc:</span>
+                          <span className="px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 font-mono">
+                            {creditBalance.audioUploads} lượt
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-slate-400 mt-0.5">
+                          Tải lên bài hát riêng cho món quà
+                        </p>
+                      </div>
                     </div>
-                  </div>
 
-                  <button
-                    type="button"
-                    onClick={() => setBuyCreditsModal({ open: true, type: "audio_credits" })}
-                    className="px-3.5 py-2 rounded-xl bg-white border border-indigo-300 hover:bg-indigo-50 text-indigo-700 font-bold text-xs shadow-xs transition"
-                  >
-                    Mua lượt tải nhạc
-                  </button>
-                </div>
+                    <button
+                      type="button"
+                      onClick={() => setBuyCreditsModal({ open: true, type: "audio_credits" })}
+                      className="px-3.5 py-2 rounded-xl bg-white border border-indigo-300 hover:bg-indigo-50 text-indigo-700 font-bold text-xs shadow-xs transition"
+                    >
+                      Mua lượt tải nhạc
+                    </button>
+                  </div>
+                )}
 
                 {/* Built-in Ready-to-use Music Presets & Direct URL */}
                 <div className="space-y-2.5">
@@ -2049,9 +2105,16 @@ function EditorContent({ invitationId }: { invitationId: string }) {
                       <span className="font-semibold text-emerald-600">1 tháng (30 ngày)</span>
                     </div>
                     <div className="pt-2 border-t border-slate-200 flex justify-between font-bold text-sm">
-                      <span>Tổng thanh toán:</span>
-                      <span className="text-emerald-600 font-mono">
-                        {isFreeProduct ? "0đ (Miễn phí)" : `${catalogItem?.price.toLocaleString("vi-VN")}đ`}
+                      <span>{isFreeProduct ? "Chi phí:" : "Tổng thanh toán:"}</span>
+                      <span className="text-emerald-600 font-mono flex items-center gap-1.5">
+                        {isFreeProduct && catalogItem?.compareAtPrice && catalogItem.compareAtPrice > 0 && (
+                          <span className="text-xs text-slate-400 line-through font-normal">
+                            {catalogItem.compareAtPrice.toLocaleString("vi-VN")}đ
+                          </span>
+                        )}
+                        <span>
+                          {isFreeProduct ? "Miễn phí (0đ)" : `${catalogItem?.price.toLocaleString("vi-VN")}đ`}
+                        </span>
                       </span>
                     </div>
                   </div>
@@ -2075,37 +2138,49 @@ function EditorContent({ invitationId }: { invitationId: string }) {
                   {/* Unlock Button */}
                   <button
                     type="button"
+                    disabled={freeUnlocking}
                     onClick={async () => {
+                      if (isFreeProduct) {
+                        await handleDirectFreeUnlock();
+                        return;
+                      }
+
                       if (autosaveTimerRef.current) {
                         clearTimeout(autosaveTimerRef.current);
                         autosaveTimerRef.current = null;
                       }
                       await saveDraft(content);
 
-                      if (isFreeProduct) {
-                        setIsFreeUnlockOpen(true);
-                      } else {
-                        // Create paid order
-                        fetch("/api/v1/orders", {
-                          method: "POST",
-                          headers: { "Content-Type": "application/json" },
-                          body: JSON.stringify({
-                            purpose: "gift_unlock",
-                            giftId: invitationMeta.id,
-                            returnContext: { giftId: invitationMeta.id, step: "finish" },
-                          }),
-                        })
-                          .then((r) => r.json())
-                          .then((d) => {
-                            if (d.data?.order?.id) router.push(`/checkout/${d.data.order.id}`);
-                          });
-                      }
+                      // Create paid order
+                      fetch("/api/v1/orders", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                          purpose: "gift_unlock",
+                          giftId: invitationMeta.id,
+                          returnContext: { giftId: invitationMeta.id, step: "finish" },
+                        }),
+                      })
+                        .then((r) => r.json())
+                        .then((d) => {
+                          if (d.data?.order?.id) router.push(`/checkout/${d.data.order.id}`);
+                        });
                     }}
                     data-testid="unlock-gift-cta"
-                    className="w-full max-w-sm mx-auto py-4 px-6 rounded-2xl bg-gradient-to-r from-rose-600 to-[#e93459] hover:opacity-95 text-white font-bold text-sm shadow-xl shadow-rose-200 transition flex items-center justify-center gap-2"
+                    className="w-full max-w-sm mx-auto py-4 px-6 rounded-2xl bg-gradient-to-r from-rose-600 to-[#e93459] hover:opacity-95 disabled:opacity-65 text-white font-bold text-sm shadow-xl shadow-rose-200 transition flex items-center justify-center gap-2"
                   >
-                    <Sparkles className="w-5 h-5" />
-                    <span>{isFreeProduct ? "Mở khóa miễn phí" : "Hoàn tất & Thanh toán"}</span>
+                    {freeUnlocking ? (
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                    ) : (
+                      <Sparkles className="w-5 h-5" />
+                    )}
+                    <span>
+                      {isFreeProduct
+                        ? freeUnlocking
+                          ? "Đang mở khóa..."
+                          : "Mở khóa miễn phí"
+                        : "Hoàn tất & Thanh toán"}
+                    </span>
                   </button>
                 </div>
               ) : (
@@ -2189,8 +2264,8 @@ function EditorContent({ invitationId }: { invitationId: string }) {
                     />
                   </div>
 
-                  {/* Tip Block */}
-                  <TipCard giftId={invitationMeta.id} />
+                  {/* Tip Block (hidden for free products) */}
+                  {!isFreeProduct && <TipCard giftId={invitationMeta.id} />}
                 </div>
               )}
             </div>

@@ -52,7 +52,6 @@ export default function CheckoutOrderPage() {
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [simulating, setSimulating] = useState(false);
   const [redirectCountdown, setRedirectCountdown] = useState<number | null>(null);
 
   const pollTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -245,25 +244,6 @@ export default function CheckoutOrderPage() {
     }
   };
 
-  const handleSimulatePayment = async () => {
-    setSimulating(true);
-    setError(null);
-    try {
-      const res = await fetch(`/api/v1/orders/${orderId}/simulate-payment`, {
-        method: "POST",
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error?.message || "Không thể thực hiện thanh toán thử nghiệm.");
-      }
-      await loadOrder(true);
-    } catch (err: any) {
-      setError(err.message || "Đã xảy ra lỗi.");
-    } finally {
-      setSimulating(false);
-    }
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-3 bg-gradient-to-b from-rose-50/40 via-white to-slate-50">
@@ -447,7 +427,7 @@ export default function CheckoutOrderPage() {
               <div className="p-3 rounded-2xl bg-amber-50/80 border border-amber-200/80 text-amber-900 text-xs flex items-start gap-2">
                 <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                 <span>
-                  Cổng đối soát tự động PayOS chưa được cấu hình trên môi trường này. Chuyển khoản xong hãy bấm nút xác nhận bên dưới (hoặc dùng nút Sandbox Test nếu đang thử nghiệm).
+                  Cổng đối soát tự động PayOS chưa được cấu hình trên môi trường này. Chuyển khoản xong hãy bấm nút xác nhận bên dưới để gửi đối soát.
                 </span>
               </div>
             )}
@@ -615,23 +595,6 @@ export default function CheckoutOrderPage() {
                 <div className="p-4 bg-slate-100 rounded-2xl text-center text-xs text-slate-600">
                   Đã ghi nhận thông báo chuyển khoản. Trang này sẽ tự động cập nhật ngay khi giao dịch được xác nhận.
                 </div>
-              )}
-
-              {order.allowSandboxSimulation && (
-                <button
-                  type="button"
-                  onClick={handleSimulatePayment}
-                  disabled={simulating}
-                  data-testid="simulate-payment-btn"
-                  className="w-full py-2.5 px-4 rounded-xl border border-dashed border-indigo-300 bg-indigo-50/50 hover:bg-indigo-100/70 text-indigo-700 font-semibold text-xs transition flex items-center justify-center gap-1.5"
-                >
-                  {simulating ? (
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  ) : (
-                    <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
-                  )}
-                  <span>Mô phỏng thanh toán thành công (Sandbox Test)</span>
-                </button>
               )}
             </div>
           </div>

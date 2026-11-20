@@ -81,7 +81,8 @@ export const DEFAULT_GENERAL_NOTES = [
   "",
   "3. CÁ NHÂN HÓA ẢNH, NHẠC & TRẢ THIỆP SAU THANH TOÁN:",
   "   - Ảnh upload & nhạc người dùng tự tải lên được lưu bền vững trong CSDL (SystemSetting key asset_blob:*) và phát nhạc chuẩn HTTP Range streaming.",
-  "   - Sau khi thanh toán chuyển khoản (2.000đ): khách nhận ngay Link chia sẻ (/i/[slug] kèm nút Sao chép), Bộ tạo Mã QR đủ 16 khung trang trí, và toàn quyền chỉnh sửa chữ, ảnh, nhạc nền (không chỉnh sửa/thêm hiệu ứng có sẵn).",
+  "   - 4 mẫu đang mở (#01–#04) được giảm giá từ 50.000đ xuống Miễn phí (0đ) để dùng trực tiếp không cần thanh toán; các mẫu còn lại có giá từ 30.000đ–50.000đ.",
+  "   - Khách nhận ngay Link chia sẻ (/i/[slug] kèm nút Sao chép), Bộ tạo Mã QR đủ 16 khung trang trí, và toàn quyền chỉnh sửa chữ, ảnh, nhạc nền (không chỉnh sửa/thêm hiệu ứng có sẵn).",
   "   - Trang thiệp người nhận (/i/[slug]) sạch 100%: KHÔNG quảng cáo, KHÔNG hiển thị bất kỳ logo, liên kết hay thương hiệu Ding Dong Gift nào.",
 ].join("\n");
 

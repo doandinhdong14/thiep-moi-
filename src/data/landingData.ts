@@ -1,6 +1,7 @@
 import {
   CATALOG_PRODUCTS,
   CatalogProduct,
+  findCatalogProductBySlug,
   resolveTemplatePreviewImage,
   TEST_PRODUCT_PRICE_VND,
 } from "./catalogData";
@@ -160,13 +161,15 @@ export function catalogProductToProductItem(item: CatalogProduct): ProductItem {
 }
 
 export function templateMetaToProductItem(tpl: TemplateMeta): ProductItem {
+  const catalog = findCatalogProductBySlug(tpl.slug);
   return {
     id: `tpl-${tpl.slug}`,
     slug: tpl.slug,
     title: tpl.title,
     coverUrl: "",
     previewImage: resolveTemplatePreviewImage(tpl.slug),
-    priceVnd: TEST_PRODUCT_PRICE_VND,
+    priceVnd: catalog ? catalog.price : TEST_PRODUCT_PRICE_VND,
+    compareAtPriceVnd: catalog?.compareAtPrice,
     demoUrl: `/templates/${tpl.slug}`,
     category: tpl.occasionTitle,
     badge: tpl.isPremium ? "PREMIUM" : tpl.badge,
@@ -284,10 +287,7 @@ const CORE_LANDING_PRODUCTS: ProductItem[] = [
   },
 ];
 
-export const productList: ProductItem[] = CATALOG_PRODUCTS.map((item) => ({
-  ...catalogProductToProductItem(item),
-  priceVnd: TEST_PRODUCT_PRICE_VND,
-}));
+export const productList: ProductItem[] = CATALOG_PRODUCTS.map(catalogProductToProductItem);
 
 export const topicChips: { label: string; href: string }[] = [
   { label: "#01 Thiệp đầu tiên 3D", href: "/templates/card-01-first-gift" },

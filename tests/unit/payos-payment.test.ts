@@ -6,7 +6,11 @@ import {
   processPayOSWebhookPayload,
 } from "@/lib/payments/payos";
 import { buildVietQrPayload, resolveVietQRBank } from "@/lib/payments/vietqr";
-import { TEST_MEDIA_CREDIT_PRICE_VND, TEST_PRODUCT_PRICE_VND } from "@/data/catalogData";
+import {
+  ALL_CATALOG_PRODUCTS,
+  TEST_MEDIA_CREDIT_PRICE_VND,
+  TEST_PRODUCT_PRICE_VND,
+} from "@/data/catalogData";
 import prisma from "@/lib/prisma";
 import { fulfillOrder } from "@/lib/payments/fulfillment";
 
@@ -50,9 +54,27 @@ describe("PayOS Payment Integration Unit Tests", () => {
     }
   });
 
-  it("should enforce 2.000đ price for products and both media upload credits", () => {
-    expect(TEST_PRODUCT_PRICE_VND).toBe(2000);
-    expect(TEST_MEDIA_CREDIT_PRICE_VND).toBe(2000);
+  it("should discount the 4 active templates from 50.000đ to free (0đ) and price all other products between 30.000đ and 50.000đ", () => {
+    expect(TEST_PRODUCT_PRICE_VND).toBeGreaterThanOrEqual(30000);
+    expect(TEST_PRODUCT_PRICE_VND).toBeLessThanOrEqual(50000);
+    expect(TEST_MEDIA_CREDIT_PRICE_VND).toBe(TEST_PRODUCT_PRICE_VND);
+
+    const freeSlugs = new Set([
+      "card-01-first-gift",
+      "card-02-second-gift",
+      "card-03-third-gift",
+      "thiep-3",
+    ]);
+
+    for (const item of ALL_CATALOG_PRODUCTS) {
+      if (freeSlugs.has(item.slug)) {
+        expect(item.price).toBe(0);
+        expect(item.compareAtPrice).toBe(50000);
+      } else {
+        expect(item.price).toBeGreaterThanOrEqual(30000);
+        expect(item.price).toBeLessThanOrEqual(50000);
+      }
+    }
   });
 
   it("should generate valid in-app NAPAS VietQR EMVCo payload without external URLs", () => {

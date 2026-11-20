@@ -129,8 +129,8 @@ const RAW_CATALOG_PRODUCTS: CatalogProduct[] = [
     slug: "card-01-first-gift",
     title: "Thiệp Đầu Tiên – Bó Hoa & Vũ Trụ 3D ✨",
     coverImage: "/cards/card-01-first-gift/photos/photo-1-75b52d22.jpg",
-    price: 49000,
-    compareAtPrice: 99000,
+    price: 0,
+    compareAtPrice: 50000,
     category: "Kỷ niệm",
     categorySlug: "ky-niem",
     demoUrl: "/templates/card-01-first-gift",
@@ -151,8 +151,8 @@ const RAW_CATALOG_PRODUCTS: CatalogProduct[] = [
     slug: "card-02-second-gift",
     title: "Thiệp Thứ Hai – Hoa Hồng, Sao Băng & Đèn Trời 3D 🌹",
     coverImage: "/cards/card-02-second-gift/photos/photo-1-b83de51b.jpg",
-    price: 49000,
-    compareAtPrice: 99000,
+    price: 0,
+    compareAtPrice: 50000,
     category: "Kỷ niệm",
     categorySlug: "ky-niem",
     demoUrl: "/templates/card-02-second-gift",
@@ -173,8 +173,8 @@ const RAW_CATALOG_PRODUCTS: CatalogProduct[] = [
     slug: "card-03-third-gift",
     title: "Thiệp Thứ Ba – Chuyện Tình 55 Trang & Trái Tim Flowtime 💌",
     coverImage: "/cards/card-03-third-gift/img/iali53.jpg",
-    price: 49000,
-    compareAtPrice: 99000,
+    price: 0,
+    compareAtPrice: 50000,
     category: "Kỷ niệm",
     categorySlug: "ky-niem",
     demoUrl: "/templates/card-03-third-gift",
@@ -195,8 +195,8 @@ const RAW_CATALOG_PRODUCTS: CatalogProduct[] = [
     slug: "thiep-3",
     title: "Thiệp 03: Một Tấm Vé Hẹn Hò ♡",
     coverImage: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=600&q=80",
-    price: 49000,
-    compareAtPrice: 89000,
+    price: 0,
+    compareAtPrice: 50000,
     category: "Hẹn hò",
     categorySlug: "hen-ho",
     demoUrl: "/templates/thiep-3",
@@ -648,8 +648,8 @@ const RAW_CATALOG_PRODUCTS: CatalogProduct[] = [
     slug: "love-galaxy",
     title: "Vũ trụ yêu thương - Mưa Lời Yêu Thương",
     coverImage: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80",
-    price: 0,
-    compareAtPrice: 49000,
+    price: 35000,
+    compareAtPrice: 69000,
     category: "Valentine",
     categorySlug: "valentine",
     demoUrl: "/templates/love-galaxy",
@@ -777,19 +777,39 @@ const RAW_CATALOG_PRODUCTS: CatalogProduct[] = [
   },
 ];
 
-export const TEST_PRODUCT_PRICE_VND = 2000;
+export const TEST_PRODUCT_PRICE_VND = 39000;
 export const TEST_MEDIA_CREDIT_PRICE_VND = TEST_PRODUCT_PRICE_VND;
 
-export const ALL_CATALOG_PRODUCTS: CatalogProduct[] = RAW_CATALOG_PRODUCTS.map((item) => {
-  const price = TEST_PRODUCT_PRICE_VND;
-  const compareAtPrice =
-    item.compareAtPrice && item.compareAtPrice > price
-      ? item.compareAtPrice
-      : item.price > price
-      ? item.price
-      : 49000;
+const LOCKED_TEMPLATE_PRICE_MAP: Record<string, { price: number; compareAtPrice: number }> = {
+  "thiep-4": { price: 49000, compareAtPrice: 99000 },
+  "thiep-5": { price: 39000, compareAtPrice: 79000 },
+  "thiep-6": { price: 35000, compareAtPrice: 69000 },
+  "thiep-7": { price: 45000, compareAtPrice: 89000 },
+  "thiep-8": { price: 50000, compareAtPrice: 99000 },
+  "thiep-9": { price: 45000, compareAtPrice: 89000 },
+  "thiep-10": { price: 30000, compareAtPrice: 59000 },
+  "thiep-giang-sinh": { price: 39000, compareAtPrice: 79000 },
+  "thiep-xmas": { price: 49000, compareAtPrice: 89000 },
+};
 
+export const ALL_CATALOG_PRODUCTS: CatalogProduct[] = RAW_CATALOG_PRODUCTS.map((item) => {
   const tpl = TEMPLATES_REGISTRY[item.slug];
+  const isOpenFreeTemplate = Boolean(tpl && !tpl.defaultHidden && !tpl.isLocked);
+  const mappedLocked = LOCKED_TEMPLATE_PRICE_MAP[item.slug];
+  const clampedRawPrice = Math.min(50000, Math.max(30000, item.price || TEST_PRODUCT_PRICE_VND));
+  const price = isOpenFreeTemplate
+    ? 0
+    : mappedLocked
+    ? mappedLocked.price
+    : clampedRawPrice;
+  const compareAtPrice = isOpenFreeTemplate
+    ? 50000
+    : mappedLocked
+    ? mappedLocked.compareAtPrice
+    : item.compareAtPrice && item.compareAtPrice > price
+    ? item.compareAtPrice
+    : 79000;
+
   const isDefaultVisible = Boolean(tpl && !tpl.defaultHidden);
   const cleanTitle = tpl?.numberCode
     ? `${tpl.numberCode} · ${item.title.replace(/^Thiệp\s*\d+\s*:\s*/i, "")}`

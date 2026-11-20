@@ -82,6 +82,7 @@ export async function POST(req: NextRequest) {
       productType = "RENEWAL";
       referenceId = data.giftId || null;
     } else if (data.purpose === "gift_unlock") {
+      let resolvedPrice = TEST_PRODUCT_PRICE_VND;
       if (data.giftId) {
         const inv = await prisma.invitation.findUnique({
           where: { id: data.giftId },
@@ -91,13 +92,13 @@ export async function POST(req: NextRequest) {
           const catalogItem = findCatalogProductBySlug(
             inv.templateVersion.template.slug
           );
-          unitPriceVnd = catalogItem?.price ?? TEST_PRODUCT_PRICE_VND;
+          resolvedPrice = catalogItem ? catalogItem.price : TEST_PRODUCT_PRICE_VND;
           titleSnapshot = `Mở khóa thiệp: ${inv.title}`;
           referenceId = inv.id;
         }
       }
-      totalVnd = unitPriceVnd || TEST_PRODUCT_PRICE_VND;
-      unitPriceVnd = totalVnd;
+      unitPriceVnd = resolvedPrice;
+      totalVnd = resolvedPrice;
       productType = "GIFT_UNLOCK";
     } else {
       unitPriceVnd = TEST_PRODUCT_PRICE_VND;

@@ -123,9 +123,7 @@ export async function GET(
           })
         : null;
 
-    const allowSandboxSimulation =
-      process.env.NODE_ENV !== "production" ||
-      (process.env.PAYMENT_MODE || env.PAYMENT_MODE) === "sandbox";
+    const allowSandboxSimulation = false;
 
     return apiSuccess({
       order: {
